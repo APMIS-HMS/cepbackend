@@ -3,22 +3,18 @@ class Service {
     constructor(options) {
         this.options = options || {};
     }
-
     setup(app) {
         this.app = app;
     }
-
     find(params) {
         return Promise.resolve([]);
     }
-
     get(id, params) {
         return Promise.resolve({
             id,
             text: `A new message with ID: ${id}!`
         });
     }
-
     async create(data, params) {
         const patientsService = this.app.service('patients');
         const billingsService = this.app.service('billings');
@@ -27,7 +23,6 @@ class Service {
         const wallet = data.filter(x => x.covered.coverType === 'wallet');
         const company = data.filter(x => x.covered.coverType === 'company');
         const family = data.filter(x => x.covered.coverType === 'family');
-
         //Collection of insurance billitems
         let filteredInsurance = [];
         let len = insurance.length;
@@ -38,11 +33,14 @@ class Service {
                     x.isPicked = true;
                 });
                 const patient = await patientsService.get(params.query.patientId);
-                const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.hmoId.toString() === insurance[index].covered.hmoId.toString());
+                const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.hmoId !== undefined && x.planDetails.hmoId.toString() === insurance[index].covered.hmoId.toString());
                 const billModel = {
                     'facilityId': params.query.facilityId,
                     'grandTotal': sumCost(indx),
-                    'patientId': patientPaymentType[0].planDetails.principalId,
+                    'coverFile': {
+                        'id': patientPaymentType[0].planDetails.principalId,
+                        'name': patientPaymentType[0].planDetails.hmoName
+                    },
                     'subTotal': sumCost(indx),
                     'discount': 0,
                     'billItems': indx
@@ -63,7 +61,10 @@ class Service {
                 const billModel = {
                     'facilityId': params.query.facilityId,
                     'grandTotal': sumCost(indx),
-                    'patientId': patientPaymentType[0].planDetails.principalId,
+                    'coverFile': {
+                        'id': patientPaymentType[0].planDetails.principalId,
+                        'name': patientPaymentType[0].planDetails.hmoName
+                    },
                     'subTotal': sumCost(indx),
                     'discount': 0,
                     'billItems': indx
@@ -71,7 +72,6 @@ class Service {
                 billGroup.push(billModel);
             }
         }
-
         //Collection of Family BillItems
         len = family.length;
         for (let index = 0; index < len; index++) {
@@ -81,11 +81,15 @@ class Service {
                     x.isPicked = true;
                 });
                 const patient = await patientsService.get(params.query.patientId);
-                const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.familyId.toString() === family[index].covered.familyId.toString());
+                const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.familyId !== undefined && x.planDetails.familyId.toString() === family[index].covered.familyId.toString());
                 const billModel = {
                     'facilityId': params.query.facilityId,
+                    'patientId': params.query.patientId,
                     'grandTotal': sumCost(indx),
-                    'patientId': patientPaymentType[0].planDetails.principalId,
+                    'coverFile': {
+                        'id': patientPaymentType[0].planDetails.principalId,
+                        'name': patientPaymentType[0].planDetails.principalName
+                    },
                     'subTotal': sumCost(indx),
                     'discount': 0,
                     'billItems': indx
@@ -93,9 +97,11 @@ class Service {
                 billGroup.push(billModel);
             }
         }
-
         //Collection of Wallet Billitems
         if (wallet.length > 0) {
+            wallet.forEach(x => {
+                x.isBearerConfirmed = true;
+            });
             const billModel = {
                 'facilityId': params.query.facilityId,
                 'grandTotal': sumCost(wallet),
@@ -108,30 +114,26 @@ class Service {
         const bills = await billingsService.create(billGroup);
         return bills;
     }
-
     update(id, data, params) {
         return Promise.resolve(data);
     }
-
     patch(id, data, params) {
         return Promise.resolve(data);
     }
-
     remove(id, params) {
         return Promise.resolve({
             id
         });
     }
 }
-
-module.exports = function (options) {
+module.exports = function(options) {
     return new Service(options);
 };
 
 function sumCost(billItems) {
     let totalCost = 0;
     billItems.forEach(element => {
-        if (element.active) {
+        if (element.active == true || element.active === undefined) {
             totalCost += element.totalPrice;
         }
     });
