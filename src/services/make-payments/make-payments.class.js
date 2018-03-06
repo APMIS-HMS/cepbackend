@@ -111,8 +111,10 @@ class Service {
                     data.invoice = awaitBillGroup;
                     return onDebitWallet(data, description, ref, facilitiesService, peopleService, PaymentPlan);
                   } else {
+                    let pd = {};
                     pd.isPaid = false;
                     pd.isWaved = true;
+                    pds.push(pd);
                     let returnObj = {
                       bill: pds,
                       invoice: awaitBillGroup
@@ -131,6 +133,9 @@ class Service {
         data.invoice.paymentStatus = 'PAID';
       }
       if (data.inputedValue.isWaved == true) {
+        if (data.invoice === undefined) {
+          data.invoice = {};
+        }
         data.invoice.paymentStatus = 'WAIVED';
       }
       let invLen = data.invoice.billingIds.length - 1;
@@ -166,36 +171,36 @@ class Service {
         const itemBill = await billingsService.get(patechedInvoice.billingIds[m].billModelId, {});
         let len6 = itemBill.billItems.length - 1;
         for (let n = len6; n >= 0; n--) {
-            if (itemBill.billItems[n]._id.toString() == patechedInvoice.billingIds[m].billingId.toString()) {
-              if (data.inputedValue.balance == 0 || data.inputedValue.isWaved == true) {
-                itemBill.billItems[n].isServiceEnjoyed = true;
-              }
-              if (data.inputedValue.balance == 0) {
-                itemBill.billItems[n].paymentCompleted = true;
-              }
+          if (itemBill.billItems[n]._id.toString() == patechedInvoice.billingIds[m].billingId.toString()) {
+            if (data.inputedValue.balance == 0 || data.inputedValue.isWaved == true) {
               itemBill.billItems[n].isServiceEnjoyed = true;
-              if (n == 0) {
-                await billingsService.patch(itemBill._id, {
-                  billItems: itemBill.billItems
-                });
-              }
-              if (m == 0) {
-                if (data.inputedValue.isWaved != true) {
-                  data.currentInvoice = patechedInvoice;
-                  return onDebitWallet(data, description, ref, facilitiesService, peopleService, PaymentPlan);
-                } else {
-                  itemBill.isPaid = false;
-                  itemBill.isWaved = true;
-                  itemBill.paidStatus = 'WAIVED';
-                  let returnObj = {
-                    bill: itemBill,
-                    invoice: patechedInvoice
-                  };
-                  return returnObj;
-                }
+            }
+            if (data.inputedValue.balance == 0) {
+              itemBill.billItems[n].paymentCompleted = true;
+            }
+            itemBill.billItems[n].isServiceEnjoyed = true;
+            if (n == 0) {
+              await billingsService.patch(itemBill._id, {
+                billItems: itemBill.billItems
+              });
+            }
+            if (m == 0) {
+              if (data.inputedValue.isWaved != true) {
+                data.currentInvoice = patechedInvoice;
+                return onDebitWallet(data, description, ref, facilitiesService, peopleService, PaymentPlan);
+              } else {
+                itemBill.isPaid = false;
+                itemBill.isWaved = true;
+                itemBill.paidStatus = 'WAIVED';
+                let returnObj = {
+                  bill: itemBill,
+                  invoice: patechedInvoice
+                };
+                return returnObj;
               }
             }
           }
+        }
       }
     }
   }
@@ -236,7 +241,12 @@ module.exports = function (options) {
 
 async function onDebitWallet(data, description, ref, facilitiesService, peopleService, paymentPlan) {
   if (data.inputedValue.paymentMethod.planType == paymentPlan.company || data.inputedValue.paymentMethod.planType == paymentPlan.insurance) {
-    const facility = facilitiesService.get(data.inputedValue.paymentMethod._id, {});
+    let facility = {};
+    if (data.inputedValue.paymentMethod.facilityId !== undefined) {
+      facility = await facilitiesService.get(data.inputedValue.paymentMethod.facilityId, {});
+    } else {
+      facility = await peopleService.get(data.selectedPatient.personDetails._id, {});
+    }
     let currentBalance = parseInt(facility.wallet.balance) - parseInt(data.inputedValue.amountPaid);
     facility.wallet.balance = currentBalance;
     facility.wallet.ledgerBalance = currentBalance;
@@ -268,7 +278,12 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     };
     return returnObj;
   } else if (data.inputedValue.paymentMethod.planType == paymentPlan.outOfPocket || data.inputedValue.paymentMethod.planType == paymentPlan.family) {
-    const getPerson = await peopleService.get(data.inputedValue.paymentMethod.bearerPersonId, {});
+    let getPerson = {};
+    if (data.inputedValue.paymentMethod.bearerPersonId !== undefined) {
+      getPerson = await peopleService.get(data.inputedValue.paymentMethod.bearerPersonId, {});
+    } else {
+      getPerson = await peopleService.get(data.selectedPatient.personDetails._id, {});
+    }
     let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
     getPerson.wallet.balance = currentBalance;
     getPerson.wallet.ledgerBalance = currentBalance;
@@ -282,6 +297,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       'balance': currentBalance,
       'ledgerBalance': currentBalance
     });
+    console.log(7);
     const patchedPerson = await peopleService.patch(getPerson._id, {
       wallet: getPerson.wallet
     });
