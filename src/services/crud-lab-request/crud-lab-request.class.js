@@ -18,7 +18,7 @@ class Service {
         const employeeService = this.app.service('employees');
         const accessToken = params.accessToken;
         const facilityId = params.query.facilityId;
-        const cQuery = params.query;
+        const cQuery = params;
 
         if (accessToken !== undefined) {
             const hasFacility = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
@@ -99,6 +99,10 @@ class Service {
                         billItem.itemName = investigation.investigation.name;
                         billItem.patientId = patientId;
                         billItem.quantity = 1;
+                        billItem.isBearerConfirmed = true,
+                        billItem.covered = {
+                            coverType: 'wallet'
+                        },
                         billItem.totalPrice = billItem.quantity * billItem.unitPrice;
                         billItem.unitDiscountedAmount = 0;
                         billItem.totalDiscoutedAmount = 0;
@@ -147,11 +151,13 @@ class Service {
     }
 
     remove(id, params) {
-        return Promise.resolve({ id });
+        return Promise.resolve({
+            id
+        });
     }
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
     return new Service(options);
 };
 

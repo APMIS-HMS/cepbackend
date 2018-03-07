@@ -155,6 +155,14 @@ const crudLabRequest = require('./crud-lab-request/crud-lab-request.service.js')
 const templates = require('./templates/templates.service.js');
 const crudLabReport = require('./crud-lab-report/crud-lab-report.service.js');
 const bedOccupancy = require('./bed-occupancy/bed-occupancy.service.js');
+const getBedOccupancy = require('./get-bed-occupancy/get-bed-occupancy.service.js');
+const purchaseInvoices = require('./purchase-invoices/purchase-invoices.service.js');
+const dispensePrescriptions = require('./dispense-prescriptions/dispense-prescriptions.service.js');
+const patientfluids = require('./patientfluids/patientfluids.service.js');
+const searchProcedure = require('./search-procedure/search-procedure.service.js');
+const treatmentSheets = require('./treatment-sheets/treatment-sheets.service.js');
+const billCreators = require('./bill-creators/bill-creators.service.js');
+const addAddendum = require('./add-addendum/add-addendum.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -313,4 +321,12 @@ module.exports = function(app) {
     app.configure(patientSearch);
     app.configure(crudLabRequest);
     app.configure(templates);
+    app.configure(getBedOccupancy);
+    app.configure(purchaseInvoices);
+    app.configure(dispensePrescriptions);
+    app.configure(patientfluids);
+    app.configure(searchProcedure);
+    app.configure(treatmentSheets);
+    app.configure(billCreators);
+    app.configure(addAddendum);
 };
