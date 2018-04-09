@@ -171,6 +171,9 @@ const productConfigs = require('./product-configs/product-configs.service.js');
 const supplierService = require('./supplier-service/supplier-service.service.js');
 const searchSuppliers = require('./search-suppliers/search-suppliers.service.js');
 const suggestPatientTags = require('./suggest-patient-tags/suggest-patient-tags.service.js');
+const storeStatistics = require('./store-statistics/store-statistics.service.js');
+const productReorder = require('./product-reorder/product-reorder.service.js');
+const productUniqueReorders = require('./product-unique-reorders/product-unique-reorders.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -345,4 +348,7 @@ module.exports = function(app) {
     app.configure(supplierService);
     app.configure(searchSuppliers);
     app.configure(suggestPatientTags);
+    app.configure(storeStatistics);
+    app.configure(productReorder);
+    app.configure(productUniqueReorders);
 };

@@ -15,16 +15,16 @@ function OrderId() {
     if (number.length < 7) {
         number = String("0000000" + number).slice(-7);
     }
-    var retVal = "PO" + number + "" + randamApha();
+    var retVal = "RQ" + number + "" + randamApha();
     return retVal;
 }
 
 async function generateUniqueOrderNumber(v) {
-    const purchaseOrder = v.app.service('purchase-orders');
+    const storeRequisition = v.app.service('store-requisitions');
     let orderNo = OrderId();
-    const purchaseOrderReturn = await purchaseOrder.find({query: { facilityId: v.data.facilityId, purchaseOrderNumber: orderNo }});
-    if (purchaseOrderReturn.data.length == 0) {
-        v.data.purchaseOrderNumber = orderNo;
+    const storeRequisitionReturn = await storeRequisition.find({query: { facilityId: v.data.facilityId, storeRequisitionNumber: orderNo }});
+    if (storeRequisitionReturn.data.length == 0) {
+        v.data.storeRequisitionNumber = orderNo;
     } else {
         return generateUniqueOrderNumber(v);
     }
