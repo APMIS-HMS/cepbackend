@@ -175,6 +175,11 @@ const storeStatistics = require('./store-statistics/store-statistics.service.js'
 const productReorder = require('./product-reorder/product-reorder.service.js');
 const productUniqueReorders = require('./product-unique-reorders/product-unique-reorders.service.js');
 const cashPayment = require('./cash-payment/cash-payment.service.js');
+const dbPatientids = require('./db-patientids/db-patientids.service.js');
+const listOfInvoices = require('./list-of-invoices/list-of-invoices.service.js');
+const billSummaryData = require('./bill-summary-data/bill-summary-data.service.js');
+const paymentChartData = require('./payment-chart-data/payment-chart-data.service.js');
+const employeeSearch = require('./employee-search/employee-search.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -353,4 +358,9 @@ module.exports = function(app) {
     app.configure(productReorder);
     app.configure(productUniqueReorders);
     app.configure(cashPayment);
+    app.configure(dbPatientids);
+    app.configure(listOfInvoices);
+    app.configure(billSummaryData);
+    app.configure(paymentChartData);
+    app.configure(employeeSearch);
 };
