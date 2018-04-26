@@ -9,31 +9,41 @@ class Service {
     }
 
     async find(params) {
+        const method = params.query.method;
+        const searchText = params.query.searchtext;
+        const productId = params.query.productId;
         let url = '';
 
-        if (params.query.method === 'drug-details') {
-            url = process.env.EMDEX_BASEURL + '/products/' + params.query.productId;
+        if (method === 'drug-details') {
+            url = process.env.EMDEX_BASEURL + '/products/' + productId;
         } else {
-            url = process.env.EMDEX_BASEURL + '/list/?query=' + params.query.searchtext +
-                '&po=' + params.query.po + '&brandonly=' + params.query.brandonly + '&genericonly=' + params.query.genericonly;
+            url = process.env.APMIS_FORMULARY + '/prescriptions?search=' + searchText;
+
+            // url = process.env.EMDEX_BASEURL + '/list/?query=' + params.query.searchtext +
+            //     '&po=' + params.query.po + '&brandonly=' + params.query.brandonly + '&genericonly=' + params.query.genericonly;
         }
 
         const options = {
             method: 'GET',
             uri: url,
-            headers: { authorisation: process.env.EMDEX_AUTHORISATION_KEY }
+            // headers: { authorisation: process.env.EMDEX_AUTHORISATION_KEY }
         };
-        const makeRequest = await requestPromise(options);
-        const parsed = JSON.parse(makeRequest);
 
-        if (params.query.method === 'drug-details') {
-            return jsend.success(parsed);
-        } else {
-            if (parsed.results !== undefined) {
-                return jsend.success(parsed.results);
+        try {
+            const makeRequest = await requestPromise(options);
+            const parsed = JSON.parse(makeRequest);
+
+            if (method === 'drug-details') {
+                return jsend.success(parsed);
             } else {
-                return jsend.success([]);
+                if (parsed.status === 'success') {
+                    return jsend.success(parsed.data.data);
+                } else {
+                    return jsend.success([]);
+                }
             }
+        } catch (e) {
+            return jsend.success([]);
         }
     }
 

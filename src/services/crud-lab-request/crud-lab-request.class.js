@@ -127,6 +127,7 @@ class Service {
     async create(data, params) {
         const requestService = this.app.service('laboratory-requests');
         const billingService = this.app.service('billings');
+        const billCreatorService = this.app.service('bill-creators');
         const patientService = this.app.service('patients');
         const accessToken = params.accessToken;
         const facilityId = data.facilityId;
@@ -134,6 +135,7 @@ class Service {
         const investigations = data.investigations;
         const labNumber = data.labNumber;
         const minorLocationId = data.minorLocationId;
+
 
         if (accessToken !== undefined) {
             const hasFacility = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
@@ -161,7 +163,9 @@ class Service {
                         billItem.patientId = patientId;
                         billItem.quantity = 1;
                         billItem.isBearerConfirmed = true,
-                            billItem.covered = { coverType: 'wallet' },
+                            billItem.covered = {
+                                coverType: 'wallet'
+                            },
                             billItem.totalPrice = billItem.quantity * billItem.unitPrice;
                         billItem.unitDiscountedAmount = 0;
                         billItem.totalDiscoutedAmount = 0;
@@ -174,11 +178,9 @@ class Service {
                 // Check if Lab number has been generated for this patient,
                 // if not, create a new lab number for the patient in the new minorLocation.
                 const getPatient = await patientService.get(patientId);
-
                 if (getPatient._id !== undefined) {
                     getPatient.clientsNo = (getPatient.clientsNo !== undefined) ? getPatient.clientsNo : [];
                     const clientsNo = getPatient.clientsNo;
-
                     // Check if the patient has previous client number.
                     if (clientsNo.length > 0) {
                         if (minorLocationId !== undefined) {
@@ -204,20 +206,65 @@ class Service {
 
                     // Update the patient data with the clientNo
                     const updatePatient = await patientService.patch(getPatient._id, getPatient, {});
-
+                    const patientDefaultPaymentPlan = updatePatient.paymentPlan.find(x => x.isDefault === true);
                     if (updatePatient._id !== undefined) {
                         if (billGroup.billItems.length > 0) {
-                            const saveBilling = await billingService.create(billGroup);
-                            if (saveBilling._id !== undefined) {
-                                // Attach billing items before saving.
-                                data.billingId = saveBilling;
-                                const saveRequest = await requestService.create(data);
-                                if (saveRequest._id !== undefined) {
-                                    return jsend.success(saveRequest);
+                            const bill = [];
+                            let covered = {};
+                            if (patientDefaultPaymentPlan.planType === 'wallet') {
+                                covered = {
+                                    coverType: patientDefaultPaymentPlan.planType
+                                };
+                            } else if (patientDefaultPaymentPlan.planType === 'insurance') {
+                                covered = {
+                                    coverType: patientDefaultPaymentPlan.planType,
+                                    hmoId: patientDefaultPaymentPlan.planDetails.hmoId
+                                };
+                            } else if (patientDefaultPaymentPlan.planType === 'company') {
+                                covered = {
+                                    coverType: patientDefaultPaymentPlan.planType,
+                                    companyId: patientDefaultPaymentPlan.planDetails.companyId
+                                };
+                            } else if (patientDefaultPaymentPlan.planType === 'family') {
+                                covered = {
+                                    coverType: patientDefaultPaymentPlan.planType,
+                                    familyId: patientDefaultPaymentPlan.planDetails.familyId
+                                };
+                            }
+
+                            billGroup.billItems.forEach(element => {
+                                bill.push({
+                                    unitPrice: element.unitPrice,
+                                    facilityId: facilityId,
+                                    facilityServiceId: element.facilityServiceId,
+                                    serviceId: element.serviceId,
+                                    patientId: element.patientId,
+                                    quantity: element.quantity,
+                                    active: true,
+                                    totalPrice: element.totalPrice,
+                                    covered: covered
+                                });
+                            });
+                            try {
+                                const saveBilling = await billCreatorService.create(bill, {
+                                    query: {
+                                        facilityId: facilityId,
+                                        patientId: patientId
+                                    }
+                                });
+                                if (saveBilling.length > 0) {
+                                    // Attach billing items before saving.
+                                    data.billingId = saveBilling[0];
+                                    const saveRequest = await requestService.create(data);
+                                    if (saveRequest._id !== undefined) {
+                                        return jsend.success(saveRequest);
+                                    } else {
+                                        return jsend.error('There was a problem trying to save to billing.');
+                                    }
                                 } else {
                                     return jsend.error('There was a problem trying to save to billing.');
                                 }
-                            } else {
+                            } catch (e) {
                                 return jsend.error('There was a problem trying to save to billing.');
                             }
                         } else {
