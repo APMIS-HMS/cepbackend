@@ -6,5 +6,5 @@ const dependantSchema = new Schema({
     relationshipId: { type: Schema.Types.ObjectId, required: false },
     createdAt: { type: Date, 'default': Date.now },
     updatedAt: { type: Date, 'default': Date.now }
-})
+});
 module.exports = dependantSchema;

@@ -70,7 +70,7 @@ class Service {
           return {};
         }
       } else {
-        return {}
+        return {};
       }
 
     } else {

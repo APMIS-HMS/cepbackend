@@ -25,10 +25,10 @@ class Service {
             if (findFamiliesService.data[i].familyCovers[j].filNo != undefined) {
               if (findFamiliesService.data[i].familyCovers[j].filNo.toLowerCase() == req.query.fillno.toLowerCase()) {
                 result = {
-                  "_id": findFamiliesService.data[i]._id,
-                  "facilityId": findFamiliesService.data[i].facilityId._id,
-                  "facilityName": findFamiliesService.data[i].facilityId.name,
-                  "enrollees": findFamiliesService.data[i].familyCovers[j]
+                  '_id': findFamiliesService.data[i]._id,
+                  'facilityId': findFamiliesService.data[i].facilityId._id,
+                  'facilityName': findFamiliesService.data[i].facilityId.name,
+                  'enrollees': findFamiliesService.data[i].familyCovers[j]
                 };
               }
             }

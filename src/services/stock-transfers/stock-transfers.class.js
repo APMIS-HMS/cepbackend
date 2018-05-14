@@ -94,7 +94,7 @@ class Service {
                         postQuantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
                         quantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
                         inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
-                      }
+                      };
                       inventory.transactions[index2].batchTransactions.push(transaction);
                       inventory.transactions[index2].quantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
                       inventory.totalQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
@@ -119,7 +119,7 @@ class Service {
                             postQuantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
                             quantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
                             inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
-                          }
+                          };
                           batchTxn[0].quantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                           batchTxn[0].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                           inventory2.data[0].totalQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;

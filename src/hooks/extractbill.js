@@ -3,9 +3,10 @@
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return context => {
-    if (context.type == "after") {
+    if (context.type == 'after') {
       const queryBillItem = context.params.isinvoice;
-      if (queryBillItem == "true") {
+      let promises = [];
+      if (queryBillItem == 'true') {
         promises.push(context.app.service('invoices').find({
           query: {
             facilityId: context.params.query.facilityId,
@@ -17,9 +18,9 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
               invoiceItems.data.filter(function (item) {
                 e.billItems = e.billItems.filter(el => item.billingIds.indexOf(el._id) === -1)
               });
-            })
+            });
           }
-        }))
+        }));
       }
 
     } else {

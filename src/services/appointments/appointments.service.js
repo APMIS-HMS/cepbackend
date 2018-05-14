@@ -6,6 +6,7 @@ const hooks = require('./appointments.hooks');
 module.exports = function (app) {
   const Model = createModel(app);
   const paginate = app.get('paginate');
+  
 
   const options = {
     name: 'appointments',

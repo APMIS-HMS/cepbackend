@@ -31,7 +31,7 @@ class Service {
               query: {
                 _id: workspaces.data[length].locations[locLen].majorLocationId
               }
-            })
+            });
             workspaces.data[length].locations[locLen].majorLocation = loc.data[0];
             delete workspaces.data[length].locations[locLen].majorLocationId;
           } else {

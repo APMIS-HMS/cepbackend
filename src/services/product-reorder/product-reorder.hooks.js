@@ -8,7 +8,7 @@ const resolvers = {
         const product = await context.app.service('products').get(item.productId, {});
         item.productObject = product;
       }catch(Exception){
-
+            console.log(Exception);
       }
     },
     productItemConfigObject: () => async (item, context) => {
@@ -18,12 +18,12 @@ const resolvers = {
         item.productItemConfigObject = packDetails;
         item.productConfigObject = configItems.data[0].packSizes;
       }catch(Exception){
-
+        console.log(Exception);
       }
       
     }
   }
-}
+};
 
 module.exports = {
   before: {

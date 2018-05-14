@@ -73,7 +73,7 @@ class Service {
                             elements[0].data.push(bill.amountPaid);
                             let d = new Date((bill.paymentDate));
                             let dt = format(d, 'Do MMM');
-                            lineChartLabels.push(dt)
+                            lineChartLabels.push(dt);
                         }
                     } else {
                         let data = [];
@@ -86,7 +86,7 @@ class Service {
                         let dt = format(d, 'Do MMM');
                         const uniqueDates = lineChartLabels.filter(x => x.toString() === dt.toString());
                         if (uniqueDates.length === 0) {
-                            lineChartLabels.push(dt)
+                            lineChartLabels.push(dt);
                         }
                     }
                 }
@@ -128,9 +128,7 @@ class Service {
             lineChartLegend: lineChartLegend,
             lineChartType: lineChartType,
             lineChartOptions: lineChartOptions
-        }
-
-
+        };
         return chartData;
     }
 

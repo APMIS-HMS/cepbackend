@@ -30,7 +30,8 @@ class Service {
             data.map(async function(current) {
                 let data = {
                     person: current
-                }
+                };
+
                 try {
                     savedPerson = await savePersonService.create(data);
                 } catch (e) {
@@ -40,14 +41,14 @@ class Service {
                 let patient = {
                     personId: savedPerson._id,
                     facilityId: current.facilityId
-                }
+                };
 
                 if (current.payPlan.toLowerCase() === 'wallet') {
                     patient.paymentPlan = [{
                         planType: 'wallet',
                         bearerPersonId: savedPerson._id,
                         isDefault: true
-                    }]
+                    }];
                 }
 
                 try {

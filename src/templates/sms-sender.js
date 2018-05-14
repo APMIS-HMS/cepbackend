@@ -9,8 +9,11 @@ function sender(mesage, data, isScheduler) {
   }
   request.get(url, null, (error, response, body) => {
     if (error) {
+      console.log(error);
     }
     if (response && body) {
+      //do nothing
+      console.log(response);
     }
   });
 }
