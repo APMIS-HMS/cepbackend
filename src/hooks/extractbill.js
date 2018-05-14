@@ -16,9 +16,9 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
           if (invoiceItems.data.length != 0) {
             context.result.data.filter(function (e) {
               invoiceItems.data.filter(function (item) {
-                e.billItems = e.billItems.filter(el => item.billingIds.indexOf(el._id) === -1)
-              });
-            });
+                e.billItems = e.billItems.filter(el => item.billingIds.indexOf(el._id) === -1);
+              })
+            })
           }
         }));
       }
@@ -26,7 +26,7 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
     } else {
       if (context.params.query != undefined && context.params.query.isinvoice != undefined) {
         context.params.isinvoice = context.params.query.isinvoice;
-        delete context.params.query.isinvoice
+        delete context.params.query.isinvoice;
       }
     }
     return Promise.resolve(context);

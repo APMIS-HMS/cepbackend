@@ -29,7 +29,7 @@ async function generateUniqueOrderNumber(v) {
         return generateUniqueOrderNumber(v);
     }
 
-};
+}
 
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
