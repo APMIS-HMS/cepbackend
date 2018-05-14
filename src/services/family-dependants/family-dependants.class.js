@@ -3,9 +3,9 @@ class Service {
   constructor(options) {
     this.options = options || {};
   }
-  // setup(app) {
-  //   this.app = app;
-  // }
+  setup(app) {
+    this.app = app;
+  }
 
   async find(params) {
     var result = {};
