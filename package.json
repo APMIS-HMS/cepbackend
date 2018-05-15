@@ -21,11 +21,8 @@
     "npm": ">= 3.0.0"
   },
   "scripts": {
-    "test": "npm run eslint && npm run mocha",
-    "eslint": "eslint src/. test/. --config .eslintrc.json",
     "start": "node src/",
-    "debug": "node --inspect src/",
-    "mocha": "mocha test/ --recursive --exit"
+    "debug": "node --inspect src/"  
   },
   "dependencies": {
     "@feathersjs/authentication": "^2.1.1",
