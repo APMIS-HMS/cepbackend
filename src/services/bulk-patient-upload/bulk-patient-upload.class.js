@@ -43,50 +43,6 @@ class Service {
             isValidating: true
           }
         });
-<<<<<<< HEAD
-    }
-
-    async create(data, params) {
-        const patientService = this.app.service('patients');
-        const savePersonService = this.app.service('save-person');
-        let savedPerson;
-        let savedPatient;
-        let returnData = [];
-        let failedAttempts = [];
-        if (Array.isArray(data)) {
-            data.map(async function(current) {
-                let data = {
-                    person: current
-                };
-
-                try {
-                    savedPerson = await savePersonService.create(data);
-                } catch (e) {
-                    failedAttempts.push(current);
-                }
-
-                let patient = {
-                    personId: savedPerson._id,
-                    facilityId: current.facilityId
-                };
-
-                if (current.payPlan.toLowerCase() === 'wallet') {
-                    patient.paymentPlan = [{
-                        planType: 'wallet',
-                        bearerPersonId: savedPerson._id,
-                        isDefault: true
-                    }];
-                }
-
-                try {
-                    savedPatient = await patientService.create(patient);
-                } catch (e) {
-                    failedAttempts.push(current);
-                }
-
-                returnData.push(savedPatient);
-
-=======
         console.log(checkPerson, data[i]);
         if (checkPerson.data === false) {
           try {
@@ -132,7 +88,6 @@ class Service {
             failedAttempts.push({
               data: data[i],
               message: 'Error, Assigning Hospital Id to Patient'
->>>>>>> 3c2428c94f8c54b292ef74538c7df5cf0603afd8
             });
           }
         } else {

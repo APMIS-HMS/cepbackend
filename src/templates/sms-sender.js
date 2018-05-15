@@ -4,19 +4,6 @@ const querystring = require('querystring');
 const https = require('https');
 
 function sender(mesage, data, isScheduler) {
-<<<<<<< HEAD
-  var url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
-  if (isScheduler == true) {
-    url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&action=scheduled' + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
-  }
-  request.get(url, null, (error, response, body) => {
-    if (error) {
-      console.log(error);
-    }
-    if (response && body) {
-      //do nothing
-      console.log(response);
-=======
     var url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
     if (isScheduler == true) {
         url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&action=scheduled' + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
@@ -31,7 +18,6 @@ function getPhoneNumber(number) {
     if (number.length === 11) {
         var inNumber = number.substring(1);
         return '+234' + inNumber;
->>>>>>> 3c2428c94f8c54b292ef74538c7df5cf0603afd8
     }
     return number;
 }
