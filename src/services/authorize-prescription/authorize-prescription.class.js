@@ -92,10 +92,14 @@ class Service {
                             }
                         });
                         if (createBill.length > 0) {
-                            const createPrescription = await prescriptionService.create(prescription);
-                            if (createPrescription._id !== undefined) {
-                                return jsend.success(createPrescription);
-                            } else {
+                            try {
+                                const createPrescription = await prescriptionService.create(prescription);
+                                if (createPrescription._id !== undefined) {
+                                    return jsend.success(createPrescription);
+                                } else {
+                                    return jsend.error('There was a problem trying to create prescription');
+                                }
+                            } catch (e) {
                                 return jsend.error('There was a problem trying to create prescription');
                             }
                         } else {
