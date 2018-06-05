@@ -27,60 +27,75 @@ class Service {
     const purchaseEntriesService = this.app.service('purchase-entries');
     const makePurchaseEntriesService = this.app.service('make-purchase-entries');
     const purchaseEntry = {};
-      purchaseEntry.invoiceAmount = data.amount.toString();
-      purchaseEntry.deliveryDate = data.deliveryDate;
-      purchaseEntry.facilityId = data.facilityId;
-      purchaseEntry.invoiceNumber = data.invoiceNo;
-      purchaseEntry.orderId = data.orderId;
-      purchaseEntry.remark = data.desc;
-      purchaseEntry.storeId = data.store;
-      purchaseEntry.supplierId = data.supplier;
-      purchaseEntry.createdBy = data.createdBy;
+    purchaseEntry.invoiceAmount = data.amount.toString();
+    purchaseEntry.deliveryDate = data.deliveryDate;
+    purchaseEntry.facilityId = data.facilityId;
+    purchaseEntry.invoiceNumber = data.invoiceNo;
+    purchaseEntry.orderId = data.orderId;
+    purchaseEntry.remark = data.desc;
+    purchaseEntry.storeId = data.store;
+    purchaseEntry.supplierId = data.supplier;
+    purchaseEntry.createdBy = data.createdBy;
 
-      purchaseEntry.products = [];
-      
-      /* end*/
+    purchaseEntry.products = [];
 
-      let inventories = [];
-      let existingInventories = [];
-      console.log(data.productForms);
-      data.productForms.forEach((item, i) => {
-        let productObj = item;
-        let product = {};
-        product.batchNo = productObj.batchNo;
-        product.costPrice = productObj.costPrice;
-        product.expiryDate = productObj.expiryDate;
-        product.productId = productObj.id;
-        product.quantity = productObj.qty;
-        product.qtyDetails = productObj.qtyDetails;
-        product.availableQuantity = productObj.qty;
-        purchaseEntry.products.push(product);
-        if (productObj.existingInventory !== undefined) {
-          delete productObj.existingInventory.productObject;
-        }
+    /* end*/
 
-        const inventory = productObj.existingInventory;
-        inventory.totalQuantity = inventory.totalQuantity + productObj.qty;
-        inventory.availableQuantity = inventory.availableQuantity + productObj.qty;
-        const inventoryTransaction = {};
-        inventoryTransaction.batchNumber = productObj.batchNo;
-        inventoryTransaction.costPrice = productObj.costPrice;
-        inventoryTransaction.expiryDate = productObj.expiryDate;
-        inventoryTransaction.quantity = productObj.qty;
-        inventoryTransaction.availableQuantity = productObj.qty;
-        inventory.transactions.push(inventoryTransaction);
-
-        existingInventories.push(inventory);
-      });
-      
-      const data_ = {
-        purchaseEntry: purchaseEntry,
-        orderId: data.orderId,
-        inventories: inventories,
-        existingInventories: existingInventories
+    let inventories = [];
+    let existingInventories = [];
+    console.log(data.productForms);
+    for (let index = 0; index < data.productForms.length; index++) {
+      let productObj = data.productForms[index];
+      console.log(productObj);
+      if (productObj.productObject.config !== undefined) {
+        delete productObj.productObject.config;
       }
-      const _makePurchaseEntriesService = await makePurchaseEntriesService.create(data_);
-      return jsend.success(_makePurchaseEntriesService);
+      // let productObject = {
+      //   id: productObj.id,
+      //   name: productObj.product,
+      //   code: productObj.code
+      // }
+      let product = {};
+      product.batchNo = productObj.batchNo;
+      product.costPrice = productObj.costPrice;
+      product.expiryDate = productObj.expiryDate;
+      product.productId = productObj.id;
+      product.productObject = productObj.productObject;
+      product.quantity = productObj.qty;
+      product.qtyDetails = productObj.qtyDetails;
+      product.availableQuantity = productObj.qty;
+      purchaseEntry.products.push(product);
+
+      const existingInventory = await inventoriesService.find({
+        query: {
+          facilityId: data.facilityId,
+          storeId: data.store,
+          productId: productObj.id
+        }
+      });
+      const inventory = existingInventory.data[0];
+      console.log(inventory);
+      inventory.totalQuantity = inventory.totalQuantity + productObj.qty;
+      inventory.availableQuantity = inventory.availableQuantity + productObj.qty;
+      const inventoryTransaction = {};
+      inventoryTransaction.batchNumber = productObj.batchNo;
+      inventoryTransaction.costPrice = productObj.costPrice;
+      inventoryTransaction.expiryDate = productObj.expiryDate;
+      inventoryTransaction.quantity = productObj.qty;
+      inventoryTransaction.availableQuantity = productObj.qty;
+      inventory.transactions.push(inventoryTransaction);
+
+      existingInventories.push(inventory);
+    };
+
+    const data_ = {
+      purchaseEntry: purchaseEntry,
+      orderId: data.orderId,
+      inventories: inventories,
+      existingInventories: existingInventories
+    }
+    const _makePurchaseEntriesService = await makePurchaseEntriesService.create(data_);
+    return jsend.success(_makePurchaseEntriesService);
   }
 
   update(id, data, params) {

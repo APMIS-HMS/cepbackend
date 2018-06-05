@@ -15,6 +15,7 @@ module.exports = function (app) {
         categoryId: { type: Schema.Types.ObjectId, require: false },
         facilityServiceId: { type: Schema.Types.ObjectId, require: false },
         productId: { type: Schema.Types.ObjectId, require: true, index: true },
+        productObject: { type: Schema.Types.Mixed, require: true, index: true },
         totalQuantity: { type: Number, required: true },
         availableQuantity:{ type: Number, required: true },
         reorderLevel: { type: Number, required: false },
