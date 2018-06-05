@@ -73,7 +73,7 @@ class Service {
                     billingItems.forEach(element => {
                         bill.push({
                             unitPrice: element.unitPrice,
-                            facilityId: this.facility._id,
+                            facilityId: facilityId,
                             facilityServiceId: element.facilityServiceId,
                             serviceId: element.serviceId,
                             patientId: element.patientId,

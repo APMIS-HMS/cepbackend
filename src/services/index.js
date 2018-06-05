@@ -191,6 +191,7 @@ const immunizationRecordHistory = require('./immunization-record-history/immuniz
 const crudImmunizationSchedule = require('./crud-immunization-schedule/crud-immunization-schedule.service.js');
 const immunizationAppointment = require('./immunization-appointment/immunization-appointment.service.js');
 const setMultipleAppointments = require('./set-multiple-appointments/set-multiple-appointments.service.js');
+const billPrescription = require('./bill-prescription/bill-prescription.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -385,4 +386,5 @@ module.exports = function(app) {
     app.configure(crudImmunizationSchedule);
     app.configure(immunizationAppointment);
     app.configure(setMultipleAppointments);
+    app.configure(billPrescription);
 };
