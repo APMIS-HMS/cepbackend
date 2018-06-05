@@ -41,7 +41,7 @@ class Service {
                     firstAppointment.appointmentReason = firstAppointment.appointmentReason == null ? vaccine.name + ' ' : firstAppointment.appointmentReason + ' ' + vaccine.name;
 
                 } else {
-                    const appointmentDate = addHours(new Date(), this.convertInterval(interval));
+                    const appointmentDate = addHours(data.appointment.startDate, this.convertInterval(interval));
                     console.log(appointmentDate);
                     let currentAppointment = JSON.parse(JSON.stringify(data.appointment));
                     currentAppointment.startDate = appointmentDate;
