@@ -73,7 +73,7 @@ class Service {
                     billingItems.forEach(element => {
                         bill.push({
                             unitPrice: element.unitPrice,
-                            facilityId: this.facility._id,
+                            facilityId: facilityId,
                             facilityServiceId: element.facilityServiceId,
                             serviceId: element.serviceId,
                             patientId: element.patientId,
@@ -92,10 +92,14 @@ class Service {
                             }
                         });
                         if (createBill.length > 0) {
-                            const createPrescription = await prescriptionService.create(prescription);
-                            if (createPrescription._id !== undefined) {
-                                return jsend.success(createPrescription);
-                            } else {
+                            try {
+                                const createPrescription = await prescriptionService.create(prescription);
+                                if (createPrescription._id !== undefined) {
+                                    return jsend.success(createPrescription);
+                                } else {
+                                    return jsend.error('There was a problem trying to create prescription');
+                                }
+                            } catch (e) {
                                 return jsend.error('There was a problem trying to create prescription');
                             }
                         } else {
