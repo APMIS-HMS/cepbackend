@@ -4,12 +4,10 @@ const productIngredient = require('./product-ingredient-model');
 const trackDispensed = require('./track-dispensed-model');
 
 const precribeItemSchema = new Schema({
-    billId: { type: Schema.Types.ObjectId, required: false },
-    billItemId: { type: Schema.Types.ObjectId, required: false },
     facilityId: { type: Schema.Types.ObjectId, required: false }, // Facility that dispensed the drug.
     productId: { type: Schema.Types.ObjectId, required: true },
-    code: { type: String, required: true },
-    productName: { type: Schema.Types.Mixed, required: false },
+    code: { type: Schema.Types.ObjectId, required: true },
+    productName: { type: String, required: false },
     genericName: { type: String, required: true },
     ingredients: [productIngredient],
     frequency: { type: String, required: true },
