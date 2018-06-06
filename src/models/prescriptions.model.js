@@ -17,7 +17,7 @@ module.exports = function(app) {
         isAuthorised: { type: Boolean, 'default': false },
         isDispensed: { type: Boolean, 'default': false },
         isCosted: { type: Boolean, 'default': false },
-        // billId: { type: Schema.Types.ObjectId, required: false },
+        billId: { type: Schema.Types.ObjectId, required: false },
     }, {
         timestamps: true
     });
