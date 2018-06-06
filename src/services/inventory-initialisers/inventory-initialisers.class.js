@@ -20,15 +20,13 @@ class Service {
   }
 
   async create(data, params) {
-    console.log(data);
     const inventoriesService = this.app.service('inventories');
     const productsService = this.app.service('products');
     const orgService = this.app.service('organisation-services');
     let inventory = await inventoriesService.find({
       query: {
         facilityId: data.product.facilityId,
-        productId: data.product.productObject.id,
-        storeId:data.storeId
+        productId: data.product.productObject.id
       }
     });
     if (inventory.data.length > 0) {
@@ -64,7 +62,6 @@ class Service {
       inventoryModel.categoryId = data.categoryId;
       inventoryModel.facilityServiceId = data.facilityServiceId;
       inventoryModel.productId = batches.product.productObject.id;
-      inventoryModel.productObject = batches.product.productObject;
       inventoryModel.transactions = [];
       inventoryModel.totalQuantity = 0;
       inventoryModel.availableQuantity = 0;

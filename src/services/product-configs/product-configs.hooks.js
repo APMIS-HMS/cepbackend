@@ -1,18 +1,18 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const {fastJoin} = require('feathers-hooks-common');
 
-// const resolvers = {
-//   joins: {
-//     productObject: () => async (data, context) => {
-//       try {
-//         const getProduct = await context.app.service('formulary-products').get(data.productId,{});
-//         data.productObject = getProduct.data;
-//       } catch (e) {
-//         // console.log(e);
-//       }
-//     }
-//   }
-// };
+const resolvers = {
+  joins: {
+    productObject: () => async (data, context) => {
+      try {
+        const getProduct = await context.app.service('formulary-products').get(data.productId,{});
+        data.productObject = getProduct.data;
+      } catch (e) {
+        // console.log(e);
+      }
+    }
+  }
+};
 
 
 
@@ -29,7 +29,7 @@ module.exports = {
   },
 
   after: {
-    all: [],//fastJoin(resolvers)],
+    all: [fastJoin(resolvers)],
     find: [],
     get: [],
     create: [],

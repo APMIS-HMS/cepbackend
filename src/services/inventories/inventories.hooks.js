@@ -13,24 +13,17 @@ const resolvers = {
   joins: {
     productObject: () => async (data, context) => {
       try {
-        // const getProduct = await context.app.service('formulary-products').get(data.productId, {});
-        // if (getProduct.data.id !== undefined) {
-        //   const productConfig = await context.app.service('product-configs').find({
-        //     query: {
-        //       facilityId: data.facilityId,
-        //       productId: data.productId
-        //     }
-        //   });
-        //   getProduct.data.productConfigObject = productConfig.data[0].packSizes;
-        //   data.productObject = getProduct.data;
-        // }
-        const productConfig = await context.app.service('product-configs').find({
-          query: {
-            facilityId: data.facilityId,
-            productId: data.productId
-          }
-        });
-        data.productObject.productConfigObject = productConfig.data[0].packSizes;
+        const getProduct = await context.app.service('formulary-products').get(data.productId, {});
+        if (getProduct.data.id !== undefined) {
+          const productConfig = await context.app.service('product-configs').find({
+            query: {
+              facilityId: data.facilityId,
+              productId: getProduct.data.id
+            }
+          });
+          getProduct.data.productConfigObject = productConfig.data[0].packSizes;
+          data.productObject = getProduct.data;
+        }
       } catch (e) {
         // console.log(e);
       }
