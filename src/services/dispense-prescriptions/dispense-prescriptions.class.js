@@ -33,10 +33,12 @@ class Service {
         const accessToken = params.accessToken;
 
         if (accessToken !== undefined) {
-            const userRole = params.user.facilitiesRole.filter(x => x.facilityId === facilityId);
+            const userRole = params.user.facilitiesRole.filter(
+                x => x.facilityId.toString() === facilityId);
             if (userRole.length > 0) {
                 try {
-                    const getPrescription = await _prescriptionService.get(prescriptionId);
+                    const getPrescription =
+                        await _prescriptionService.get(prescriptionId);
                     console.log('Get Prescription => ', getPrescription);
                     if (getPrescription._id) {
                         try {
@@ -53,19 +55,22 @@ class Service {
                                             postQuantity: batch.quantity - qty, // After Operation.
                                             quantity: qty, // Operational qty.
                                             referenceId: prescriptionId, // Dispense id, Transfer id...
-                                            referenceService: 'Prescription/Dispense Service', // Dispense, Transfer...
+                                            referenceService: 'Prescription/Dispense Service', // Dispense,
+                                            // Transfer...
                                             inventorytransactionTypeId: inventoryTransactionTypeId,
                                         }
                                         inventory.batchTransactions.push(batchTransaction);
                                         inventory.quantity = inventory.quantity - qty;
-                                        inventory.availableQuantity = inventory.availableQuantity - qty;
+                                        inventory.availableQuantity =
+                                            inventory.availableQuantity - qty;
                                     }
                                 });
                                 getInventory.totalQuantity = getInventory.totalQuantity - qty;
 
                                 try {
                                     // Dispense the required quantity from inventory.
-                                    const patchInventory = await _inventoryService.patch(getInventory._id, getInventory, {});
+                                    const patchInventory = await _inventoryService.patch(
+                                        getInventory._id, getInventory, {});
                                     console.log('PatchInventory => ', patchInventory);
 
                                     if (patchInventory) {
@@ -75,14 +80,17 @@ class Service {
                                                 prescription.dispensed = prescriptionItem.dispensed;
                                                 prescription.quantityDispensed = qty;
 
-                                                if (prescription.quantityDispensed === prescription.quantity) {
+                                                if (prescription.quantityDispensed ===
+                                                    prescription.quantity) {
                                                     prescription.isDispensed = true;
                                                 }
                                             }
                                         });
 
                                         try {
-                                            const patchPrescription = await _prescriptionService.patch(getPrescription._id, getPrescription, {});
+                                            const patchPrescription =
+                                                await _prescriptionService.patch(
+                                                    getPrescription._id, getPrescription, {});
                                             console.log('patchPrescription => ', patchPrescription);
 
                                             if (patchPrescription) {
