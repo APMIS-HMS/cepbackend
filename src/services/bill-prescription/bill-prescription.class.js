@@ -25,7 +25,6 @@ class Service {
         console.log('Data => ', data);
         console.log('Params => ', params);
         const prescriptionService = this.app.service('prescriptions');
-        const billingService = this.app.service('billings');
         const patientService = this.app.service('patients');
         const billCreatorService = this.app.service('bill-creators');
         const accessToken = params.accessToken;
@@ -76,16 +75,13 @@ class Service {
                     // billed.
                     let createBill = await billCreatorService.create(
                         billItems, { query: { facilityId: facilityId, patientId: patientId } });
-                    console.log('Bill creator => ', createBill);
 
                     if (createBill.length > 0) {
                         createBill = createBill[0];
                         // Update prescription items with
                         createBill.billItems.forEach(bill => {
-                            console.log('Bill => ', bill);
                             prescription.prescriptionItems.forEach(prescribe => {
                                 if (bill.serviceId.toString() === prescribe.serviceId) {
-                                    console.log('prescriber => ', prescribe);
                                     // Update prescription items with billingId
                                     prescribe.billItemId = bill._id;
                                     prescribe.billId = createBill._id;
@@ -94,9 +90,7 @@ class Service {
                         });
                         // If bill creation succeeds then update prescription
                         try {
-                            const updatePrescription = await prescriptionService.patch(
-                                prescription._id, prescription, {});
-                            console.log('presciption => ', updatePrescription);
+                            const updatePrescription = await prescriptionService.patch(prescription._id, prescription, {});
                             if (updatePrescription) {
                                 return jsend.success(updatePrescription);
                             }

@@ -5,6 +5,8 @@ const trackDispensed = require('./track-dispensed-model');
 
 const precribeItemSchema = new Schema({
     facilityId: { type: Schema.Types.ObjectId, required: false }, // Facility that dispensed the drug.
+    billId: { type: Schema.Types.ObjectId, required: false },
+    billItemId: { type: Schema.Types.ObjectId, required: false },
     productId: { type: Schema.Types.ObjectId, required: false },
     code: { type: String, required: true },
     productName: { type: Schema.Types.Mixed, required: false },
