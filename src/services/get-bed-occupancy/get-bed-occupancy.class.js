@@ -16,9 +16,6 @@ class Service {
 
     async get(data, params) {
         const bedOccupancyService = this.app.service('bed-occupancy');
-        const patientService = this.app.service('patients');
-        const locationService = this.app.service('locations');
-        const employeeService = this.app.service('employees');
         const facilityService = this.app.service('facilities');
         const facilityId = data.facilityId;
         const minorLocationId = data.minorLocationId;
@@ -26,7 +23,7 @@ class Service {
         const action = data.action;
 
         //Check for facility Id is in the userRole
-        const hasRole = params.user.facilitiesRole.filter(x => x.facilityId === facilityId);
+        const hasRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
 
         if (hasRole.length > 0) {
             // Get inpatientwaiting list
