@@ -20,7 +20,6 @@ class Service {
 
     async create(data, params) {
         const prescriptionService = this.app.service('prescriptions');
-        const billingService = this.app.service('billings');
         const patientService = this.app.service('patients');
         const billCreatorService = this.app.service('bill-creators');
         const accessToken = params.accessToken;
@@ -28,26 +27,13 @@ class Service {
         const prescription = data;
 
         if (accessToken !== undefined) {
-            const userRole =
-                params.user.facilitiesRole.filter(x => x.facilityId === facilityId);
+            const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
             if (userRole.length > 0) {
                 /* Create Billing for any item that has been billed */
                 const billingItems =
                     prescription.prescriptionItems.filter(x => x.isBilled);
 
                 if (billingItems.length > 0) {
-                    const totalCost =
-                        prescription.prescriptionItems.reduce((acc, obj) => {
-                            return acc + obj.cost;
-                        }, 0);
-                    // const bill = {
-                    //     facilityId: this.facility._id,
-                    //     patientId: this.prescriptions.patientId,
-                    //     billItems: billingItems,
-                    //     discount: 0,
-                    //     subTotal: totalCost,
-                    //     grandTotal: totalCost
-                    // };
                     const patientDetails =
                         await patientService.get(prescription.patientId);
                     const patientDefaultPaymentPlan =
@@ -92,25 +78,20 @@ class Service {
                         });
                         if (createBill.length > 0) {
                             try {
-                                const createPrescription =
-                                    await prescriptionService.create(prescription);
+                                const createPrescription = await prescriptionService.create(prescription);
                                 if (createPrescription._id !== undefined) {
                                     return jsend.success(createPrescription);
                                 } else {
-                                    return jsend.error(
-                                        'There was a problem trying to create prescription');
+                                    return jsend.error('There was a problem trying to create prescription');
                                 }
                             } catch (e) {
-                                return jsend.error(
-                                    'There was a problem trying to create prescription');
+                                return jsend.error('There was a problem trying to create prescription');
                             }
                         } else {
-                            return jsend.error(
-                                'There was a problem trying to create prescription');
+                            return jsend.error('There was a problem trying to create prescription');
                         }
                     } catch (e) {
-                        return jsend.error(
-                            'There was a problem trying to create prescription');
+                        return jsend.error('There was a problem trying to create prescription');
                     }
                 } else {
                     try {
@@ -124,8 +105,8 @@ class Service {
                                 'There was a problem trying to create prescription');
                         }
                     } catch (e) {
-                        return jsend.error(
-                            'There was a problem trying to create prescription');
+                        console.log(e);
+                        return jsend.error('There was a problem trying to create prescription');
                     }
                 }
             } else {
