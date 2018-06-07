@@ -244,19 +244,6 @@ class Service {
         }
     }
 
-    compareIngredient(pIngredients, ingred) {
-        let i = pIngredients.length;
-
-        while (i--) {
-            const item = pIngredients[i];
-            if ((item.strengthUnit === ingred.strengthUnit) && (item.strength === ingred.strength) && (item.name === ingred.name)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     update(id, data, params) {
         return Promise.resolve(data);
     }
