@@ -4,7 +4,12 @@ const productIngredient = require('./product-ingredient-model');
 const trackDispensed = require('./track-dispensed-model');
 
 const precribeItemSchema = new Schema({
-    facilityId: { type: Schema.Types.ObjectId, required: false }, // Facility that dispensed the drug.
+    billId: { type: Schema.Types.ObjectId, required: false },
+    billItemId: { type: Schema.Types.ObjectId, required: false },
+    facilityId: {
+        type: Schema.Types.ObjectId,
+        required: false
+    }, // Facility that dispensed the drug.
     productId: { type: Schema.Types.ObjectId, required: true },
     code: { type: String, required: true },
     productName: { type: Schema.Types.Mixed, required: false },
@@ -18,17 +23,29 @@ const precribeItemSchema = new Schema({
     routeName: { type: String, required: false },
     startDate: { type: Date, required: false },
     quantity: { type: Number, required: false },
-    quantityDispensed: { type: Number, required: false }, // I need to know the quantity that has been dispensed.
+    quantityDispensed: {
+        type: Number,
+        required: false
+    }, // I need to know the quantity that has been dispensed.
     dispensed: trackDispensed, // This is to keep track of what has been dispensed.
     cost: { type: Number, required: true }, // Unit price of drug.
     totalCost: { type: Number, required: true }, // Total price of drug.
-    initiateBill: { type: Boolean, required: false }, // Helps me to know when a bill has been initiated.
-    isBilled: { type: Boolean, required: false }, // Helps me to know when a drug has been billed.
+    initiateBill: {
+        type: Boolean,
+        required: false
+    }, // Helps me to know when a bill has been initiated.
+    isBilled: {
+        type: Boolean,
+        required: false
+    }, // Helps me to know when a drug has been billed.
     serviceId: { type: Schema.Types.ObjectId, required: false },
     facilityServiceId: { type: Schema.Types.ObjectId, required: false },
     categoryId: { type: Schema.Types.ObjectId, required: false },
     isExternal: { type: Boolean, 'default': false },
-    isDispensed: { type: Boolean, 'default': false }, // Using this to track if a drug has been dispensed.
+    isDispensed: {
+        type: Boolean,
+        'default': false
+    }, // Using this to track if a drug has been dispensed.
     patientInstruction: { type: String, required: false }
 });
 module.exports = precribeItemSchema;
