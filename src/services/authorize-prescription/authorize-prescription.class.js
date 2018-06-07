@@ -114,6 +114,7 @@ class Service {
                             return jsend.error('There was a problem trying to create prescription');
                         }
                     } catch (e) {
+                        console.log(e);
                         return jsend.error('There was a problem trying to create prescription');
                     }
                 }
