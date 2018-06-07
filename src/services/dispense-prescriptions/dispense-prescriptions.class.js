@@ -173,7 +173,7 @@ class Service {
                                         const batchTransaction = {
                                             batchNumber: batch.batchNumber,
                                             employeeId: getPrescription.employeeId,
-                                            preQuantity: batch.quantity, // Before Operation.
+                                            preQuantity: inventory.quantity, // Before Operation.
                                             postQuantity: batch.quantity - qty, // After Operation.
                                             quantity: qty, // Operational qty.
                                             referenceId: prescriptionId, // Dispense id, Transfer id...
@@ -196,16 +196,22 @@ class Service {
                                         // Update prescription
                                         getPrescription.prescriptionItems.forEach(prescription => {
                                             if (prescription._id.toString() === prescriptionItem._id) {
-                                                prescription = prescriptionItem;
+                                                console.log('complete');
+                                                prescription.dispensed = prescriptionItem.dispensed;
+                                                prescription.quantityDispensed = qty;
+
+                                                if (prescription.quantityDispensed === prescription.quantity) {
+                                                    prescription.isDispensed = true;
+                                                }
                                             }
                                         });
 
                                         try {
-                                            const updatePrescription = await _prescriptionService.update(getPrescription._id, getPrescription, {});
-                                            console.log('updatePrescription => ', updatePrescription);
+                                            const patchPrescription = await _prescriptionService.patch(getPrescription._id, getPrescription, {});
+                                            console.log('patchPrescription => ', patchPrescription);
 
-                                            if (updatePrescription) {
-                                                return jsend.success(updatePrescription);
+                                            if (patchPrescription) {
+                                                return jsend.success(patchPrescription);
                                             }
                                         } catch (e) {
                                             console.log(e);
