@@ -145,6 +145,7 @@ class Service {
                           categoryId: updatedInv.categoryId,
                           facilityServiceId: updatedInv.facilityServiceId,
                           productId: updatedInv.productId,
+                          productObject: updatedInv.productObject,
                           transactions: [],
                           totalQuantity: inventoryTransfers.inventoryTransferTransactions[index].quantity,
                           availableQuantity: inventoryTransfers.inventoryTransferTransactions[index].quantity
