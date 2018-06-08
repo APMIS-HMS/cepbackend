@@ -30,8 +30,7 @@ class Service {
             const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
             if (userRole.length > 0) {
                 /* Create Billing for any item that has been billed */
-                const billingItems =
-                    prescription.prescriptionItems.filter(x => x.isBilled);
+                const billingItems = prescription.prescriptionItems.filter(x => x.isBilled);
 
                 if (billingItems.length > 0) {
                     const patientDetails =
@@ -60,23 +59,35 @@ class Service {
                     }
                     billingItems.forEach(element => {
                         bill.push({
-                            unitPrice: element.unitPrice,
+                            unitPrice: element.cost,
                             facilityId: facilityId,
                             facilityServiceId: element.facilityServiceId,
                             serviceId: element.serviceId,
-                            patientId: element.patientId,
+                            patientId: prescription.patientId,
                             quantity: element.quantity,
                             active: true,
-                            totalPrice: element.totalPrice,
+                            totalPrice: element.totalCost,
                             covered: covered
                         });
                     });
 
                     try {
-                        const createBill = await billCreatorService.create(bill, {
+                        let createBill = await billCreatorService.create(bill, {
                             query: { facilityId: facilityId, patientId: prescription.patientId }
                         });
                         if (createBill.length > 0) {
+                            createBill = createBill[0];
+                            // Update prescription items with
+                            createBill.billItems.forEach(bill => {
+                                prescription.prescriptionItems.forEach(prescribe => {
+                                    if (bill.serviceId.toString() === prescribe.serviceId) {
+                                        // Update prescription items with billingId
+                                        prescribe.billItemId = bill._id;
+                                        prescribe.billId = createBill._id;
+                                    }
+                                });
+                            });
+
                             try {
                                 const createPrescription = await prescriptionService.create(prescription);
                                 if (createPrescription._id !== undefined) {
@@ -91,7 +102,7 @@ class Service {
                             return jsend.error('There was a problem trying to create prescription');
                         }
                     } catch (e) {
-                        return jsend.error('There was a problem trying to create prescription');
+                        return jsend.error('There was a problem trying to generate bill');
                     }
                 } else {
                     try {

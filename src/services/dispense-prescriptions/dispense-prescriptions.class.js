@@ -19,8 +19,6 @@ class Service {
     }
 
     async create(data, params) {
-        console.log(data);
-        console.log(params);
         const _inventoryService = this.app.service('inventories');
         const _prescriptionService = this.app.service('prescriptions');
         const facilityId = data.facilityId;
@@ -37,12 +35,10 @@ class Service {
             if (userRole.length > 0) {
                 try {
                     const getPrescription = await _prescriptionService.get(prescriptionId);
-
                     if (getPrescription._id) {
                         try {
                             // Dispense from inventory first before updating prescription
                             const getInventory = await _inventoryService.get(inventoryId);
-                            console.log('Get Inventory => ', getInventory);
                             if (getInventory._id) {
                                 getInventory.transactions.forEach(inventory => {
                                     if (inventory._id.toString() === batch._id) {
@@ -68,12 +64,12 @@ class Service {
                                     // Dispense the required quantity from inventory.
                                     const patchInventory = await _inventoryService.patch(getInventory._id, getInventory, {});
 
-                                    if (patchInventory) {
+                                    if (patchInventory._id) {
                                         // Update prescription
                                         getPrescription.prescriptionItems.forEach(prescription => {
                                             if (prescription._id.toString() === prescriptionItem._id) {
                                                 prescription.dispensed = prescriptionItem.dispensed;
-                                                prescription.quantityDispensed = qty;
+                                                prescription.quantityDispensed += qty;
 
                                                 if (prescription.quantityDispensed === prescription.quantity) {
                                                     prescription.isDispensed = true;
@@ -82,12 +78,8 @@ class Service {
                                         });
 
                                         try {
-                                            const patchPrescription =
-                                                await _prescriptionService.patch(
-                                                    getPrescription._id, getPrescription, {});
-                                            console.log('patchPrescription => ', patchPrescription);
-
-                                            if (patchPrescription) {
+                                            const patchPrescription = await _prescriptionService.patch(getPrescription._id, getPrescription, {});
+                                            if (patchPrescription._id) {
                                                 return jsend.success(patchPrescription);
                                             }
                                         } catch (e) {
@@ -117,31 +109,43 @@ class Service {
         }
     }
 
-    update(id, data, params) {
-        console.log(id);
-        console.log(data);
-        console.log(params);
-        const _inventoryService = this.app.service('inventories');
+    async update(id, data, params) {
         const _prescriptionService = this.app.service('prescriptions');
+        const _dispenseService = this.app.service('dispenses');
         const facilityId = data.facilityId;
-        const prescriptionId = data.prescriptionId;
+        const prescriptionId = id;
         const accessToken = params.accessToken;
 
         if (accessToken !== undefined) {
             const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
             if (userRole.length > 0) {
-                // try {
-                //     const getPrescription = await _prescriptionService.get(prescriptionId);
-                //     console.log('Get Prescription => ', getPrescription);
-                //     if (getPrescription._id) {
-
-                //     } else {
-                //         return jsend.error('There was problem getting prescription.');
-                //     }
-                // } catch (e) {
-                //     console.log(e);
-                //     return jsend.error('There was problem getting prescription.');
-                // }
+                try {
+                    const getPrescription = await _prescriptionService.get(prescriptionId);
+                    if (getPrescription._id) {
+                        // Update isDispensed to true;
+                        getPrescription.isDispensed = true;
+                        try {
+                            const patchPrescription = await _prescriptionService.patch(getPrescription._id, getPrescription, {});
+                            if (patchPrescription._id) {
+                                try {
+                                    // create dispense resource.
+                                    const createDispense = await _dispenseService.create(data);
+                                    if (createDispense._id) {
+                                        return jsend.success(createDispense);
+                                    }
+                                } catch (e) {
+                                    return jsend.error('There was problem trying to create dispense.');
+                                }
+                            }
+                        } catch (e) {
+                            return jsend.error('There was problem trying to updating prescription.');
+                        }
+                    } else {
+                        return jsend.error('There was problem getting prescription.');
+                    }
+                } catch (e) {
+                    return jsend.error('There was problem getting prescription.');
+                }
             } else {
                 return jsend.error('You have not been assigned to this facility.');
             }
