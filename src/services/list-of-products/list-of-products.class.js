@@ -16,7 +16,7 @@ class Service {
 
     let productIds = await fpService.find({
       query: {
-        name: params.query.name
+        facilityId: params.query.facilityId
       }
     });
     // console.log(productIds);
