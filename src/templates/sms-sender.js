@@ -4,12 +4,21 @@ const querystring = require('querystring');
 const https = require('https');
 
 function sender(mesage, data, isScheduler) {
-    var url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
+    var url =
+        'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' +
+        mesage + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
     if (isScheduler == true) {
-        url = 'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' + mesage + '&action=scheduled' + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
+        url =
+            'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' +
+            mesage + '&action=scheduled' +
+            '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
     }
+    console.log(11);
+    console.log(url);
     request.get(url, null, (error, response, body) => {
-        if (error) {}
+        if (error) {
+            console.log(error);
+        }
         if (response && body) {}
     });
 }
@@ -26,12 +35,7 @@ function africas_sender(message, data, isScheduler) {
     var username = process.env.AFRICASTALKINGUSERNAME;
     var apikey = process.env.AFRICASTALKINGKEY;
     var to = getPhoneNumber(data.primaryContactPhoneNo);
-    var post_data = querystring.stringify({
-        'username': username,
-        'to': to,
-        'from': 34461,
-        'message': message
-    });
+    var post_data = querystring.stringify({ 'username': username, 'to': to, 'from': 34461, 'message': message });
 
     var post_options = {
         host: 'api.africastalking.com',
@@ -56,14 +60,16 @@ function africas_sender(message, data, isScheduler) {
             var jsObject = JSON.parse(chunk);
             var recipients = jsObject.SMSMessageData.Recipients;
             if (recipients.length > 0) {
+                console.log(12);
                 // for (var i = 0; i < recipients.length; ++i) {
                 //     var logStr = 'number=' + recipients[i].number;
                 //     logStr += ';cost=' + recipients[i].cost;
-                //     logStr += ';status=' + recipients[i].status; // status is either "Success" or "error message"
-                //     console.log(logStr);
+                //     logStr += ';status=' + recipients[i].status; // status is either
+                //     "Success" or "error message" console.log(logStr);
                 // }
             } else {
-                // console.log('Error while sending: ' + jsObject.SMSMessageData.Message);
+                // console.log('Error while sending: ' +
+                // jsObject.SMSMessageData.Message);
             }
         });
     });
@@ -75,33 +81,55 @@ function africas_sender(message, data, isScheduler) {
 }
 
 function sendToken(data) {
-    const message = 'Kindly login to www.apmis.com with your APMISID or email address to complete your registration by verifing your account with this OTP code: ' + data.verificationToken + ' to complete your registration';
+    const message =
+        'Kindly login to www.apmis.com with your APMISID or email address to complete your registration by verifing your account with this OTP code: ' +
+        data.verificationToken + ' to complete your registration';
     sender(message, data, false);
 }
 
 function sendPasswordResetToken(data) {
-    const message = 'Complete your password reset by verifing your account with this OTP: ' + data.verificationToken + ' to complete your registration';
+    const message =
+        'Complete your password reset by verifing your account with this OTP: ' +
+        data.verificationToken + ' to complete your registration';
     sender(message, data, false);
 }
 
 function sendApmisId(data) {
-    const message = 'This is to notify you that ' + data.apmisId + ' is your personal APMIS identification number. Visit www.apmis.ng/details for details';
+    const message = 'This is to notify you that ' + data.apmisId +
+        ' is your personal APMIS identification number. Visit www.apmis.ng/details for details';
     sender(message, data, false);
 }
 
 function sendAutoGeneratorPassword(data, password) {
-    const message = 'APMIS Auto-generated password: ' + password + ' kindly change your password';
+    const message = 'APMIS Auto-generated password: ' + password +
+        ' kindly change your password';
     sender(message, data, false);
+}
+
+function sendPatientDocumentAuthorization(data, code) {
+    const message = 'This is to notify you that ' + code +
+        ' is your documentation authorization code.';
+    console.log('am sending');
+    sender(message, data, false);
+    africas_sender(message, data, false);
 }
 
 function sendScheduleAppointment(date, data) {
     var message = '';
     if (data.doctorId != undefined) {
-        message = 'This is to notify you of your appointment with ' + data.providerDetails.personDetails.title + ' ' + data.providerDetails.personDetails.lastName + ' ' + data.providerDetails.personDetails.firstName + ' scheduled for: ' + data.startDate + ' at ' + data.patientDetails.facilityObj.name + ' ' + data.clinicId + ' clinic';
+        message = 'This is to notify you of your appointment with ' +
+            data.providerDetails.personDetails.title + ' ' +
+            data.providerDetails.personDetails.lastName + ' ' +
+            data.providerDetails.personDetails.firstName +
+            ' scheduled for: ' + data.startDate + ' at ' +
+            data.patientDetails.facilityObj.name + ' ' + data.clinicId + ' clinic';
     } else {
-        message = 'This is to notify you of your appointment scheduled for: ' + data.startDate + ' at ' + data.patientDetails.facilityObj.name + ' in ' + data.clinicId + ' clinic';
+        message = 'This is to notify you of your appointment scheduled for: ' +
+            data.startDate + ' at ' + data.patientDetails.facilityObj.name +
+            ' in ' + data.clinicId + ' clinic';
     }
-    data.primaryContactPhoneNo = data.patientDetails.personDetails.primaryContactPhoneNo;
+    data.primaryContactPhoneNo =
+        data.patientDetails.personDetails.primaryContactPhoneNo;
     africas_sender(message, data, true);
     sender(message, data, true);
 }
@@ -123,5 +151,8 @@ module.exports = {
     },
     sendScheduleAppointment(date, data) {
         sendScheduleAppointment(date, data);
+    },
+    sendPatientDocumentAuthorization(data, code) {
+        sendPatientDocumentAuthorization(data, code);
     }
 };
