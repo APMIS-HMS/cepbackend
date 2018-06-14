@@ -16,13 +16,15 @@ module.exports = function(app) {
     const resolvers = {
         joins: {
             security: () => async(login, context) => {
-                var email_bytes = AES.decrypt(login.email, 'secret key 123');
-                var password_bytes = AES.decrypt(login.password, 'secret key 123');
-                login.email = email_bytes.toString(CryptoJS.enc.Utf8);
-                login.password = password_bytes.toString(CryptoJS.enc.Utf8);
-
-                console.log(login.email);
-                console.log(login.password);
+                try {
+                    var email_bytes = AES.decrypt(login.email, 'endurance@pays@alot');
+                    var password_bytes =
+                        AES.decrypt(login.password, 'endurance@pays@alot');
+                    login.email = email_bytes.toString(CryptoJS.enc.Utf8);
+                    login.password = password_bytes.toString(CryptoJS.enc.Utf8);
+                } catch (error) {
+                    // console.log(error);
+                }
             }
         }
     };

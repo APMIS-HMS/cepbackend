@@ -7,6 +7,8 @@ const documentationAuthorizationSchema = new Schema({
     expires: { type: Schema.Types.Date, required: true },
     attempts: [{ type: Schema.Types.Date, required: false }],
     lastAttempt: { type: Schema.Types.Date, required: false },
-    tryAgainAt: { type: Schema.Types.Date, required: false }
+    tryAgainAt: { type: Schema.Types.Date, required: false },
+    employeeId: { type: Schema.Types.ObjectId, required: true },
+    facilityId: { type: Schema.Types.ObjectId, required: true }
 }, { timestamps: true });
 module.exports = documentationAuthorizationSchema;

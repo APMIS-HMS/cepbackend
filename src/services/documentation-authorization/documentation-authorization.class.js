@@ -5,6 +5,8 @@ var addMinutes = require('date-fns/add_minutes');
 var isFuture = require('date-fns/is_future');
 const jsend = require('jsend');
 const sms = require('../../templates/sms-sender');
+var AES = require('crypto-js/aes');
+var CryptoJS = require('crypto-js');
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -14,26 +16,37 @@ class Service {
         if (params.query.type === 'patient') {
             const _patientService = this.app.service('patients');
             const patientId = params.query.patientId;
+            const employeeId = params.query.employeeId;
+            const facilityId = params.query.facilityId;
             let patient = await _patientService.get(patientId);
             const token = params.query.token;
             const code = patient.documentationAuthorizationCode;
             if (code.attempts.length > 2 && isFuture(code.tryAgainAt)) {
                 return jsend.fail('Please attempt back in ' + code.tryAgainAt);
-            } else if (code.documentationAuthorizationCode === token) {
+            } else if (
+                code.documentationAuthorizationCode === token &&
+                code.employeeId.toString() == employeeId.toString() &&
+                code.facilityId.toString() == facilityId.toString()) {
                 code.attempts = [];
                 patient.documentationAuthorizationCode = code;
                 patient = await _patientService.update(patient._id, patient, {});
-                return jsend.success('Authorization code is valid');
+                const msg = {
+                    text: 'Authorization code is valid',
+                    expires: patient.documentationAuthorizationCode.expires,
+                    patientId: patientId
+                };
+                return jsend.success(msg);
             } else {
                 const dateNow = Date.now();
                 if (code.attempts.length == 2) {
-                    code.tryAgainAt = addMinutes(dateNow);
+                    code.tryAgainAt = addMinutes(dateNow, 30);
                 }
                 code.attempts.push(dateNow);
                 code.lastAttempt = dateNow;
                 code.expires = dateNow;
                 patient.documentationAuthorizationCode = code;
-                console.log('about to update');
+                patient.employeeId = employeeId;
+                patient.facilityId = facilityId;
                 patient = await _patientService.update(patient._id, patient, {});
                 return jsend.fail('Invalid authorization code supplied');
             }
@@ -68,21 +81,37 @@ class Service {
             const facilityId = data.facilityId;
             const employeeId = data.employeeId;
             let patient = await _patientService.get(patientId);
-            const token = await _tokenService.get(
-                tokenLabel.tokenType.facilityVerification, {});
-            patient.documentationAuthorizationCode = {
-                documentationAuthorizationCode: token.result,
-                expires: addMinutes(
-                    Date.now(), parseInt(process.env.PATIENTDOCUMENTATIONEXPIRESIN)),
-                attempts: [],
+            const code = patient.documentationAuthorizationCode;
+            if (code.employeeId.toString() == employeeId.toString() &&
+                code.facilityId.toString() == facilityId.toString() &&
+                isFuture(code.expires)) {
+                const msg = {
+                    text: 'Authorization code is valid',
+                    expires: patient.documentationAuthorizationCode.expires,
+                    patientId: patientId,
+                    stillValid: true
+                };
+                return jsend.success(msg);
+            } else {
+                const token = await _tokenService.get(
+                    tokenLabel.tokenType.facilityVerification, {});
+                patient.documentationAuthorizationCode = {
+                    documentationAuthorizationCode: token.result,
+                    expires: addMinutes(
+                        Date.now(), parseInt(process.env.PATIENTDOCUMENTATIONEXPIRESIN)),
+                    attempts: [],
+                    employeeId: employeeId,
+                    facilityId: facilityId
 
-            };
-            patient = await _patientService.update(patient._id, patient, {});
-            if (process.env.SENDSMS === 'true') {
-                await sms.sendPatientDocumentAuthorization(
-                    patient.personDetails, token.result);
+                };
+                patient = await _patientService.update(patient._id, patient, {});
+                if (process.env.SENDSMS === 'true') {
+                    await sms.sendPatientDocumentAuthorization(
+                        patient.personDetails, token.result);
+                }
+                return jsend.success('Authorization code sent to the patient');
             }
-            return jsend.success('Authorization code sent to the patient');
+
         } else if (data.type === 'medical') {
             const _employeeService = this.app.service('employees');
             const employeeId = data.employeeId;
