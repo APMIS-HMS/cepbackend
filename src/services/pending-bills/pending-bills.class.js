@@ -116,6 +116,7 @@ class Service {
     const patientService = this.app.service('patients');
     const patientIdsService = this.app.service('db-patientids');
     const peopleService = this.app.service('people');
+
     if (params.query.name === undefined) {
       awaitedBills = await billingsService.find({
         query: {
@@ -159,12 +160,10 @@ class Service {
             }
           }
         })));
-
         const _awaitedBills = await billsPromiseYetResolved;
         awaitedBills = _awaitedBills[0];
       }
     }
-
     awaitedBills.data.forEach(element => {
       const index = patientIds.filter(x => x.id.toString() === element.patientId.toString());
       if (index.length === 0) {
@@ -199,15 +198,13 @@ class Service {
     patientBills.forEach(item => {
       const indx = uniquePatients.filter(x => x.patientId.toString() === item.patientId.toString());
       if (indx.length > 0) {
-        // console.log(item);
         let _billExisting = JSON.parse(JSON.stringify(item));
         _billExisting.billItems = [];
         _billExisting.billItems = item.billItems.filter(x => x.isInvoiceGenerated === false);
         if (_billExisting.billItems.length > 0) {
-            indx[0].billItems.push.apply(indx[0].billItems, item.billItems);
+          indx[0].billItems.push.apply(indx[0].billItems, item.billItems);
         }
-    } else {
-        // console.log(item);
+      } else {
         let _bill = JSON.parse(JSON.stringify(item));;
         _bill.billItems = [];
         _bill.billItems = item.billItems.filter(x => x.isInvoiceGenerated === false);

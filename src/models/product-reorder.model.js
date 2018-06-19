@@ -8,6 +8,7 @@ module.exports = function (app) {
   const productReorder = new Schema({
     facilityId: { type: Schema.Types.ObjectId, require: true },
     productId: { type: Schema.Types.ObjectId, require: true },
+    productObject: { type: Schema.Types.Mixed, require: true },
     storeId: { type: Schema.Types.ObjectId, require: true },
     reOrderLevel: { type: Number, require: true },
     reOrderSizeId: { type: Schema.Types.ObjectId, require: true },

@@ -15,15 +15,11 @@ class Service {
     }
 
     get(id, params) {
-        return Promise.resolve({
-            id,
-            text: `A new message with ID: ${id}!`
-        });
+        return Promise.resolve({ id, text: `A new message with ID: ${id}!` });
     }
 
     async create(data, params) {
         const prescriptionService = this.app.service('prescriptions');
-        const billingService = this.app.service('billings');
         const patientService = this.app.service('patients');
         const billCreatorService = this.app.service('bill-creators');
         const accessToken = params.accessToken;
@@ -31,25 +27,16 @@ class Service {
         const prescription = data;
 
         if (accessToken !== undefined) {
-            const userRole = params.user.facilitiesRole.filter(x => x.facilityId === facilityId);
+            const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
             if (userRole.length > 0) {
                 /* Create Billing for any item that has been billed */
                 const billingItems = prescription.prescriptionItems.filter(x => x.isBilled);
 
                 if (billingItems.length > 0) {
-                    const totalCost = prescription.prescriptionItems.reduce((acc, obj) => {
-                        return acc + obj.cost;
-                    }, 0);
-                    // const bill = {
-                    //     facilityId: this.facility._id,
-                    //     patientId: this.prescriptions.patientId,
-                    //     billItems: billingItems,
-                    //     discount: 0,
-                    //     subTotal: totalCost,
-                    //     grandTotal: totalCost
-                    // };
-                    const patientDetails = await patientService.get(prescription.patientId);
-                    const patientDefaultPaymentPlan = patientDetails.paymentPlan.find(x => x.isDefault === true);
+                    const patientDetails =
+                        await patientService.get(prescription.patientId);
+                    const patientDefaultPaymentPlan =
+                        patientDetails.paymentPlan.find(x => x.isDefault === true);
                     const bill = [];
                     let covered = {};
                     if (patientDefaultPaymentPlan.planType === 'wallet') {
@@ -72,48 +59,64 @@ class Service {
                     }
                     billingItems.forEach(element => {
                         bill.push({
-                            unitPrice: element.unitPrice,
-                            facilityId: this.facility._id,
+                            unitPrice: element.cost,
+                            facilityId: facilityId,
                             facilityServiceId: element.facilityServiceId,
                             serviceId: element.serviceId,
-                            patientId: element.patientId,
+                            patientId: prescription.patientId,
                             quantity: element.quantity,
                             active: true,
-                            totalPrice: element.totalPrice,
+                            totalPrice: element.totalCost,
                             covered: covered
                         });
                     });
 
                     try {
-                        const createBill = await billCreatorService.create(bill, {
-                            query: {
-                                facilityId: facilityId,
-                                patientId: prescription.patientId
-                            }
+                        let createBill = await billCreatorService.create(bill, {
+                            query: { facilityId: facilityId, patientId: prescription.patientId }
                         });
                         if (createBill.length > 0) {
-                            const createPrescription = await prescriptionService.create(prescription);
-                            if (createPrescription._id !== undefined) {
-                                return jsend.success(createPrescription);
-                            } else {
+                            createBill = createBill[0];
+                            // Update prescription items with
+                            createBill.billItems.forEach(bill => {
+                                prescription.prescriptionItems.forEach(prescribe => {
+                                    if (bill.serviceId.toString() === prescribe.serviceId) {
+                                        // Update prescription items with billingId
+                                        prescribe.billItemId = bill._id;
+                                        prescribe.billId = createBill._id;
+                                    }
+                                });
+                            });
+
+                            try {
+                                const createPrescription = await prescriptionService.create(prescription);
+                                if (createPrescription._id !== undefined) {
+                                    return jsend.success(createPrescription);
+                                } else {
+                                    return jsend.error('There was a problem trying to create prescription');
+                                }
+                            } catch (e) {
                                 return jsend.error('There was a problem trying to create prescription');
                             }
                         } else {
                             return jsend.error('There was a problem trying to create prescription');
                         }
                     } catch (e) {
-                        return jsend.error('There was a problem trying to create prescription');
+                        return jsend.error('There was a problem trying to generate bill');
                     }
                 } else {
                     try {
-                        const createPrescription = await prescriptionService.create(prescription);
+                        const createPrescription =
+                            await prescriptionService.create(prescription);
 
                         if (createPrescription._id !== undefined) {
                             return jsend.success(createPrescription);
                         } else {
-                            return jsend.error('There was a problem trying to create prescription');
+                            return jsend.error(
+                                'There was a problem trying to create prescription');
                         }
                     } catch (e) {
+                        console.log(e);
                         return jsend.error('There was a problem trying to create prescription');
                     }
                 }
@@ -134,9 +137,7 @@ class Service {
     }
 
     remove(id, params) {
-        return Promise.resolve({
-            id
-        });
+        return Promise.resolve({ id });
     }
 }
 
