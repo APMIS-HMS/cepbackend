@@ -36,7 +36,7 @@ class Service {
         facilityId: data.facilityId
       }
     });
-    if (existingSubscription.status === 'success') {
+    if (facilitySubscriptionUrl.status === 'success') {
       let existingSubscription = facilitySubscriptionUrl;
       let description = '';
       if (data.isInvoicePage == false) {
