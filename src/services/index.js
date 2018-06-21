@@ -194,6 +194,8 @@ const setMultipleAppointments = require('./set-multiple-appointments/set-multipl
 const billPrescription = require('./bill-prescription/bill-prescription.service.js');
 const immunizationRecords = require('./immunization-records/immunization-records.service.js');
 const crudImmunizationRecord = require('./crud-immunization-record/crud-immunization-record.service.js');
+const facilityPlans = require('./facility-plans/facility-plans.service.js');
+const apmisSubscriptions = require('./apmis-subscriptions/apmis-subscriptions.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -391,4 +393,6 @@ module.exports = function(app) {
     app.configure(billPrescription);
     app.configure(immunizationRecords);
     app.configure(crudImmunizationRecord);
+    app.configure(facilityPlans);
+    app.configure(apmisSubscriptions);
 };
