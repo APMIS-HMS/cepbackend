@@ -17,15 +17,15 @@ class Service {
       uri: facilitySubscriptionUrl
     };
     try {
-      const subscriptions = await request(options);
-      const parsed = JSON.parse(subscriptions);
+      let subscriptions = await request(options);
+      let parsed = JSON.parse(subscriptions);
       parsed.subscriptions_status = process.env.PLATFORM_SUBSCRIPTION_STATUS;
-      if(parsed.status==='success'){
+      if (parsed.status === 'success') {
         return jsend.success(parsed);
-      }else{
-        return jsend.fail({subscriptions_status : process.env.PLATFORM_SUBSCRIPTION_STATUS});
+      } else {
+        return jsend.fail({});
       }
-      
+
     } catch (e) {
       return jsend.fail({});
     }
