@@ -19,10 +19,11 @@ class Service {
     try {
       const subscriptions = await request(options);
       const parsed = JSON.parse(subscriptions);
+      parsed.subscriptions_status = process.env.PLATFORM_SUBSCRIPTION_STATUS;
       if(parsed.status==='success'){
         return jsend.success(parsed);
       }else{
-        return jsend.fail({});
+        return jsend.fail({subscriptions_status : process.env.PLATFORM_SUBSCRIPTION_STATUS});
       }
       
     } catch (e) {
