@@ -40,11 +40,7 @@ class Service {
 
             if (checkImmuneName.data.length === 0) {
                 //Get all organisation services
-                let org = await organisationServices.find({
-                    query: {
-                        facilityId: facilityId
-                    }
-                });
+                let org = await organisationServices.find({ query: { facilityId: facilityId } });
 
                 // Verify if the Facility has any service record
                 if (org.data.length > 0) {
@@ -186,8 +182,189 @@ class Service {
         }
     }
 
-    update(id, data, params) {
-        return Promise.resolve(data);
+    async update(id, data, params) {
+        const vaccines = data.vaccines;
+        const immuneName = data.name;
+        const immunePrice = data.price;
+        const immunizationSchedule = data;
+        const immuneServiceId = data.serviceId;
+        const facilityId = data.facilityId;
+
+        const organisationServices = this.app.service('organisation-services');
+        const facilityPriceService = this.app.service('facility-prices');
+        const immunizationService = this.app.service('immunization-schedule');
+
+        try {
+            // Get immunization schedule with the id sent from the client.
+            const getImmuneSchedule = await immunizationService.get(id);
+            if (getImmuneSchedule._id !== undefined) {
+                try {
+                    // Get all organization services.
+                    let org = await organisationServices.find({ query: { facilityId: facilityId } });
+                    // Declare and define frequently used parameters
+                    org = org.data[0];
+                    // Get facility Categories.
+                    const facilityCategories = org.categories;
+                    // Filter all service categories under this facility
+                    const immuCategory = facilityCategories.filter(x => x.name.toLowerCase() === 'immunization');
+                    // Extract the organisation services from the category
+                    let orgServices = immuCategory[0].services;
+                    // Filter the new vaccines from the entire data sent
+                    let newVaccines = vaccines.map(x => {
+                        return {
+                            name: `${immuneName} ${x.code}`,
+                            code: x.code,
+                            price: x.price,
+                            serviceId: (x.serviceId !== '') ? x.serviceId : ''
+                        };
+                    });
+                    // Add the general sevice to the newVaccine array. ~That is every vaccine is treated as a service
+                    newVaccines.push({
+                        name: immuneName,
+                        code: immuneName,
+                        price: immunePrice,
+                        serviceId: immuneServiceId
+                    });
+                    // Array to hold vaccines that has not been created.
+                    let newVacServices = [];
+                    // Need to check if a service has been created for before
+                    // update anyone that has been created and create new ones if they exist.
+                    for (let i = 0; i < newVaccines.length; i++) {
+                        const vac = newVaccines[i];
+                        // If this is a new vaccine that has no serviceId
+                        if (vac.serviceId === '') {
+                            let vacc = {
+                                name: vac.name,
+                                facilityServiceId: org._id,
+                                categoryId: immuCategory[0]._id,
+                                facilityId: facilityId,
+                                price: vac.price,
+                                code: vac.code
+                            };
+                            // Push into a new array
+                            newVacServices.push(vacc);
+                            break;
+                        }
+                        for (let j = 0; j < orgServices.length; j++) {
+                            const orgService = orgServices[j];
+                            // Update the name and code for the existing services
+                            if (orgService._id.toString() === vac.serviceId) {
+                                orgService.name = vac.name;
+                                orgService.code = vac.code;
+
+                                // find and update existing price too.
+                                let findServicePrice = await facilityPriceService.find({
+                                    query: {
+                                        facilityId: facilityId,
+                                        facilityServiceId: org._id,
+                                        categoryId: immuCategory[0]._id,
+                                        serviceId: vac.serviceId,
+                                    }
+                                });
+
+                                if (findServicePrice.data !== undefined && findServicePrice.data.length > 0) {
+                                    findServicePrice = findServicePrice.data[0];
+
+                                    // Update the object of the service price.
+                                    findServicePrice.price = vac.price;
+                                    // Update the existing price.
+                                    const updateServicePrice = await facilityPriceService.patch(findServicePrice._id, findServicePrice, {});
+
+                                    if (updateServicePrice._id !== undefined) {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Merge the newVaccineService array with the existing services.
+                    immuCategory[0].services = orgServices.concat(newVacServices);
+                    try {
+                        // Update organization service
+                        let updateOrgService = await organisationServices.patch(org._id, org, {});
+                        if (updateOrgService._id !== undefined) {
+                            // Updated organiation categories.
+                            let updatedCatServices = updateOrgService.categories.filter(x => x.name.toLowerCase() === 'immunization');
+                            // Updated organization categories services.
+                            let updatedServices = updatedCatServices[0].services;
+                            let vacServices = [];
+
+                            // Update only new services before saving to immunization.
+                            if (newVacServices.length > 0) {
+                                updatedServices.forEach(element => {
+                                    newVacServices.forEach(vac => {
+                                        if (element.name === vac.name && element.code === vac.code) {
+                                            let vacc = {
+                                                name: vac.name,
+                                                facilityServiceId: updateOrgService._id,
+                                                categoryId: updatedCatServices[0]._id,
+                                                facilityId: facilityId,
+                                                serviceId: element._id,
+                                                price: vac.price,
+                                                code: vac.code
+                                            };
+                                            vacServices.push(vacc);
+                                        }
+                                    });
+                                });
+                                try {
+                                    // let vacNew = [];
+                                    // Create and attach prices to the newly created services
+                                    const createNewFacPrice = await facilityPriceService.create(vacServices);
+                                    // Verify if the process above was successfull
+                                    if (createNewFacPrice.length > 0) {
+                                        //Attach service Ids to each vaccine
+                                        vacServices.forEach(ser => {
+                                            vaccines.forEach(vac => {
+                                                if (ser.code === vac.code) {
+                                                    vac.serviceId = ser.serviceId;
+                                                }
+                                            });
+                                        });
+                                    }
+
+                                    const saveImmunization = await this.saveImmunization(immunizationSchedule);
+                                    if (saveImmunization.status === 'success') {
+                                        return jsend.success(saveImmunization.data);
+                                    } else {
+                                        return jsend.error(saveImmunization.message);
+                                    }
+                                } catch (error) {
+                                    return jsend.error('Failed to create Facility price');
+                                }
+                            } else {
+                                const saveImmunization = await this.saveImmunization(immunizationSchedule);
+                                if (saveImmunization.status === 'success') {
+                                    return jsend.success(saveImmunization.data);
+                                } else {
+                                    return jsend.error(saveImmunization.message);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        return jsend.error('There was a problem trying to update organization services.');
+                    }
+                } catch (e) {
+                    return jsend.error('There was a problem trying to get all organization services.');
+                }
+            } else {
+                return jsend.error('There was a problem trying to get all organization services.');
+            }
+        } catch (e) {
+            return jsend.error('Immunization schedule you are trying to edit does not exist.');
+        }
+    }
+
+    async saveImmunization(immunization) {
+        const immunizationService = this.app.service('immunization-schedule');
+        try {
+            // Create immuzation schedule
+            const createNewImmunSch = await immunizationService.patch(immunization._id, immunization, {});
+            return jsend.success(createNewImmunSch);
+        } catch (e) {
+            return jsend.error('Failed to create immunization schedule');
+        }
     }
 
     patch(id, data, params) {
@@ -205,7 +382,7 @@ class Service {
     }
 }
 
-module.exports = function (options) {
+module.exports = function(options) {
     return new Service(options);
 };
 
