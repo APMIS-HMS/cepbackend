@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+const request = require('request-promise');
+const jsend = require('jsend');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -9,30 +11,24 @@ class Service {
   }
 
   async find(params) {
-    const productConfigService = this.app.service('product-configs');
-    const fpService = this.app.service('formulary-products');
-    let productConfig = {};
-    productConfig.data = [];
+    let facilitySubscriptionUrl = process.env.APMIS_ADMIN + '/subscribed-facilities?facilityId=' + params.query.facilityId;
+    const options = {
+      method: 'GET',
+      uri: facilitySubscriptionUrl
+    };
+    try {
+      let subscriptions = await request(options);
+      let parsed = JSON.parse(subscriptions);
+      parsed.subscriptions_status = process.env.PLATFORM_SUBSCRIPTION_STATUS;
+      if (parsed.status === 'success') {
+        return jsend.success(parsed);
+      } else {
+        return jsend.fail({});
+      }
 
-    let productIds = await fpService.find({
-      query: {
-        facilityId: params.query.facilityId
-      }
-    });
-    // console.log(productIds);
-    for (let index = 0; index < productIds.data.length; index++) {
-      const productConfigItems = await productConfigService.find({
-        query: {
-          facilityId: params.query.facilityId,
-          productId: productIds.data[index].id
-        }
-      });
-      if (productConfigItems.data[0] !== undefined) {
-        productConfig.data.push(productConfigItems.data[0]);
-      }
+    } catch (e) {
+      return jsend.fail({});
     }
-
-    return productConfig;
   }
 
   get(id, params) {
@@ -64,6 +60,7 @@ class Service {
     });
   }
 }
+
 module.exports = function (options) {
   return new Service(options);
 };

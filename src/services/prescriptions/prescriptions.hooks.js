@@ -13,6 +13,31 @@ const resolvers = {
     }
 };
 
+const billing = {
+    joins: {
+        isBilled: () => async(prescription, context) => {
+            console.log(context);
+            console.log(prescription);
+            if (prescription.prescriptionItems.length > 0) {
+                for (let i = 0; i < prescription.prescriptionItems.length; i++) {
+                    const prescribe = prescription.prescriptionItems[i];
+                    if (prescribe.billId && prescription.billItemId) {
+                        const billing = await context.app.service('billings').get(prescribe.billId, {});
+
+                        if (billing._id) {
+                            billing.billItems.forEach(i => {
+                                if (i._id === prescribe.billItemId) {
+                                    prescribe.paymentCompleted = i.paymentCompleted;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 module.exports = {
     before: {
         all: [authenticate('jwt')],
@@ -27,7 +52,7 @@ module.exports = {
     after: {
         all: [fastJoin(resolvers)],
         find: [],
-        get: [],
+        get: [fastJoin(billing)],
         create: [],
         update: [],
         patch: [],
