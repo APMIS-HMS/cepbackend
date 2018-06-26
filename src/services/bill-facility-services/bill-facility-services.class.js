@@ -43,7 +43,13 @@ class Service {
     const billingsService = this.app.service('billings');
     const getTokenService = this.app.service('get-tokens');
     const invoicesService = this.app.service('invoices');
-    var newBillItems = [];
+    const subscriptionsService = this.app.service('apmis-subscriptions');
+    const existingSub = await subscriptionsService.find({
+      query: {
+        facilityId: data.facilityId
+      }
+    });
+
     if (data.checkBillitems.length > 0) {
       const billGroup = {
         billingIds: []
@@ -51,6 +57,7 @@ class Service {
       billGroup.facilityId = data.facilityId;
       billGroup.patientId = data.patientId;
       billGroup.payments = [];
+      const awaitToken = await getTokenService.get(tokenLabel.tokenType.invoiceNo, {});
       data.billGroups.forEach((itemg, g) => {
         itemg.bills.forEach((itemb, b) => {
           if (itemb.isChecked) {
@@ -67,6 +74,7 @@ class Service {
               qty: itemb.billObject.quantity,
               facilityServiceObject: itemb.billObject.facilityServiceObject,
               amountPaid: 0,
+              isSubCharge:false,
               totalPrice: itemb.billObject.totalPrice,
               balance: itemb.billObject.totalPrice,
               isPaymentCompleted: false,
@@ -74,15 +82,60 @@ class Service {
               waiverComment: '',
               createdBy: ''
             });
+            if (existingSub.data.name === 'Subscription') {
+              let subCharge = data.subTotal * (existingSub.data.rate / 100);
+              const apmisSubChargeItem = {
+                "billObject": {
+                  "facilityServiceObject": {
+                    "service": "Apmis Sub-charge",
+                    "category": "Apmis Sub-charge"
+                  },
+                  "paymentCompleted": false,
+                  "isServiceEnjoyed": true,
+                  "isInvoiceGenerated": true,
+                  "active": true,
+                  "modifierId": [],
+                  "unitPrice": subCharge,
+                  "totalPrice": subCharge,
+                  "quantity": 1,
+                  "description": "Apmis Sub-charge on Invoice "+ awaitToken.result,
+                  "patientId": data.patientId,
+                  "facilityId": data.facilityId,
+                }
+              }
+              billGroup.billingIds.push(apmisSubChargeItem);
+
+              billGroup.payments.push({
+                paymentDate: new Date,
+                date: itemb.billObject.updatedAt,
+                qty: 1,
+                facilityServiceObject: {
+                  "service": "Apmis Sub-charge",
+                  "category": "Apmis Sub-charge"
+                },
+                amountPaid: 0,
+                isSubCharge:true,
+                totalPrice: subCharge,
+                balance: subCharge,
+                isPaymentCompleted: false,
+                isWaiver: false,
+                waiverComment: ''
+              });
+            }
           }
         });
       });
-      const awaitToken = await getTokenService.get(tokenLabel.tokenType.invoiceNo, {});
+     
       if (billGroup.billingIds.length > 0) {
         billGroup.totalDiscount = data.totalDiscount;
         billGroup.subTotal = data.subTotal;
         billGroup.totalPrice = data.totalPrice;
         billGroup.balance = data.totalPrice;
+        if (existingSub.data.name === 'Subscription') {
+          let _subCharge = data.subTotal * (existingSub.data.rate / 100);
+          billGroup.totalPrice = _subCharge + billGroup.totalPrice;
+          billGroup.balance = data.totalPrice;
+        }
         billGroup.invoiceNo = awaitToken.result;
         const awaitInvoices = await invoicesService.create(billGroup);
         const len = data.checkBillitems.length - 1;
@@ -145,45 +198,45 @@ function fixedGroupExisting(billGroups, results) {
       if ((results[i].billItems[k].isInvoiceGenerated === false || results[i].billItems[k].isInvoiceGenerated === undefined) && results[i].billItems[k].facilityServiceObject.serviceId !== undefined) {
         let bill = results[i].billItems[k];
         const _id = results[i]._id;
-          const inBill = {};
-          inBill.amount = bill.totalPrice;
-          inBill.itemDesc = bill.description;
-          inBill.itemName = bill.facilityServiceObject.service;
-          inBill.qty = bill.quantity;
-          inBill.covered = bill.covered;
-          inBill.unitPrice = bill.unitPrice;
-          inBill._id = bill._id;
-          inBill.facilityServiceObject = bill.facilityServiceObject;
-          inBill.billObject = bill;
-          inBill.billModelId = _id;
-          const existingGroupList = billGroups.filter(x => x.categoryId !== undefined && x.categoryId.toString() === bill.facilityServiceObject.categoryId.toString());
-          if (existingGroupList.length > 0) {
-            const existingGroup = existingGroupList[0];
-            if (existingGroup.isChecked) {
-              bill.isChecked = true;
-            }
-            existingGroup.bills.push(inBill);
-            subTotal = subTotal + existingGroup.total;
-            total = subTotal - discount;
-            if (existingGroup.bills.length > 5) {
-              existingGroup.isOpened = false;
-            }
-          } else {
-            const group = {
-              isChecked: false,
-              total: 0,
-              isOpened: false,
-              categoryId: bill.facilityServiceObject.categoryId,
-              category: bill.facilityServiceObject.category,
-              bills: []
-            };
-            inBill.isChecked = false;
-            group.bills.push(inBill);
-            billGroups.push(group);
-            billGroups.sort(p => p.categoryId);
-            total = subTotal - discount;
-            group.isOpened = true;
+        const inBill = {};
+        inBill.amount = bill.totalPrice;
+        inBill.itemDesc = bill.description;
+        inBill.itemName = bill.facilityServiceObject.service;
+        inBill.qty = bill.quantity;
+        inBill.covered = bill.covered;
+        inBill.unitPrice = bill.unitPrice;
+        inBill._id = bill._id;
+        inBill.facilityServiceObject = bill.facilityServiceObject;
+        inBill.billObject = bill;
+        inBill.billModelId = _id;
+        const existingGroupList = billGroups.filter(x => x.categoryId !== undefined && x.categoryId.toString() === bill.facilityServiceObject.categoryId.toString());
+        if (existingGroupList.length > 0) {
+          const existingGroup = existingGroupList[0];
+          if (existingGroup.isChecked) {
+            bill.isChecked = true;
           }
+          existingGroup.bills.push(inBill);
+          subTotal = subTotal + existingGroup.total;
+          total = subTotal - discount;
+          if (existingGroup.bills.length > 5) {
+            existingGroup.isOpened = false;
+          }
+        } else {
+          const group = {
+            isChecked: false,
+            total: 0,
+            isOpened: false,
+            categoryId: bill.facilityServiceObject.categoryId,
+            category: bill.facilityServiceObject.category,
+            bills: []
+          };
+          inBill.isChecked = false;
+          group.bills.push(inBill);
+          billGroups.push(group);
+          billGroups.sort(p => p.categoryId);
+          total = subTotal - discount;
+          group.isOpened = true;
+        }
       }
     }
   }
