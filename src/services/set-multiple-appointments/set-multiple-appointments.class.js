@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 var addHours = require('date-fns/add_hours');
+var isSameDay = require('date-fns/is_same_day');
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -10,15 +11,15 @@ class Service {
     }
 
     get(id, params) {
-        return Promise.resolve({
-            id,
-            text: `A new message with ID: ${id}!`
-        });
+        return Promise.resolve({ id, text: `A new message with ID: ${id}!` });
     }
 
     async create(data, params) {
-        const immunizationScheduleService = this.app.service('immunization-schedule');
-        const selectedImmunizationSchedule = await immunizationScheduleService.get(data.immunizationScheduleId);
+        const immunizationScheduleService =
+            this.app.service('immunization-schedule');
+        const appointmentService = this.app.service('appointments');
+        const selectedImmunizationSchedule =
+            await immunizationScheduleService.get(data.immunizationScheduleId);
 
         const vaccines = selectedImmunizationSchedule.vaccines;
         const checkedVaccines = vaccines.filter(vaccine => {
@@ -26,33 +27,183 @@ class Service {
                 return vac == vaccine._id;
             });
         });
-        // console.log(selectedImmunizationSchedule);
-        // console.log(checkedVaccines);
-        // console.log(data.appointment);
         let appointments = [];
+        let immunizationRecords = {
+            patientId: data.appointment.patientId,
+            facilityId: data.appointment.facilityId,
+            immunizations: []
+        };
         let firstAppointment;
+        let immunizations = [];
         checkedVaccines.forEach(vaccine => {
             vaccine.intervals.forEach((interval, i) => {
-                console.log(i);
                 if (i === 0) {
                     if (firstAppointment == undefined) {
                         firstAppointment = JSON.parse(JSON.stringify(data.appointment));
                     }
-                    firstAppointment.appointmentReason = firstAppointment.appointmentReason == null ? vaccine.name + ' ' : firstAppointment.appointmentReason + ' ' + vaccine.name;
+
+                    let existingAppointment = this.appointmentDateBooked(
+                        appointments, data.appointment.startDate);
+                    if (existingAppointment == null) {
+                        firstAppointment.appointmentReason =
+                            firstAppointment.appointmentReason == null ?
+                            vaccine.name + ' ' :
+                            firstAppointment.appointmentReason + ' ' + vaccine.name;
+
+
+                        let immunizationObj = {};
+                        immunizationObj.immunizationScheduleId =
+                            data.immunizationScheduleId;
+                        immunizationObj.immunizationName =
+                            selectedImmunizationSchedule.name;
+                        immunizationObj.vaccine = {
+                            name: vaccine.name,
+                            nameCode: vaccine.nameCode,
+                            code: vaccine.code,
+                            vaccinationSite: vaccine.vaccinationSite,
+                            numberOfDosage: vaccine.numberOfDosage,
+                            dosage: vaccine.dosage,
+                            serviceId: vaccine.serviceId,
+                            _id: vaccine._id
+                        }
+                        immunizationObj.sequence = interval.sequence;
+                        immunizationObj.appointmentDate = firstAppointment.startDate;
+                        immunizationObj.administered = false;
+
+                        immunizationRecords.immunizations.push(immunizationObj);
+
+                        appointments.push(firstAppointment);
+                    } else {
+                        console.log('else 1');
+                        existingAppointment.appointmentReason =
+                            existingAppointment.appointmentReason == null ?
+                            vaccine.name + ' ' :
+                            existingAppointment.appointmentReason + ' || ' + vaccine.name;
+
+
+                        let immunizationObj = {};
+                        immunizationObj.immunizationScheduleId =
+                            data.immunizationScheduleId;
+                        immunizationObj.immunizationName =
+                            selectedImmunizationSchedule.name;
+                        immunizationObj.vaccine = {
+                            name: vaccine.name,
+                            nameCode: vaccine.nameCode,
+                            code: vaccine.code,
+                            vaccinationSite: vaccine.vaccinationSite,
+                            numberOfDosage: vaccine.numberOfDosage,
+                            dosage: vaccine.dosage,
+                            serviceId: vaccine.serviceId,
+                            _id: vaccine._id
+                        }
+                        immunizationObj.sequence = interval.sequence;
+                        immunizationObj.appointmentDate = existingAppointment.startDate;
+                        immunizationObj.administered = false;
+
+                        immunizationRecords.immunizations.push(immunizationObj);
+
+
+                        appointments.push(existingAppointment);
+                    }
 
                 } else {
-                    const appointmentDate = addHours(data.appointment.startDate, this.convertInterval(interval));
-                    console.log(appointmentDate);
+                    const appointmentDate = addHours(
+                        data.appointment.startDate, this.convertInterval(interval));
                     let currentAppointment = JSON.parse(JSON.stringify(data.appointment));
+
+
+
                     currentAppointment.startDate = appointmentDate;
-                    appointments.push(currentAppointment);
+                    let existingAppointment = this.appointmentDateBooked(
+                        appointments, currentAppointment.startDate);
+                    console.log(existingAppointment);
+                    if (existingAppointment == null) {
+                        currentAppointment.appointmentReason =
+                            currentAppointment.appointmentReason == null ?
+                            vaccine.name + ' ' :
+                            currentAppointment.appointmentReason + ' ' + vaccine.name;
+
+
+
+                        let immunizationObj = {};
+                        immunizationObj.immunizationScheduleId =
+                            data.immunizationScheduleId;
+                        immunizationObj.immunizationName =
+                            selectedImmunizationSchedule.name;
+                        immunizationObj.vaccine = {
+                            name: vaccine.name,
+                            nameCode: vaccine.nameCode,
+                            code: vaccine.code,
+                            vaccinationSite: vaccine.vaccinationSite,
+                            numberOfDosage: vaccine.numberOfDosage,
+                            dosage: vaccine.dosage,
+                            serviceId: vaccine.serviceId,
+                            _id: vaccine._id
+                        }
+                        immunizationObj.sequence = interval.sequence;
+                        immunizationObj.appointmentDate = currentAppointment.startDate;
+                        immunizationObj.administered = false;
+
+                        immunizationRecords.immunizations.push(immunizationObj);
+
+
+
+                        appointments.push(currentAppointment);
+                    } else {
+                        console.log('else 2');
+                        existingAppointment.appointmentReason =
+                            existingAppointment.appointmentReason == null ?
+                            vaccine.name + ' ' :
+                            existingAppointment.appointmentReason + ' || ' + vaccine.name;
+
+
+                        let immunizationObj = {};
+                        immunizationObj.immunizationScheduleId =
+                            data.immunizationScheduleId;
+                        immunizationObj.immunizationName =
+                            selectedImmunizationSchedule.name;
+                        immunizationObj.vaccine = {
+                            name: vaccine.name,
+                            nameCode: vaccine.nameCode,
+                            code: vaccine.code,
+                            vaccinationSite: vaccine.vaccinationSite,
+                            numberOfDosage: vaccine.numberOfDosage,
+                            dosage: vaccine.dosage,
+                            serviceId: vaccine.serviceId,
+                            _id: vaccine._id
+                        }
+                        immunizationObj.sequence = interval.sequence;
+                        immunizationObj.appointmentDate = existingAppointment.startDate;
+                        immunizationObj.administered = false;
+
+                        immunizationRecords.immunizations.push(immunizationObj);
+
+
+                        appointments.push(existingAppointment);
+                    }
                 }
             });
         });
-        console.log(appointments);
-        console.log(firstAppointment);
         data._id = 3493438;
-        return Promise.resolve(data);
+        // const createdAppointments = await
+        // appointmentService.create(appointments);
+        return Promise.resolve({ appointments, immunizationRecords });
+    }
+
+    appointmentDateBooked(appointments, comingDate) {
+        console.log(1);
+        let retVal = undefined;
+        for (var i = 0; i < appointments.length; i++) {
+            if (isSameDay(appointments[i].startDate, comingDate)) {
+                retVal = appointments[i];
+                appointments.splice(i, 1);
+                console.log(2);
+                break;
+            }
+        }
+
+        console.log(3);
+        return retVal;
     }
 
     convertInterval(interval) {
