@@ -186,9 +186,16 @@ const formularyProducts = require('./formulary-products/formulary-products.servi
 const getServerTime = require('./get-server-time/get-server-time.service.js');
 const vitalBpLocations = require('./vital-bp-locations/vital-bp-locations.service.js');
 const immunizationSchedule = require('./immunization-schedule/immunization-schedule.service.js');
-const immunizationRecords = require('./immunization-records/immunization-records.service.js');
-const immunizationRecordHistory = require('./immunization-record-history/immunization-record-history.service.js');
+// const immunizationRecords = require('./immunization-records/immunization-records.service.js');
+// const immunizationRecordHistory = require('./immunization-record-history/immunization-record-history.service.js');
+// const immunizationAppointment = require('./immunization-appointment/immunization-appointment.service.js');
 const crudImmunizationSchedule = require('./crud-immunization-schedule/crud-immunization-schedule.service.js');
+const setMultipleAppointments = require('./set-multiple-appointments/set-multiple-appointments.service.js');
+const billPrescription = require('./bill-prescription/bill-prescription.service.js');
+const immunizationRecords = require('./immunization-records/immunization-records.service.js');
+const crudImmunizationRecord = require('./crud-immunization-record/crud-immunization-record.service.js');
+const facilityPlans = require('./facility-plans/facility-plans.service.js');
+const apmisSubscriptions = require('./apmis-subscriptions/apmis-subscriptions.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -378,7 +385,14 @@ module.exports = function(app) {
     app.configure(getServerTime);
     app.configure(vitalBpLocations);
     app.configure(immunizationSchedule);
-    app.configure(immunizationRecords);
-    app.configure(immunizationRecordHistory);
+    // app.configure(immunizationRecords);
+    // app.configure(immunizationRecordHistory);
+    // app.configure(immunizationAppointment);
     app.configure(crudImmunizationSchedule);
+    app.configure(setMultipleAppointments);
+    app.configure(billPrescription);
+    app.configure(immunizationRecords);
+    app.configure(crudImmunizationRecord);
+    app.configure(facilityPlans);
+    app.configure(apmisSubscriptions);
 };

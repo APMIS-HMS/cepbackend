@@ -5,6 +5,8 @@ const inventoryTransferTransactionSchema = new Schema({
   inventoryId: { type: Schema.Types.ObjectId, require: true },
   transactionId: { type: Schema.Types.ObjectId, require: true },
   productId: { type: Schema.Types.ObjectId, require: true },
+  productObject: { type: Schema.Types.Mixed, require: true },
+  qtyDetails:[{ type: Schema.Types.Mixed, require: true }],
   quantity: { type: Number, required: false },
   costPrice: { type: Number, required: false },
   lineCostPrice: { type: Number, required: false },

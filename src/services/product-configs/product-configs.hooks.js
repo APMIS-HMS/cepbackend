@@ -1,12 +1,28 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
-const {fastJoin} = require('feathers-hooks-common');
+const {
+  authenticate
+} = require('@feathersjs/authentication').hooks;
+const {
+  fastJoin
+} = require('feathers-hooks-common');
+
+
 
 const resolvers = {
   joins: {
-    productObject: () => async (data, context) => {
+    isVented: () => async (data, context) => {
       try {
-        const getProduct = await context.app.service('formulary-products').get(data.productId,{});
-        data.productObject = getProduct.data;
+        const getProduct = await context.app.service('inventories').find({
+          query: {
+            productId: data.productId,
+            facilityId:data.facilityId,
+            storeId:context.mStoreId
+          }
+        });
+        if (getProduct.data.length > 0) {
+          data.isVented = true;
+        } else {
+          data.isVented = false;
+        }
       } catch (e) {
         // console.log(e);
       }
@@ -17,10 +33,15 @@ const resolvers = {
 
 
 
+const inventedConfigProduct = require('../../hooks/invented-config-product');
+
+
+
+
 module.exports = {
   before: {
-    all: [ authenticate('jwt') ],
-    find: [],
+    all: [authenticate('jwt')],
+    find: [inventedConfigProduct()],
     get: [],
     create: [],
     update: [],
