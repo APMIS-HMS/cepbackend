@@ -18,6 +18,8 @@ class Service {
         const immunizationScheduleService =
             this.app.service('immunization-schedule');
         const appointmentService = this.app.service('appointments');
+        const crudImmunizationRecordService =
+            this.app.service('crud-immunization-record');
         const selectedImmunizationSchedule =
             await immunizationScheduleService.get(data.immunizationScheduleId);
 
@@ -187,6 +189,8 @@ class Service {
         data._id = 3493438;
         // const createdAppointments = await
         // appointmentService.create(appointments);
+        const createdImmunizationRecords =
+            await crudImmunizationRecordService.create(immunizationRecords);
         return Promise.resolve({ appointments, immunizationRecords });
     }
 
