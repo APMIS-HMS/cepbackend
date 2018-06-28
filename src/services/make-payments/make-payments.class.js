@@ -88,6 +88,30 @@ class Service {
             billGroup.paymentStatus = 'WAIVED';
             billGroup.paymentCompleted = false;
           }
+          if (existingSubscription.data.name === 'Subscription') {
+            let subCharge = data.subTotal * (existingSubscription.data.rate / 100);
+            const apmisSubChargeItem = {
+              "billObject": {
+                "facilityServiceObject": {
+                  "service": "Apmis Sub-charge",
+                  "category": "Apmis Sub-charge"
+                },
+                "paymentCompleted": false,
+                "isServiceEnjoyed": true,
+                "isInvoiceGenerated": true,
+                "active": true,
+                "modifierId": [],
+                "unitPrice": subCharge,
+                "totalPrice": subCharge,
+                "isSubCharge": true,
+                "quantity": 1,
+                "description": "Apmis Sub-charge on Invoice " + tokenPayload.result,
+                "patientId": data.patientId,
+                "facilityId": data.facilityId,
+              }
+            }
+            billGroup.billingIds.push(apmisSubChargeItem);
+          }
           const awaitBillGroup = await invoicesService.create(billGroup);
           const len = data.inputedValue.paymentTxn.length - 1;
           const len2 = data.listedBillItems.length - 1;
@@ -96,16 +120,18 @@ class Service {
             for (var x2 = len2; x2 >= 0; x2--) {
               let len3 = data.listedBillItems[x2].billItems.length - 1;
               for (var x3 = len3; x3 >= 0; x3--) {
-                if (data.listedBillItems[x2].billItems[x3].serviceId.toString() === data.inputedValue.paymentTxn[x].facilityServiceObject.serviceId.toString()) {
-                  data.listedBillItems[x2].billItems[x3].isInvoiceGenerated = true;
-                  if (data.inputedValue.balance == 0 || data.inputedValue.isWaved == true) {
+                if (data.inputedValue.paymentTxn[x].facilityServiceObject.serviceId !== undefined) {
+                  if (data.listedBillItems[x2].billItems[x3].serviceId.toString() === data.inputedValue.paymentTxn[x].facilityServiceObject.serviceId.toString()) {
+                    data.listedBillItems[x2].billItems[x3].isInvoiceGenerated = true;
+                    if (data.inputedValue.balance == 0 || data.inputedValue.isWaved == true) {
+                      data.listedBillItems[x2].billItems[x3].isServiceEnjoyed = true;
+                    }
+                    if (data.inputedValue.balance == 0) {
+                      data.listedBillItems[x2].billItems[x3].paymentCompleted = true;
+                    }
                     data.listedBillItems[x2].billItems[x3].isServiceEnjoyed = true;
+                    filterCheckedBills.push(data.listedBillItems[x2]);
                   }
-                  if (data.inputedValue.balance == 0) {
-                    data.listedBillItems[x2].billItems[x3].paymentCompleted = true;
-                  }
-                  data.listedBillItems[x2].billItems[x3].isServiceEnjoyed = true;
-                  filterCheckedBills.push(data.listedBillItems[x2]);
                 }
               }
             }
@@ -311,28 +337,25 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     } else {
       getPerson = await peopleService.get(data.personId, {});
     }
-    let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
-    getPerson.wallet.balance = currentBalance;
-    getPerson.wallet.ledgerBalance = currentBalance;
-    getPerson.wallet.transactions.push({
-      'transactionType': data.inputedValue.transactionType,
-      'amount': data.inputedValue.amountPaid,
-      'refCode': ref,
-      'transactionMedium': data.inputedValue.paymentMethod.planType,
-      'description': description,
-      'transactionStatus': data.transactionStatus,
-      'balance': currentBalance,
-      'ledgerBalance': currentBalance
-    });
+
     let patchedPerson, facility = {};
-
     if (existingSubscription.status === 'success') {
-
       facility = await facilitiesService.get(data.facilityId, {});
-      if (existingSubscription.name === 'Subscription') {
-        let apmis_sub_charge = data.subTotal * (existingSubscription.rate / 100);
-        getPerson.wallet.balance = parseInt(getPerson.wallet.balance) + (data.inputedValue.cost + apmis_sub_charge);
+      if (existingSubscription.data.name === 'Subscription') {
+        let apmis_sub_charge = data.subTotal * (existingSubscription.data.rate / 100);
+        let currentBalance = parseInt(getPerson.wallet.balance) + (data.inputedValue.cost + apmis_sub_charge);
+        getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
+        getPerson.wallet.transactions.push({
+          'transactionType': data.inputedValue.transactionType,
+          'amount': data.inputedValue.amountPaid,
+          'refCode': ref,
+          'transactionMedium': data.inputedValue.paymentMethod.planType,
+          'description': description,
+          'transactionStatus': data.transactionStatus,
+          'balance': currentBalance,
+          'ledgerBalance': currentBalance
+        });
         patchedPerson = await peopleService.patch(getPerson._id, {
           wallet: getPerson.wallet
         });
@@ -350,10 +373,23 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           'ledgerBalance': facilityBalance
         });
 
-        //let apmisPercentage = (parseInt(facility.wallet.amountPaid) * (existingSubscription.rate / 100));
+        //let apmisPercentage = (parseInt(facility.wallet.amountPaid) * (existingSubscription.data.rate / 100));
         //Code to POST apmisPercentage to Apmis Bank Account.
 
-      } else if (existingSubscription.name === 'One-of-payment') {
+      } else if (existingSubscription.data.name === 'One-of-payment') {
+        let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
+        getPerson.wallet.balance = currentBalance;
+        getPerson.wallet.ledgerBalance = currentBalance;
+        getPerson.wallet.transactions.push({
+          'transactionType': data.inputedValue.transactionType,
+          'amount': data.inputedValue.amountPaid,
+          'refCode': ref,
+          'transactionMedium': data.inputedValue.paymentMethod.planType,
+          'description': description,
+          'transactionStatus': data.transactionStatus,
+          'balance': currentBalance,
+          'ledgerBalance': currentBalance
+        });
         patchedPerson = await peopleService.patch(getPerson._id, {
           wallet: getPerson.wallet
         });

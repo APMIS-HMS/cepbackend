@@ -24,7 +24,6 @@ class Service {
       }
     });
     results = await facilityItemService.create(awaitBills.data, {});
-    console.log(results);
     if (results.length > 0) {
       recentBillModelId = results[results.length - 1]._id;
     }
@@ -97,6 +96,7 @@ class Service {
                   "modifierId": [],
                   "unitPrice": subCharge,
                   "totalPrice": subCharge,
+                  "isSubCharge":true,
                   "quantity": 1,
                   "description": "Apmis Sub-charge on Invoice "+ awaitToken.result,
                   "patientId": data.patientId,
