@@ -36,7 +36,6 @@ class Service {
             immunizations: []
         };
         let firstAppointment;
-        let immunizations = [];
         checkedVaccines.forEach(vaccine => {
             vaccine.intervals.forEach((interval, i) => {
                 if (i === 0) {
@@ -187,11 +186,18 @@ class Service {
             });
         });
         data._id = 3493438;
-        // const createdAppointments = await
-        // appointmentService.create(appointments);
+        const createdAppointments = await appointmentService.create(appointments);
+        createdAppointments.forEach(
+            appointment => {
+                immunizationRecords.immunizations.forEach(record => {
+                    if (isSameDay(appointment.startDate, record.appointmentDate)) {
+                        record.appointmentId = appointment._id;
+                    }
+                })
+            })
         const createdImmunizationRecords =
             await crudImmunizationRecordService.create(immunizationRecords);
-        return Promise.resolve({ appointments, immunizationRecords });
+        return Promise.resolve({ createdAppointments, createdImmunizationRecords });
     }
 
     appointmentDateBooked(appointments, comingDate) {
