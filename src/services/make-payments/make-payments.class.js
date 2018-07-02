@@ -376,7 +376,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
         //let apmisPercentage = (parseInt(facility.wallet.amountPaid) * (existingSubscription.data.rate / 100));
         //Code to POST apmisPercentage to Apmis Bank Account.
 
-      } else if (existingSubscription.data.name === 'One-of-payment') {
+      } else {  //else if (existingSubscription.data.name === 'One-of-payment') {
         let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
         getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
