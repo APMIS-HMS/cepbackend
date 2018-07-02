@@ -149,8 +149,60 @@ class Service {
         }
     }
 
-    update(id, data, params) {
-        return Promise.resolve(data);
+    async update(id, data, params) {
+        console.log(id);
+        console.log('Data => ', data);
+        console.log('params => ', params);
+        const immunizationRecordService = this.app.service('immunization-records');
+        const appointmentService = this.app.service('appointments');
+        const accessToken = params.accessToken;
+        const facilityId = data.facilityId;
+        const vaccine = data;
+        const patientId = data.patientId;
+
+        if (facilityId !== undefined) {
+            if (accessToken !== undefined) {
+                const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
+                if (userRole.length > 0) {
+                    // Get appointment for the vaccine
+                    const getAppointment = await appointmentService.get(vaccine.appointmentId);
+
+                    if (getAppointment._id !== undefined) {
+                        const appointment = getAppointment;
+                        appointment.startDate = vaccine.newAppointmentDate;
+                        // Update appointment with the current date.
+
+                        // Get patient immunization record.
+                        const getPatientsImmunizationRecord = await immunizationRecordService.get(id);
+
+                        if (getPatientsImmunizationRecord._id !== undefined) {
+                            const immunizationRecord = getPatientsImmunizationRecord;
+                            console.log('Immunization Record => ', immunizationRecord);
+                            // Get records that have same appointmentId
+                            const sameAppointmentIds = immunizationRecord.immunizations.filter(x => x.appointmentId.toString() === vaccine.appointmentId);
+                            console.log('Same ', sameAppointmentIds);
+                            // // Update Immunization record
+                            // const updateImmunizationRecord = await immunizationRecordService.patch(immunizationRecord._id, immunizationRecord, {});
+                            // if (updateImmunizationRecord._id !== undefined) {
+                            //     return jsend.success(updateImmunizationRecord);
+                            // } else {
+                            //     return jsend.error('There was a problem updating immunization record.');
+                            // }
+                        } else {
+                            return jsend.error('There was a problem fetching patient immunization record.');
+                        }
+                    } else {
+                        return jsend.error('There was no appointment set for this record!');
+                    }
+                } else {
+                    return jsend.error('You do not have access to perform this transaction!');
+                }
+            } else {
+                return jsend.error('You do not have access to perform this transaction!');
+            }
+        } else {
+            return jsend.error('facilityId is undefined!');
+        }
     }
 
     patch(id, data, params) {
