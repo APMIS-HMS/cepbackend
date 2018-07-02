@@ -196,6 +196,7 @@ const immunizationRecords = require('./immunization-records/immunization-records
 const crudImmunizationRecord = require('./crud-immunization-record/crud-immunization-record.service.js');
 const facilityPlans = require('./facility-plans/facility-plans.service.js');
 const apmisSubscriptions = require('./apmis-subscriptions/apmis-subscriptions.service.js');
+const walkinDispensePrescription = require('./walkin-dispense-prescription/walkin-dispense-prescription.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -395,4 +396,5 @@ module.exports = function(app) {
     app.configure(crudImmunizationRecord);
     app.configure(facilityPlans);
     app.configure(apmisSubscriptions);
+    app.configure(walkinDispensePrescription);
 };
