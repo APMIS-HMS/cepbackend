@@ -376,7 +376,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
         //let apmisPercentage = (parseInt(facility.wallet.amountPaid) * (existingSubscription.data.rate / 100));
         //Code to POST apmisPercentage to Apmis Bank Account.
 
-      } else {  //else if (existingSubscription.data.name === 'One-of-payment') {
+      } else if (existingSubscription.data.name === 'One-of-payment') {
         let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
         getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
@@ -406,14 +406,33 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           'balance': facilityBalance,
           'ledgerBalance': facilityBalance
         });
+      } else if (existingSubscription.data.name === undefined) {
+        let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
+        getPerson.wallet.balance = currentBalance;
+        getPerson.wallet.ledgerBalance = currentBalance;
+        getPerson.wallet.transactions.push({
+          'transactionType': data.inputedValue.transactionType,
+          'amount': data.inputedValue.amountPaid,
+          'refCode': ref,
+          'transactionMedium': data.inputedValue.paymentMethod.planType,
+          'description': description,
+          'transactionStatus': data.transactionStatus,
+          'balance': currentBalance,
+          'ledgerBalance': currentBalance
+        });
+        patchedPerson = await peopleService.patch(getPerson._id, {
+          wallet: getPerson.wallet
+        });
+
       }
     } else {
       return jsend.fail({})
     }
-    facilitiesService.patch(facility._id, {
-      wallet: facility.wallet
-    });
-
+    if (existingSubscription.data.name !== undefined) {
+      facilitiesService.patch(facility._id, {
+        wallet: facility.wallet
+      });
+    }
     if (data.inputedValue.balance == 0) {
       patchedPerson.isPaid = true;
       patchedPerson.paidStatus = 'PAID';
@@ -426,7 +445,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       person: patchedPerson,
       invoice: data.currentInvoice
     };
-    return returnObj;
+    return jsend.success(returnObj);
   }
 }
 
