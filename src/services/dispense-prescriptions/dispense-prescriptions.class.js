@@ -54,11 +54,11 @@ class Service {
                                         }
                                         inventory.batchTransactions.push(batchTransaction);
                                         inventory.quantity = inventory.quantity - qty;
-                                        inventory.availableQuantity =
-                                            inventory.availableQuantity - qty;
+                                        inventory.availableQuantity = inventory.availableQuantity - qty;
                                     }
                                 });
                                 getInventory.totalQuantity = getInventory.totalQuantity - qty;
+                                getInventory.availableQuantity = getInventory.totalQuantity - qty;
 
                                 try {
                                     // Dispense the required quantity from inventory.
