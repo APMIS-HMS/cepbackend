@@ -10,7 +10,7 @@ const resolvers = {
             const patient =
                 await context.app.service('patients').get(appointment.patientId, {});
             appointment.patientDetails = patient;
-            if (context.method === 'create' && process.env.SENDSMS) {
+            if (context.method === 'create' && process.env.SENDSMS === 'true') {
                 await sms.sendScheduleAppointment(new Date(), appointment);
             }
         },
