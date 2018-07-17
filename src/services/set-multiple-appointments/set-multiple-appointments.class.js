@@ -15,13 +15,10 @@ class Service {
     }
 
     async create(data, params) {
-        const immunizationScheduleService =
-            this.app.service('immunization-schedule');
+        const immunizationScheduleService = this.app.service('immunization-schedule');
         const appointmentService = this.app.service('appointments');
-        const crudImmunizationRecordService =
-            this.app.service('crud-immunization-record');
-        const selectedImmunizationSchedule =
-            await immunizationScheduleService.get(data.immunizationScheduleId);
+        const crudImmunizationRecordService = this.app.service('crud-immunization-record');
+        const selectedImmunizationSchedule = await immunizationScheduleService.get(data.immunizationScheduleId);
 
         const vaccines = selectedImmunizationSchedule.vaccines;
         const checkedVaccines = vaccines.filter(vaccine => {
@@ -29,6 +26,7 @@ class Service {
                 return vac == vaccine._id;
             });
         });
+
         let appointments = [];
         let immunizationRecords = {
             patientId: data.appointment.patientId,
@@ -75,7 +73,6 @@ class Service {
 
                         appointments.push(firstAppointment);
                     } else {
-                        console.log('else 1');
                         existingAppointment.appointmentReason =
                             existingAppointment.appointmentReason == null ?
                             vaccine.name + ' ' :
@@ -108,29 +105,21 @@ class Service {
                     }
 
                 } else {
-                    const appointmentDate = addHours(
-                        data.appointment.startDate, this.convertInterval(interval));
+                    const appointmentDate = addHours(data.appointment.startDate, this.convertInterval(interval));
                     let currentAppointment = JSON.parse(JSON.stringify(data.appointment));
 
-
-
                     currentAppointment.startDate = appointmentDate;
-                    let existingAppointment = this.appointmentDateBooked(
-                        appointments, currentAppointment.startDate);
-                    console.log(existingAppointment);
+                    let existingAppointment = this.appointmentDateBooked(appointments, currentAppointment.startDate);
+
                     if (existingAppointment == null) {
                         currentAppointment.appointmentReason =
                             currentAppointment.appointmentReason == null ?
                             vaccine.name + ' ' :
                             currentAppointment.appointmentReason + ' ' + vaccine.name;
 
-
-
                         let immunizationObj = {};
-                        immunizationObj.immunizationScheduleId =
-                            data.immunizationScheduleId;
-                        immunizationObj.immunizationName =
-                            selectedImmunizationSchedule.name;
+                        immunizationObj.immunizationScheduleId = data.immunizationScheduleId;
+                        immunizationObj.immunizationName = selectedImmunizationSchedule.name;
                         immunizationObj.vaccine = {
                             name: vaccine.name,
                             nameCode: vaccine.nameCode,
@@ -140,29 +129,23 @@ class Service {
                             dosage: vaccine.dosage,
                             serviceId: vaccine.serviceId,
                             _id: vaccine._id
-                        }
+                        };
                         immunizationObj.sequence = interval.sequence;
                         immunizationObj.appointmentDate = currentAppointment.startDate;
                         immunizationObj.administered = false;
 
                         immunizationRecords.immunizations.push(immunizationObj);
 
-
-
                         appointments.push(currentAppointment);
                     } else {
-                        console.log('else 2');
                         existingAppointment.appointmentReason =
                             existingAppointment.appointmentReason == null ?
                             vaccine.name + ' ' :
                             existingAppointment.appointmentReason + ' || ' + vaccine.name;
 
-
                         let immunizationObj = {};
-                        immunizationObj.immunizationScheduleId =
-                            data.immunizationScheduleId;
-                        immunizationObj.immunizationName =
-                            selectedImmunizationSchedule.name;
+                        immunizationObj.immunizationScheduleId = data.immunizationScheduleId;
+                        immunizationObj.immunizationName = selectedImmunizationSchedule.name;
                         immunizationObj.vaccine = {
                             name: vaccine.name,
                             nameCode: vaccine.nameCode,
@@ -172,13 +155,12 @@ class Service {
                             dosage: vaccine.dosage,
                             serviceId: vaccine.serviceId,
                             _id: vaccine._id
-                        }
+                        };
                         immunizationObj.sequence = interval.sequence;
                         immunizationObj.appointmentDate = existingAppointment.startDate;
                         immunizationObj.administered = false;
 
                         immunizationRecords.immunizations.push(immunizationObj);
-
 
                         appointments.push(existingAppointment);
                     }
@@ -186,17 +168,18 @@ class Service {
             });
         });
         data._id = 3493438;
+
         const createdAppointments = await appointmentService.create(appointments);
-        createdAppointments.forEach(
-            appointment => {
-                immunizationRecords.immunizations.forEach(record => {
-                    if (isSameDay(appointment.startDate, record.appointmentDate)) {
-                        record.appointmentId = appointment._id;
-                    }
-                })
-            })
-        const createdImmunizationRecords =
-            await crudImmunizationRecordService.create(immunizationRecords);
+        createdAppointments.forEach(appointment => {
+            immunizationRecords.immunizations.forEach(record => {
+                if (isSameDay(appointment.startDate, record.appointmentDate)) {
+                    record.appointmentId = appointment._id;
+                }
+            });
+        });
+
+        const createdImmunizationRecords = await crudImmunizationRecordService.create(immunizationRecords);
+
         return Promise.resolve({ createdAppointments, createdImmunizationRecords });
     }
 
