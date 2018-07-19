@@ -17,18 +17,12 @@ class Service {
     }
 
     async create(data, params) {
-        console.log('Data => ', data);
-        console.log('params => ', params);
         const immunizationRecordService = this.app.service('immunization-records');
-        // const accessToken = params.accessToken;
         const facilityId = data.facilityId;
         const immunizations = data.immunizations;
         const patientId = data.patientId;
 
         if (facilityId !== undefined) {
-            // if (accessToken !== undefined) {
-            //     const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
-            // if (userRole.length > 0) {
             if (immunizations.length > 0) {
                 // Get patient immunization record.
                 const getPatientsImmunizationRecord = await immunizationRecordService.find({
@@ -62,95 +56,71 @@ class Service {
             } else {
                 return jsend.error('immunizations array is empty.');
             }
-            // } else {
-            //     return jsend.error('You have not been assigned to this facility.');
-            // }
-            // } else {
-            //     return jsend.error('You need to log in to perform this transaction');
-            // }
-            // if (immunizationScheduleId !== undefined) {
-
-            //     //immunizations.push(patientId);
-            //     const immunizationSch = await immuScheduleService.find({ query: { _id: immunizationScheduleId } });
-
-            //     const getVaccines = immunizationSch.data[0].vaccines;
-
-            //     if (getVaccines.length > 0) {
-
-
-            //         let vaccine = {
-            //             vaccine: String,
-            //             appointments: appointments
-            //         };
-
-
-            //         let vac = [];
-            //         if (getVaccines.length > 0) {
-            //             getVaccines.forEach(element => {
-            //                 // appointments.forEach(appoint => {
-            //                 // if(element.serviceId === appoint.serviceId){
-            //                 vaccine.vaccine = element;
-            //                 vaccine.appointments = appointments;
-            //                 //vaccine.appointments = appoint;
-            //                 vac.push(vaccine);
-            //                 // }
-
-            //                 // });
-
-            //             });
-
-            //             let immune = {
-            //                 immunizationScheduleId: immunizationScheduleId,
-            //                 immunizationName: immunizationSch.data[0].name,
-            //                 vaccines: vac
-            //             };
-
-            //             let ImmHistory = {
-            //                 facilityId: data.facilityId,
-            //                 patientId: data.patientId,
-            //                 immunizations: immune
-            //             };
-
-            //             try {
-            //                 const history = await immunizationRecordService.create(ImmHistory);
-
-
-            //                 if (history.immunizations.length > 0) {
-            //                     let appt = {
-            //                         date: Date.now,
-            //                         status: 'valid',
-            //                         isPast: false,
-            //                         isFuture: true,
-            //                         completed: false,
-            //                         appointmentId: data.appointmentId
-            //                     };
-            //                     try {
-            //                         const appoint = await appointmentServices.create(appt);
-            //                     } catch (error) {
-            //                         return jsend.error('Could not post to Immunization appointments schedul');
-            //                     }
-
-            //                 }
-            //                 //return jsend.success(history);
-
-            //             } catch (error) {
-            //                 return jsend.error('Something went wrong ========>>>>>>>>> ', error);
-            //             }
-
-            //         } else {
-            //             return jsend.error('No vaccine found');
-            //         }
-            //     }
-            // } else {
-            //     return jsend.error('Immunization schedule not found!');
-            // }
         } else {
             return jsend.error('facilityId is undefined!');
         }
     }
 
-    update(id, data, params) {
-        return Promise.resolve(data);
+    async update(id, data, params) {
+        const immunizationRecordService = this.app.service('immunization-records');
+        const appointmentService = this.app.service('appointments');
+        const accessToken = params.accessToken;
+        const facilityId = data.facilityId;
+        const vaccine = data;
+        const patientId = data.patientId;
+
+        if (facilityId !== undefined) {
+            if (accessToken !== undefined) {
+                const userRole = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
+                if (userRole.length > 0) {
+                    // Get appointment for the vaccine
+                    const getAppointment = await appointmentService.get(vaccine.appointmentId);
+
+                    if (getAppointment._id !== undefined) {
+                        const appointment = getAppointment;
+                        appointment.startDate = vaccine.newAppointmentDate;
+                        // Update appointment with the current date.
+                        const updateAppoinment = await appointmentService.patch(appointment._id, appointment, {});
+
+                        // Check if appointment save properly
+                        if (updateAppoinment._id !== undefined) {
+                            // Get patient immunization record.
+                            const getPatientsImmunizationRecord = await immunizationRecordService.get(id);
+
+                            if (getPatientsImmunizationRecord._id !== undefined) {
+                                const immunizationRecord = getPatientsImmunizationRecord;
+                                // Get records that have same appointmentId
+                                immunizationRecord.immunizations.forEach(x => {
+                                    if (x.appointmentId.toString() === vaccine.appointmentId && !x.administered) {
+                                        x.appointmentId = updateAppoinment._id;
+                                        x.appointmentDate = vaccine.newAppointmentDate;
+                                    }
+                                });
+                                // Update Immunization record
+                                const updateImmunizationRecord = await immunizationRecordService.patch(immunizationRecord._id, immunizationRecord, {});
+                                if (updateImmunizationRecord._id !== undefined) {
+                                    return jsend.success(updateImmunizationRecord);
+                                } else {
+                                    return jsend.error('There was a problem updating immunization record.');
+                                }
+                            } else {
+                                return jsend.error('There was a problem fetching patient immunization record.');
+                            }
+                        } else {
+                            return jsend.error('There was a problem updating appointment. Please try again later!');
+                        }
+                    } else {
+                        return jsend.error('There was no appointment set for this record!');
+                    }
+                } else {
+                    return jsend.error('You do not have access to perform this transaction!');
+                }
+            } else {
+                return jsend.error('You do not have access to perform this transaction!');
+            }
+        } else {
+            return jsend.error('facilityId is undefined!');
+        }
     }
 
     patch(id, data, params) {
