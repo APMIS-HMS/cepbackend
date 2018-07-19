@@ -3,12 +3,10 @@ const { fastJoin } = require('feathers-hooks-common');
 const resolvers = {
     joins: {
         recordObject: () => async(data, context) => {
-            console.log('data ', data);
             if (!data.immunizations) return;
             if (data.immunizations.length > 0) {
                 for (let i = 0; i < data.immunizations.length; i++) {
                     const record = data.immunizations[i];
-                    console.log(record);
                     if (!record.administeredBy) continue;
                     const employee = await context.app.service('employees').get(record.administeredBy);
                     const fullName = `${employee.personDetails.firstName} ${employee.personDetails.lastName}`;
