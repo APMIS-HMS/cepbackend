@@ -16,7 +16,8 @@ module.exports = function(app) {
     const resolvers = {
         joins: {
             security: () => async(login, context) => {
-                console.log(login);
+                // console.log(context);
+                // console.log(login);
                 try {
                     var email_bytes = AES.decrypt(login.email, 'endurance@pays@alot');
                     var password_bytes = AES.decrypt(login.password, 'endurance@pays@alot');
@@ -36,7 +37,7 @@ module.exports = function(app) {
     app.service('authentication').hooks({
         before: {
             create: [
-                fastJoin(resolvers),
+                // fastJoin(resolvers),
                 authentication.hooks.authenticate(config.strategies)
             ],
             remove: [authentication.hooks.authenticate('jwt')]
