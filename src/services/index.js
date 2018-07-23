@@ -281,6 +281,7 @@ const walkinDispensePrescription = require(
     './walkin-dispense-prescription/walkin-dispense-prescription.service.js');
 const documentationAuthorization = require(
     './documentation-authorization/documentation-authorization.service.js');
+const nhisResports = require('./nhis-resports/nhis-resports.service.js');
 const crudLabInvestigationPrice = require('./crud-lab-investigation-price/crud-lab-investigation-price.service.js');
 module.exports = function(app) {
     app.configure(users);
@@ -480,5 +481,6 @@ module.exports = function(app) {
     app.configure(apmisSubscriptions);
     app.configure(walkinDispensePrescription);
     app.configure(documentationAuthorization);
+    app.configure(nhisResports);
     app.configure(crudLabInvestigationPrice);
 };
