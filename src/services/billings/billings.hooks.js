@@ -38,7 +38,6 @@ const resolvers = {
       }
     },
     serviceObject: () => async (bill, context) => {
-        console.log(context.params.isCoveredPage);
       if (context.params.isCoveredPage === true) {
         if (bill.billItems.length > 0) {
           const len = bill.billItems.length - 1;
@@ -71,9 +70,9 @@ const resolvers = {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt'),iscovered()],
-    find: [extractbill()],
-    get: [],
+    all: [authenticate('jwt')],
+    find: [extractbill(),iscovered()],
+    get: [iscovered()],
     create: [],
     update: [],
     patch: [],
