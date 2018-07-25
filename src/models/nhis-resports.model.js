@@ -120,22 +120,6 @@ module.exports = function (app) {
       type: String,
       required: true
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   }, {
     timestamps: true
   });
