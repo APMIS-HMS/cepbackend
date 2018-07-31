@@ -5,9 +5,9 @@ const request = require('request');
 const jsend = require('jsend');
 
 var Client = require('node-rest-client').Client;
-var Zoom = require("zoomus")({
-    "key": 'fXH4ThUQQ-K9buLuROA1UA',
-    "secret": 'XiySsm2TqNOBMJD40ZfexU6O5h8uvqbOyMgC'
+var Zoom = require('zoomus')({
+    'key': 'fXH4ThUQQ-K9buLuROA1UA',
+    'secret': 'XiySsm2TqNOBMJD40ZfexU6O5h8uvqbOyMgC'
 });
 class Service {
     constructor(options) {
@@ -26,14 +26,13 @@ class Service {
     }
 
     async create(data, params) {
-
-        console.log(data);
-        console.log(params);
-        var startTime = data.startTime;
-        var topic = data.topic;
-        var appointmentId = data.appointmentId;
+        const startTime = data.startTime;
+        const topic = data.topic;
+        const appointmentId = data.appointmentId;
+        const _appointmentService = this.app.service('appointments');
+        const appointment = await _appointmentService.get(appointmentId);
         var meeting = {
-            host_id: 'XO_fV9abS4mUmuzi8TriQg',
+            host_id: 'tEE78MXDTuOsWnhH5rlk3g',
             type: 2,
             data_type: 'JSON',
             topic: topic,
@@ -42,20 +41,30 @@ class Service {
             option_auto_record_type: 'cloud',
             timezone: 'Africa/Bangui'
         };
-        Zoom.meeting.create(meeting, function(response) {
-            if (response.error) {
+        // Zoom.user.list(function(res) {
+        //     if (res.error) {
+        //         console.log('error calling user list');
+        //     } else {
+        //         console.log('list of users:');
+        //         console.log(res);
+        //     }
+        // });
 
-                jsend.error({
-                    code: 404,
-                    message: 'An error has occured!'
-                });
-            } else {
-                let appointment = this.updateAppointment(this.app, appointmentId, response);
-                request.send({ zoom: response.body, appointment: appointment });
-                jsend.success(appointment);
-            }
+
+        let response = await new Promise(resolve => {
+            Zoom.meeting.create(meeting, response => resolve(response));
         });
-        return Promise.resolve(data);
+        if (response.error) {
+            jsend.error({
+                code: 404,
+                message: 'An error has occured!'
+            });
+        } else {
+            appointment.zoom = response;
+            const patchAppointment = await _appointmentService.patch(appointment._id, appointment, {});
+            return { zoom: response, appointment: patchAppointment };
+        }
+
     }
 
     update(id, data, params) {
