@@ -15,7 +15,7 @@
             "header": {
                 "typ": "access"
             },
-            "audience": "https://yourdomain.com",
+            "audience": "http://yourdomain.com",
             "subject": "anonymous",
             "issuer": "feathers",
             "algorithm": "HS256",

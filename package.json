@@ -23,7 +23,7 @@
     "scripts": {
         "test": "npm run eslint && npm run mocha",
         "eslint": "eslint src/. test/. --config .eslintrc.json",
-        "start": "nodemon node src/",
+        "start": "node src/",
         "debug": "node --inspect src/",
         "mocha": "mocha test/ --recursive --exit"
     },
@@ -35,9 +35,8 @@
         "@feathersjs/errors": "^3.2.2",
         "@feathersjs/express": "^1.1.2",
         "@feathersjs/feathers": "^3.1.0",
-        "@feathersjs/socketio": "^3.2.2",
+        "@feathersjs/socketio": "^3.1.0",
         "azure-storage": "^2.7.0",
-        "circular-json": "^0.5.5",
         "compression": "^1.7.1",
         "convert-excel-to-json": "^1.2.1",
         "cors": "^2.8.4",
@@ -47,7 +46,6 @@
         "feathers-hooks-common": "^4.3.0",
         "feathers-mongodb": "^3.0.0",
         "feathers-mongoose": "^6.1.0",
-        "has-binary2": "^1.0.2",
         "helmet": "^3.9.0",
         "jsend": "^1.0.2",
         "mongodb": "^3.0.1",
@@ -59,7 +57,8 @@
         "rxjs": "^5.5.6",
         "sendgrid": "^5.2.3",
         "serve-favicon": "^2.4.5",
-        "winston": "^2.4.0"
+        "winston": "^2.4.0",
+        "zoomus": "^0.1.2"
     },
     "devDependencies": {
         "chai": "^4.1.2",
