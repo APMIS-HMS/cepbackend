@@ -1,28 +1,26 @@
 'use strict';
 
 function sendEmailViaApi(sender, receiver, title, body) {
-  var helper = require('sendgrid').mail;
-  var from_email = new helper.Email(sender);
-  var to_email = new helper.Email(receiver);
-  var subject = title;
-  var content = new helper.Content('text/html', body);
-  var mail = new helper.Mail(from_email, subject, to_email, content);
-  var sg = require('sendgrid')('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');
-  var request_send_grid = sg.emptyRequest({
-    method: 'POST',
-    path: '/v3/mail/send',
-    body: mail.toJSON()
-  });
+    var helper = require('sendgrid').mail;
+    var from_email = new helper.Email(sender);
+    var to_email = new helper.Email(receiver);
+    var subject = title;
+    var content = new helper.Content('text/html', body);
+    var mail = new helper.Mail(from_email, subject, to_email, content);
+    var sg = require('sendgrid')('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');
+    var request_send_grid = sg.emptyRequest({
+        method: 'POST',
+        path: '/v3/mail/send',
+        body: mail.toJSON()
+    });
 
-  sg.API(request_send_grid, function (error, response) {
-    console.log('returning from email api');
-    console.log(response.body);
-    return response;
-  });
+    sg.API(request_send_grid, function(error, response) {
+        return response;
+    });
 }
 
 function emailApmisIdTemplate(themeMessage, titleMessage, data) {
-  let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
+    let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
     <tr>
       <td align="center" valign="top">
         <!--[if (gte mso 9)|(IE)]>
@@ -166,7 +164,7 @@ function emailApmisIdTemplate(themeMessage, titleMessage, data) {
                                     <!-- <font face="'Source Sans Pro', sans-serif" color="#1a1a1a" style="font-size:
                                     17px; line-height: 20px;">
                           <span style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px;"><a href="mailto:dev@apmis.ng" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">dev@apmis.ng</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">1(800)232-90-26</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">Unsubscribe</a></span>
-                      </font> 
+                      </font>
 
                       <div style="height: 35px; line-height: 35px; font-size: 33px;">&nbsp;</div>
 
@@ -220,11 +218,11 @@ function emailApmisIdTemplate(themeMessage, titleMessage, data) {
     </tr>
   </table>`;
 
-  return tem;
+    return tem;
 }
 
 function emailOtpTemplate(themeMessage, titleMessage, data) {
-  let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
+    let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
     <tr>
       <td align="center" valign="top">
         <!--[if (gte mso 9)|(IE)]>
@@ -370,7 +368,7 @@ function emailOtpTemplate(themeMessage, titleMessage, data) {
                                     <!-- <font face="'Source Sans Pro', sans-serif" color="#1a1a1a" style="font-size:
                                     17px; line-height: 20px;">
                           <span style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px;"><a href="mailto:dev@apmis.ng" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">dev@apmis.ng</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">1(800)232-90-26</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">Unsubscribe</a></span>
-                      </font> 
+                      </font>
 
                       <div style="height: 35px; line-height: 35px; font-size: 33px;">&nbsp;</div>
 
@@ -424,12 +422,12 @@ function emailOtpTemplate(themeMessage, titleMessage, data) {
     </tr>
   </table>`;
 
-  return tem;
+    return tem;
 }
 
 
 function emailReorderTemplate(themeMessage, titleMessage, data) {
-  let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
+    let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
     <tr>
       <td align="center" valign="top">
         <!--[if (gte mso 9)|(IE)]>
@@ -575,7 +573,7 @@ function emailReorderTemplate(themeMessage, titleMessage, data) {
                                     <!-- <font face="'Source Sans Pro', sans-serif" color="#1a1a1a" style="font-size:
                                     17px; line-height: 20px;">
                           <span style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px;"><a href="mailto:dev@apmis.ng" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">dev@apmis.ng</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">1(800)232-90-26</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="#" target="_blank" style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #1a1a1a; font-size: 17px; line-height: 20px; text-decoration: none;">Unsubscribe</a></span>
-                      </font> 
+                      </font>
 
                       <div style="height: 35px; line-height: 35px; font-size: 33px;">&nbsp;</div>
 
@@ -629,75 +627,70 @@ function emailReorderTemplate(themeMessage, titleMessage, data) {
     </tr>
   </table>`;
 
-  return tem;
+    return tem;
 }
 
 function sendApmisId(data) {
-  const message = `This is to notify you that ${data.apmisId}. is your personal APMIS identification number.`;
-  const title = 'Confirm Your APMIS Id';
-  let tem = emailApmisIdTemplate(message, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+    const message = `This is to notify you that ${data.apmisId}. is your personal APMIS identification number.`;
+    const title = 'Confirm Your APMIS Id';
+    let tem = emailApmisIdTemplate(message, title, data);
+    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
 function passwordReset(data) {
-  const title = 'Password Reset';
-  const message = `Kindly use this code ${data.otp} to complete your password reset.`;
-  let tem = emailApmisIdTemplate(message, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+    const title = 'Password Reset';
+    const message = `Kindly use this code ${data.otp} to complete your password reset.`;
+    let tem = emailApmisIdTemplate(message, title, data);
+    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
 function sendToken(data) {
-  const title = 'Confirm Your APMIS Registration';
-  const message = `Please use the OTP code ${data.verificationToken} to complete your registration.`;
-  let tem = emailOtpTemplate(message, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+    const title = 'Confirm Your APMIS Registration';
+    const message = `Please use the OTP code ${data.verificationToken} to complete your registration.`;
+    let tem = emailOtpTemplate(message, title, data);
+    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
 function authGeneratedPassword(data) {
-  const title = 'APMIS Auto-generated Password';
-  const message = `APMIS Auto-generated password: ${data.password} kindly change your password.`;
-  let tem = emailApmisIdTemplate(message, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+    const title = 'APMIS Auto-generated Password';
+    const message = `APMIS Auto-generated password: ${data.password} kindly change your password.`;
+    let tem = emailApmisIdTemplate(message, title, data);
+    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
 function appointment(data) {
-  console.log(1);
-  console.log(data.patientDetails.facilityObj);
-  let themeMessage = (data.providerDetails.personDetails != undefined) ? `This is to notify you of your appointment with ${data.providerDetails.personDetails.title} ${data.providerDetails.personDetails.lastName} ${data.providerDetails.personDetails.firstName} scheduled for: ${data.startDate} at ${data.patientDetails.facilityObj.name} ${data.clinicId} clinic` : `This is to notify you of your appointment scheduled for: ${data.startDate} at ${data.patientDetails.facilityObj.name} ${data.clinicId} clinic`;
-  const title = 'Your Apmis Appoinment';
-  console.log(themeMessage);
-  let tem = emailApmisIdTemplate(themeMessage, title, data.patientDetails.personDetails);
-  sendEmailViaApi('dev@apmis.ng', data.patientDetails.personDetails.email, title, tem);
+    let themeMessage = (data.providerDetails != undefined && data.providerDetails.personDetails != undefined) ? `This is to notify you of your appointment with ${data.providerDetails.personDetails.title} ${data.providerDetails.personDetails.lastName} ${data.providerDetails.personDetails.firstName} scheduled for: ${data.startDate} at ${data.clinicId} clinic of ${data.patientDetails.facilityObj.name}` : `This is to notify you of your appointment scheduled for: ${data.startDate} at ${data.clinicId} clinic of ${data.patientDetails.facilityObj.name}`;
+    const title = 'Your Apmis Appoinment';
+    let tem = emailApmisIdTemplate(themeMessage, title, data.patientDetails.personDetails);
+    sendEmailViaApi('dev@apmis.ng', data.patientDetails.personDetails.email, title, tem);
 }
 
-function reorderLevel(data){
-  let title = `The quantity of ${data.productObject.name} in your inventory is getting low.`;
-  const message = `The quantity of ${data.productObject.name} in your inventory is getting low and needs your attention for a reorder.`;
-  const tem = emailReorderTemplate(message, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+function reorderLevel(data) {
+    let title = `The quantity of ${data.productObject.name} in your inventory is getting low.`;
+    const message = `The quantity of ${data.productObject.name} in your inventory is getting low and needs your attention for a reorder.`;
+    const tem = emailReorderTemplate(message, title, data);
+    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
 
 module.exports = {
-  sendApmisId: function (data) {
-    sendApmisId(data);
-  },
-  passwordReset: function (data) {
-    passwordReset(data);
-  },
-  sendToken: function (data) {
-    sendToken(data);
-  },
-  authGeneratedPassword: function (data) {
-    authGeneratedPassword(data);
-  },
-  appointment: function (data) {
-    console.log('this is appointment data');
-    console.dir(data);
-    appointment(data);
-  },
+    sendApmisId: function(data) {
+        sendApmisId(data);
+    },
+    passwordReset: function(data) {
+        passwordReset(data);
+    },
+    sendToken: function(data) {
+        sendToken(data);
+    },
+    authGeneratedPassword: function(data) {
+        authGeneratedPassword(data);
+    },
+    appointment: function(data) {
+        appointment(data);
+    },
 
-  reorder: function(data) {
-    reorderLevel(data);
-  }
+    reorder: function(data) {
+        reorderLevel(data);
+    }
 };
