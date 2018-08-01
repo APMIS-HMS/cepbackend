@@ -14,10 +14,11 @@ const resolvers = {
             if (context.method === 'create' && process.env.SENDSMS === 'true') {
                 await sms.sendScheduleAppointment(new Date(), appointment);
             }
-            if (context.method === 'create' || context.method === 'update') {
-                console.log('am in now');
-                await emailer.appointment(appointment);
-            }
+            // if (context.method === 'create' || context.method === 'update') {
+            //     console.log('am in now');
+            //     console.log(appointment);
+            //     await emailer.appointment(appointment);
+            // }
         },
         providerDetails: () => async(appointment, context) => {
             if (appointment.doctorId !== undefined) {
@@ -35,7 +36,7 @@ const resolvers = {
                 const records = recordResult.data[0].immunizations.filter(
                     rec => {
                         return rec.appointmentId.toString() ==
-                            appointment._id.toString()
+                            appointment._id.toString();
                     });
                 appointment.immunizationRecords = records;
             }

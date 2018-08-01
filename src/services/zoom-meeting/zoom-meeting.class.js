@@ -3,7 +3,7 @@
 const service = require('feathers-mongoose');
 const request = require('request');
 const jsend = require('jsend');
-
+const emailer = require('../../templates/emailer');
 var Client = require('node-rest-client').Client;
 var Zoom = require('zoomus')({
     'key': 'fXH4ThUQQ-K9buLuROA1UA',
@@ -62,6 +62,7 @@ class Service {
         } else {
             appointment.zoom = response;
             const patchAppointment = await _appointmentService.patch(appointment._id, appointment, {});
+            await emailer.appointment(appointment);
             return { zoom: response, appointment: patchAppointment };
         }
 
