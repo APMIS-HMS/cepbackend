@@ -4,6 +4,7 @@ var startOfDay = require('date-fns/start_of_day');
 var endOfDay = require('date-fns/end_of_today');
 var isToday = require('date-fns/is_today');
 const sms = require('../../templates/sms-sender');
+const emailer = require('../../templates/emailer');
 const resolvers = {
     joins: {
         patientDetails: () => async(appointment, context) => {
@@ -12,6 +13,10 @@ const resolvers = {
             appointment.patientDetails = patient;
             if (context.method === 'create' && process.env.SENDSMS === 'true') {
                 await sms.sendScheduleAppointment(new Date(), appointment);
+            }
+            if (context.method === 'create' || context.method === 'update') {
+                console.log('am in now');
+                await emailer.appointment(appointment);
             }
         },
         providerDetails: () => async(appointment, context) => {

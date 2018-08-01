@@ -15,6 +15,8 @@ function sendEmailViaApi(sender, receiver, title, body) {
   });
 
   sg.API(request_send_grid, function (error, response) {
+    console.log('returning from email api');
+    console.log(response.body);
     return response;
   });
 }
@@ -46,7 +48,7 @@ function emailApmisIdTemplate(themeMessage, titleMessage, data) {
                           <div style="height: 40px; line-height: 40px; font-size: 38px;">&nbsp;</div>
                           <a href="#"
                           style="display: block; max-width: 192px;">
-                            <img src="https://ng.linkedin.com/mpr/mpr/shrinknp_400_400/AAEAAQAAAAAAAAUCAAAAJGRmOTM3NzMwLTAwYjItNDFmZC1iMjM4LTY1OTE3N2YyMDJjOQ.png" alt="Apmis" width="192"
+                            <img src="https://app.apmis.ng/assets/images/app_logo/apmis_vector.svg" alt="Apmis" width="192"
                             border="0" style="display: block; width: 192px;" />
                           </a>
                           <div class="top_pad2" style="height: 48px; line-height: 48px; font-size: 46px;">&nbsp;</div>
@@ -76,12 +78,10 @@ function emailApmisIdTemplate(themeMessage, titleMessage, data) {
                           style="background: #6070E9; border-radius: 4px;">
                             <tr>
                               <td align="center" valign="top">
-                                <a href="www.apmis.ng/details"
+                                <a href="https://app.apmis.ng"
                                 target="_blank" style="display: block; border: 1px solid #6070E9; border-radius: 4px; padding: 19px 27px; font-family: 'Source Sans Pro', Arial, Verdana, Tahoma, Geneva, sans-serif; color: #ffffff; font-size: 26px; line-height: 30px; text-decoration: none; white-space: nowrap; font-weight: 600;"> <font face="'Source Sans Pro', sans-serif" color="#ffffff" style="font-size: 26px; line-height: 30px; text-decoration: none; white-space: nowrap; font-weight: 600;">
-                <span style="font-family: 'Source Sans Pro', Arial, Verdana, Tahoma, Geneva, sans-serif; color: #ffffff; font-size: 26px; line-height: 30px; text-decoration: none; white-space: nowrap; font-weight: 600;">Visit for more details</span>
-              </font>
-
-                                </a>
+                <span style="font-family: 'Source Sans Pro', Arial, Verdana, Tahoma, Geneva, sans-serif; color: #ffffff; font-size: 26px; line-height: 30px; text-decoration: none; white-space: nowrap; font-weight: 600;">Please Log-In for more details</span>
+              </font></a>
                               </td>
                             </tr>
                           </table>
@@ -661,10 +661,13 @@ function authGeneratedPassword(data) {
 }
 
 function appointment(data) {
-  let themeMessage = (data.doctorId.employeeDetails != undefined) ? `This is to notify you of your appointment with ${data.doctorId.employeeDetails.personFullName} scheduled for: ${data.date} at ${data.facilityId.name} ${data.clinicId.clinicName} clinic` : `This is to notify you of your appointment scheduled for: ${data.date} at ${data.facilityId.name} ${data.clinicId.clinicName} clinic`;
+  console.log(1);
+  console.log(data.patientDetails.facilityObj);
+  let themeMessage = (data.providerDetails.personDetails != undefined) ? `This is to notify you of your appointment with ${data.providerDetails.personDetails.title} ${data.providerDetails.personDetails.lastName} ${data.providerDetails.personDetails.firstName} scheduled for: ${data.startDate} at ${data.patientDetails.facilityObj.name} ${data.clinicId} clinic` : `This is to notify you of your appointment scheduled for: ${data.startDate} at ${data.patientDetails.facilityObj.name} ${data.clinicId} clinic`;
   const title = 'Your Apmis Appoinment';
-  let tem = emailApmisIdTemplate(themeMessage, title, data);
-  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+  console.log(themeMessage);
+  let tem = emailApmisIdTemplate(themeMessage, title, data.patientDetails.personDetails);
+  sendEmailViaApi('dev@apmis.ng', data.patientDetails.personDetails.email, title, tem);
 }
 
 function reorderLevel(data){
@@ -689,8 +692,11 @@ module.exports = {
     authGeneratedPassword(data);
   },
   appointment: function (data) {
+    console.log('this is appointment data');
+    console.dir(data);
     appointment(data);
   },
+
   reorder: function(data) {
     reorderLevel(data);
   }
