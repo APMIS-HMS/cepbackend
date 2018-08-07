@@ -23,7 +23,7 @@ module.exports = function(app) {
                     login.email = email_bytes.toString(CryptoJS.enc.Utf8);
                     login.password = password_bytes.toString(CryptoJS.enc.Utf8);
                 } catch (error) {
-                    console.log(error);
+                    // console.log(error);
                 }
             }
         }
