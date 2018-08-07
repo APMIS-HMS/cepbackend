@@ -19,11 +19,19 @@ const inpatientSchema = require('../custom-models/inpatient-model');
 const inpatientAdminSchema = require('../custom-models/inpatient-admissions-model');
 const pharmaceuticalSchema = require('../custom-models/pharmaceutical-model');
 const adverseDrugSchema = require('../custom-models/adverse-drug-reaction-model');
+const mortalitySchema = require('../custom-models/mortality-model');
+const hivCounsellingSchema = require('../custom-models/hiv-counselling-model');
+const hivTreatmentSchema = require('../custom-models/hiv-care-treatment-model');
+const hivIntegrationSchema = require('../custom-models/srh-hiv-integration-model');
+const tbHivSchema = require('../custom-models/tb-hiv-model');
+const pmtctSchema = require('../custom-models/pmtct-model');
+const tpLbSchema = require('../custom-models/tp-lb-model');
+const malariaSchema = require('../custom-models/malaria-test-model');
+const fistulaSchema = require('../custom-models/fistula-model');
+const commodityAvailabilitySchema = require('../custom-models/commodity-availability-model');
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
-  const {
-    Schema
-  } = mongooseClient;
+  const {   Schema  } = mongooseClient;
   const nhisResports = new Schema({
     Facility_Attendance: facilityAttendanceSchema,
     Maternal_Health: maternalHealthSchema,
@@ -42,84 +50,16 @@ module.exports = function (app) {
     Inpatient_Admissions: inpatientAdminSchema,
     Pharmaceutical_Service: pharmaceuticalSchema,
     Adverse_Drug_Reaction: adverseDrugSchema,
-    Mortality: {
-      type: String,
-      required: true
-    },
-    Neonatal_Deaths: {
-      type: String,
-      required: true
-    },
-    Under_5_Mortality: {
-      type: String,
-      required: true
-    },
-    HIV_Counselling_Testing: {
-      A: {
-        type: String,
-        required: true
-      },
-      B: {
-        type: String,
-        required: true
-      }
-    },
-    HIV_Care_and_Treatment: {
-      type: String,
-      required: true
-    },
-    SRH_HIV_Integration: {
-      type: String,
-      required: true
-    },
-    TB_HIV: {
-      type: String,
-      required: true
-    },
-    PM_TCT: {
-      Mother: {
-        type: String,
-        required: true
-      },
-      Infant: {
-        type: String,
-        required: true
-      },
-    },
-    TB_LP: {
-      type: String,
-      required: true
-    },
-    Malaria_Testing: {
-      type: String,
-      required: true
-    },
-    Malaria_in_Pregnancy: {
-      type: String,
-      required: true
-    },
-    Malaria_Cases: {
-      type: String,
-      required: true
-    },
-    Malaria_Treatment: {
-      type: String,
-      required: true
-    },
-    Obstetric_Fistula: {
-      A: {
-        type: String,
-        required: true
-      },
-      B: {
-        type: String,
-        required: true
-      }
-    },
-    Commodity_Availability: {
-      type: String,
-      required: true
-    }
+    Mortality: mortalitySchema,
+    HIV_Counselling_Testing: hivCounsellingSchema,
+    HIV_Care_and_Treatment: hivTreatmentSchema,
+    SRH_HIV_Integration: hivIntegrationSchema,
+    TB_HIV: tbHivSchema,
+    PM_TCT: pmtctSchema,
+    TB_LP: tpLbSchema,
+    Malaria: malariaSchema,
+    Obstetric_Fistula: fistulaSchema,
+    Commodity_Availability: commodityAvailabilitySchema
   }, {
     timestamps: true
   });
