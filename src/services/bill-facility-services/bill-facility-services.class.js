@@ -19,7 +19,7 @@ class Service {
         facilityId: params.query.facilityId,
         patientId: params.query.patientId,
         isinvoice: params.query.isinvoice,
-        $sort: { createdAt: -1 }
+        $sort: { updatedAt: -1 }
       }
     });
     let results = await facilityItemService.create(awaitBills.data, {});
