@@ -3,6 +3,7 @@ const jwt = require('@feathersjs/authentication-jwt');
 const local = require('@feathersjs/authentication-local');
 const { fastJoin } = require('feathers-hooks-common');
 var AES = require('crypto-js/aes');
+const CircularJSON = require('circular-json');
 
 var CryptoJS = require('crypto-js');
 module.exports = function(app) {
@@ -16,15 +17,13 @@ module.exports = function(app) {
     const resolvers = {
         joins: {
             security: () => async(login, context) => {
-                // console.log(context);
-                // console.log(login);
                 try {
-                    var email_bytes = AES.decrypt(login.email, 'endurance@pays@alot');
-                    var password_bytes = AES.decrypt(login.password, 'endurance@pays@alot');
+                    var email_bytes = AES.decrypt(CircularJSON.parse(login.email), 'endurance@pays@alot');
+                    var password_bytes = AES.decrypt(CircularJSON.parse(login.password), 'endurance@pays@alot');
                     login.email = email_bytes.toString(CryptoJS.enc.Utf8);
                     login.password = password_bytes.toString(CryptoJS.enc.Utf8);
                 } catch (error) {
-                    console.log(error);
+                    // console.log(error);
                 }
             }
         }
@@ -37,7 +36,7 @@ module.exports = function(app) {
     app.service('authentication').hooks({
         before: {
             create: [
-                // fastJoin(resolvers),
+                fastJoin(resolvers),
                 authentication.hooks.authenticate(config.strategies)
             ],
             remove: [authentication.hooks.authenticate('jwt')]
