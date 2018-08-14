@@ -16,8 +16,6 @@ const resolvers = {
 const billing = {
     joins: {
         isBilled: () => async(prescription, context) => {
-            console.log(context);
-            console.log(prescription);
             if (prescription.prescriptionItems.length > 0) {
                 for (let i = 0; i < prescription.prescriptionItems.length; i++) {
                     const prescribe = prescription.prescriptionItems[i];
