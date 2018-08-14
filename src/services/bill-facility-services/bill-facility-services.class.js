@@ -10,25 +10,20 @@ class Service {
   }
 
   async find(params) {
-    var recentBillModelId = {};
-    var masterBillGroups = {};
-    var billGroups = {};
+    let billGroups = {};
     const billingsService = this.app.service('billings');
     const facilityItemService = this.app.service('facility-service-items');
-    var results = [];
-    var awaitBills = await billingsService.find({
+    
+    let awaitBills = await billingsService.find({
       query: {
         facilityId: params.query.facilityId,
         patientId: params.query.patientId,
-        isinvoice: params.query.isinvoice
+        isinvoice: params.query.isinvoice,
+        $sort: { updatedAt: -1 }
       }
     });
-    results = await facilityItemService.create(awaitBills.data, {});
-    if (results.length > 0) {
-      recentBillModelId = results[results.length - 1]._id;
-    }
-    billGroups = [];
-    return fixedGroupExisting(billGroups, results);
+    let results = await facilityItemService.create(awaitBills.data, {});
+    return fixedGroupExisting(results);
   }
 
   get(id, params) {
@@ -184,7 +179,8 @@ class Service {
   }
 }
 
-function fixedGroupExisting(billGroups, results) {
+function fixedGroupExisting(results) {
+  let billGroups = [];
   let subTotal = 0;
   let total = 0;
   let discount = 0;
@@ -240,6 +236,7 @@ function fixedGroupExisting(billGroups, results) {
       }
     }
   }
+  
   let uniqueGroupedBill = [];
   billGroups.forEach(item => {
     const index = uniqueGroupedBill.filter(x => x.categoryId.toString() === item.categoryId.toString());
