@@ -15,7 +15,7 @@
             "header": {
                 "typ": "access"
             },
-            "audience": "https://yourdomain.com",
+            "audience": "http://yourdomain.com",
             "subject": "anonymous",
             "issuer": "feathers",
             "algorithm": "HS256",
@@ -27,5 +27,6 @@
             "passwordField": "password"
         }
     },
-    "mongodb": "mongodb://localhost:27017/apmisapi_test2"
+    "mongodb": "mongodb://localhost:27017/apmisapiv_2"
 }
+
