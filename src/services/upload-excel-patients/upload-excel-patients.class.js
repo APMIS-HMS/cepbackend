@@ -25,29 +25,26 @@ class Service {
       this.uploadItemCounter = i;
       const rowObj = {};
       rowObj.homeAddress = {};
-      rowObj.title = (data[i][0] !== undefined) ? data[i][0] : ' ';
-      rowObj.firstName = (data[i][1] !== undefined) ? data[i][1] : ' ';
-      rowObj.lastName = (data[i][2] !== undefined) ? data[i][2] : ' ';
-      rowObj.gender = (data[i][3] !== undefined) ? data[i][3] : ' ';
+      rowObj.title = (data[i][0] !== null) ? data[i][0] : ' ';
+      rowObj.firstName = (data[i][1] !== null) ? data[i][1] : ' ';
+      rowObj.lastName = (data[i][2] !== null) ? data[i][2] : ' ';
+      rowObj.gender = (data[i][3] !== null) ? data[i][3] : ' ';
       rowObj.dateOfBirth = (new Date() >= new Date(data[i][4])) ? new Date(data[i][4]) : new Date();
-      rowObj.street = (data[i][5] !== undefined) ? data[i][5] : ' ';
-      rowObj.lga = (data[i][6] !== undefined) ? data[i][6] : ' ';
-      rowObj.state = (data[i][7] !== undefined) ? data[i][7] : ' ';
-      rowObj.country = (data[i][8] !== undefined) ? data[i][8] : ' ';
+      rowObj.street = (data[i][5] !== null) ? data[i][5] : ' ';
+      rowObj.lga = (data[i][6] !== null) ? data[i][6] : ' ';
+      rowObj.state = (data[i][7] !== null) ? data[i][7] : ' ';
+      rowObj.country = (data[i][8] !== null) ? data[i][8] : ' ';
       rowObj.homeAddress = {
         street: rowObj.street,
         lga: rowObj.lga,
         state: rowObj.state,
         country: rowObj.country
       }
-      rowObj.email = (data[i][9] !== undefined) ? data[i][9] : ' ';
-      rowObj.hospId = (data[i][10] !== undefined) ? data[i][10] : '';
-      rowObj.primaryContactPhoneNo = (data[i][11] !== undefined) ? data[i][11] : ' ';
-      rowObj.motherMaidenName = (data[i][12] !== undefined) ? data[i][12] : ' ';
-      rowObj.maritalStatus = (data[i][13] !== undefined) ? data[i][13] : ' ';
-      rowObj.lgaOfOrigin = (data[i][14] !== undefined) ? data[i][14] : ' ';
-      rowObj.stateOfOrigin = (data[i][15] !== undefined) ? data[i][15] : ' ';
-      rowObj.nationality = (data[i][16] !== undefined) ? data[i][16] : ' ';
+      rowObj.email = (data[i][9] !== null) ? data[i][9] : ' ';
+      rowObj.hospId = (data[i][10] !== null) ? data[i][10] : '';
+      rowObj.primaryContactPhoneNo = (data[i][11] !== null) ? data[i][11] : ' ';
+      rowObj.motherMaidenName = (data[i][12] !== null) ? data[i][12] : ' ';
+      rowObj.maritalStatus = (data[i][13] !== null) ? data[i][13] : ' ';
       rowObj.payPlan = 'Wallet';
       arr.push(rowObj);
     }
