@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+var format = require('date-fns/format');
+
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -21,6 +23,7 @@ class Service {
     let arr = [];
     this.uploadItemTotal = len - 1;
     for (let i = 0; i < len; i++) {
+      let dt = data[i][4].split('/');
       this.uploadingLoading = true;
       this.uploadItemCounter = i;
       const rowObj = {};
@@ -29,7 +32,7 @@ class Service {
       rowObj.firstName = (data[i][1] !== null) ? data[i][1] : ' ';
       rowObj.lastName = (data[i][2] !== null) ? data[i][2] : ' ';
       rowObj.gender = (data[i][3] !== null) ? data[i][3] : ' ';
-      rowObj.dateOfBirth = (new Date() >= new Date(data[i][4])) ? new Date(data[i][4]) : new Date();
+      rowObj.dateOfBirth = (dateValidator(data[i][4], format(new Date(), 'DD/MM/YYYY')) === true) ? new Date(dt[2].toString() + '-' + dt[1].toString() + '-' + dt[0].toString()) : new Date();
       rowObj.street = (data[i][5] !== null) ? data[i][5] : ' ';
       rowObj.lga = (data[i][6] !== null) ? data[i][6] : ' ';
       rowObj.state = (data[i][7] !== null) ? data[i][7] : ' ';
@@ -63,6 +66,24 @@ class Service {
     return Promise.resolve({
       id
     });
+  }
+}
+
+function dateValidator(dt, cDt) {
+  let date = dt.split('/');
+  let currentDate = cDt.split('/');
+  if (currentDate[2] >= date[2]) {
+    if (currentDate[1] >= date[1] || (date[1] > currentDate[1] && currentDate[2] > date[2])) {
+      if (currentDate[0] >= date[0] || (date[0] > currentDate[0] && currentDate[2] > date[2])) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
 }
 
