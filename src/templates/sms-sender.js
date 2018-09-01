@@ -13,8 +13,6 @@ function sender(mesage, data, isScheduler) {
             mesage + '&action=scheduled' +
             '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
     }
-    console.log(11);
-    console.log(url);
     request.get(url, null, (error, response, body) => {
         if (error) {
             console.log(error);
