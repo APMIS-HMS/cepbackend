@@ -17,6 +17,7 @@ class Service {
         const accessToken = params.accessToken;
         const facilityId = params.query.facilityId;
         const searchText = params.query.searchText;
+        console.log(params.query.searchText);
         const patientTable = (params.query.patientTable === true) ? params.query.patientTable : false;
         let patientz = [];
 
@@ -24,7 +25,9 @@ class Service {
             const hasFacility = params.user.facilitiesRole.filter(x => x.facilityId.toString() === facilityId);
             if (hasFacility.length > 0) {
                 // Get Patients
-                let patients = await patientService.find({ query: { facilityId: facilityId, $select: ['personId'], $limit: (params.query.$limit) ? params.query.$limit : 10 } });
+                console.log(1);
+                let patients = await patientService.find({ query: { facilityId: facilityId, $select: ['personId'], $limit: false } });
+                console.log(patients);
                 if (patients.data.length > 0) {
                     patients = patients.data.map(x => x.personId);
 
