@@ -134,11 +134,7 @@ class Service {
 
 
             // Populate using async/await.
-            console.log('am going there');
             const commentsLoaderAwait = new BatchLoader(async keys => {
-                console.log('listing coming keys');
-                console.log(keys);
-                console.log('end listing keys');
                 const postRecords = await peopleService.find({
 
                     query: {
@@ -197,19 +193,34 @@ class Service {
                 excludePopulate: true
 
             });
-            // console.log(postRecords);
-            const patients = postRecords.data.map(x => x.personId);
-            // console.log(patients);
-            const post = await commentsLoaderAwait.loadMany(patients);
-            console.log(post.filter(x => x !== null));
-            // return post;
-            return jsend.success(post);
-            // const data = await Promise.all(postRecords.data.map(async post => {
-            //     // console.log(post);
-            //     post.commentRecords = await commentsLoaderAwait.load(post.personId);
 
-            //     return post;
-            // }));
+            const personIds = postRecords.data.map(x => x.personId);
+            const post = await commentsLoaderAwait.loadMany(personIds);
+
+
+
+            const peopleIds = post.filter(x => x !== null).map(x => x._id);
+            const patientLoaderAwait = new BatchLoader(async keys => {
+                const patientRecords = await patientService.find({
+                    query: {
+                        personId: {
+                            $in: getUniqueKeys(keys)
+                        },
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $sort: {
+                            createdAt: -1
+                        }
+                    }
+
+                });
+                return getResultsByKey(keys, patientRecords.data, comment => comment.personId, '!');
+            }, {
+                batch: true,
+                cache: true
+            });
+            const patients = await patientLoaderAwait.loadMany(peopleIds);
+
+            return jsend.success(patients);
 
 
 
