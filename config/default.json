@@ -27,6 +27,6 @@
             "passwordField": "password"
         }
     },
-    "mongodb": "mongodb://localhost:27017/apmisapiv_2"
+    "mongodb": "mongodb://apmistest:nH9gRx666RMrGJ8qYgQ0ymeq3frpWTzke0vWG6tOVvR9GeNhA8rt9GRpcUrz4XHnQ2OXbyVsbRuGCznvSR9BHA==@apmistest.documents.azure.com:10255/apmisapiv_2?ssl=true&replicaSet=globaldb"
 
 }
