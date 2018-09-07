@@ -7,6 +7,7 @@ const departmentSchema = require('../custom-models/department-model');
 const walletSchema = require('../custom-models/wallet-model');
 const locationSchema = require('../custom-models/minorlocation-model');
 const inviteSchema = require('../custom-models/invitee-model');
+const paymentDistributionSchema = require('../custom-models/facility-payment-distribution-model.js');
 
 
 
@@ -45,7 +46,15 @@ module.exports = function(app) {
         isValidRegistration: { type: Boolean, 'default': false },
         description: { type: String, required: false },
         invitees: [inviteSchema],
-        wallet: walletSchema
+        wallet: {
+            type: walletSchema,
+            select: false,
+        },
+        paymentDistribution: {
+            type: paymentDistributionSchema,
+            required: false,
+            select: false,
+        },
     }, {
         timestamps: true
     });
