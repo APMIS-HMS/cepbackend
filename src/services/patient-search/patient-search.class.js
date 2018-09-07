@@ -21,7 +21,6 @@ class Service {
         const accessToken = params.accessToken;
         const facilityId = params.query.facilityId;
         const searchText = params.query.searchText;
-        console.log(params.query.searchText);
         const patientTable = (params.query.patientTable === true) ? params.query.patientTable : false;
         let patientz = [];
 
