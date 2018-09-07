@@ -286,6 +286,7 @@ const crudLabInvestigationPrice = require('./crud-lab-investigation-price/crud-l
 const zoomMeeting = require('./zoom-meeting/zoom-meeting.service.js');
 const nhisReports = require('./nhis-reports/nhis-reports.service.js');
 const uploadExcelPatients = require('./upload-excel-patients/upload-excel-patients.service.js');
+const getPatientAppointments = require('./get-patient-appointments/get-patient-appointments.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -489,4 +490,5 @@ module.exports = function(app) {
     app.configure(zoomMeeting);
     app.configure(nhisReports);
     app.configure(uploadExcelPatients);
+    app.configure(getPatientAppointments);
 };
