@@ -39,11 +39,8 @@ class Service {
     if (facilitySubscriptionUrl.status === 'success') {
       let existingSubscription = facilitySubscriptionUrl;
       let description = '';
-      console.log(data);
       if (data.isInvoicePage == false) {
-        console.log('Not from invoice page');
         const tokenPayload = await getTokenService.get(tokenLabel.tokenType.invoiceNo, {});
-        console.log(tokenPayload);
         let billGroup = {
           billingIds: []
         };
@@ -72,8 +69,6 @@ class Service {
             }
           });
         });
-        console.log(data.billGroups);
-
         if (billGroup.billingIds.length > 0) {
           billGroup.payments = [];
           billGroup.totalDiscount = data.discount;
@@ -166,7 +161,6 @@ class Service {
             return returnObj;
           }
         }
-        console.log(billGroup.billingIds);
       } else {
         if (data.inputedValue.balance === 0) {
           data.invoice.paymentCompleted = true;
@@ -179,7 +173,6 @@ class Service {
         if (data.inputedValue.isWaved == true) {
           data.invoice.paymentStatus = 'WAIVED';
         }
-        console.log( data.invoice);
         let invLen = data.invoice.billingIds.length - 1;
         for (let v = invLen; v >= 0; v--) {
           data.invoice.billingIds[v].billObject.isServiceEnjoyed = true;
@@ -203,7 +196,6 @@ class Service {
               });
             }
           }
-          console.log(data.invoice.billingIds[v]);
         }
 
         data.invoice.balance = data.inputedValue.balance;
@@ -228,44 +220,29 @@ class Service {
           paymentStatus: data.invoice.paymentStatus,
           paymentCompleted: data.invoice.paymentCompleted
         });
-        console.log(patechedInvoice);
         let len5 = patechedInvoice.billingIds.length - 1;
-        console.log(1);
         let itemBill = {};
         for (let m = len5; m >= 0; m--) {
-          console.log(2);
           if (patechedInvoice.billingIds[m].billModelId !== undefined) {
-            console.log(3);
             itemBill = await billingsService.get(patechedInvoice.billingIds[m].billModelId, {});
-            console.log(4);
             let len6 = itemBill.billItems.length - 1;
-            console.log(5);
             for (let n = len6; n >= 0; n--) {
-              console.log(6);
               if (itemBill.billItems[n].serviceId.toString() === patechedInvoice.billingIds[m].billObject.serviceId.toString()) {
-                console.log(7);
                 if (data.inputedValue.balance === 0 || data.inputedValue.isWaved === true) {
-                  console.log(8);
                   itemBill.billItems[n].isServiceEnjoyed = true;
-                  console.log(9);
                 }
                 if (data.inputedValue.balance === 0) {
-                  console.log(10);
                   itemBill.billItems[n].paymentCompleted = true;
-                  console.log(11);
                 }
                 itemBill.billItems[n].isServiceEnjoyed = true;
-                console.log(12);
               }
             }
             await billingsService.patch(itemBill._id, {
               billItems: itemBill.billItems
             });
-            console.log(13,billingsService);
           }
         }
         if (data.inputedValue.isWaved !== true) {
-          console.log('Not waive...');
           data.currentInvoice = patechedInvoice;
           return onDebitWallet(data, description, ref, facilitiesService, peopleService, PaymentPlan, existingSubscription);
         } else {
@@ -358,7 +335,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
   //   };
   //   return returnObj;
   // }
-  console.log('Time to debit');
   if (data.inputedValue.paymentMethod.planType == paymentPlan.outOfPocket || data.inputedValue.paymentMethod.planType == paymentPlan.family) {
     let getPerson = {};
     if (data.inputedValue.paymentMethod.bearerPersonId !== undefined) {
@@ -371,7 +347,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     if (existingSubscription.status === 'success') {
       facility = await facilitiesService.get(data.facilityId, {});
       if (existingSubscription.data.name === 'Subscription') {
-        console.log('Subscription');
         let apmis_sub_charge = data.subTotal * (existingSubscription.data.rate / 100);
         let currentBalance = parseInt(getPerson.wallet.balance) + (data.inputedValue.cost + apmis_sub_charge);
         getPerson.wallet.balance = currentBalance;
@@ -407,7 +382,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
         //Code to POST apmisPercentage to Apmis Bank Account.
 
       } else if (existingSubscription.data.name === 'One-of-payment') {
-        console.log('One-of-payment');
         let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
         getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
@@ -438,7 +412,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           'ledgerBalance': facilityBalance
         });
       } else if (existingSubscription.data.name === undefined) {
-        console.log('Not subscribed');
         let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
         getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
@@ -452,7 +425,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           'balance': currentBalance,
           'ledgerBalance': currentBalance
         });
-        console.log(getPerson.wallet);
         patchedPerson = await peopleService.patch(getPerson._id, {
           wallet: getPerson.wallet
         });
@@ -478,7 +450,6 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       person: patchedPerson,
       invoice: data.currentInvoice
     };
-    console.log(returnObj);
     return jsend.success(returnObj);
   }
 }
