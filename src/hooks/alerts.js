@@ -19,7 +19,7 @@ module.exports = function(options = {}) { // eslint-disable-line no-unused-vars
                 if (context.result.email != undefined) {
                     emailer.sendApmisId(context.result);
                 }
-                sms.sendApmisId(context.result);
+                // sms.sendApmisId(context.result);
             } else if (
                 context.alertType.toString() ==
                 tokenLabel.tokenType.patientAuthorization.toString()) {
