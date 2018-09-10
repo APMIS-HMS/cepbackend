@@ -134,6 +134,12 @@ function sendScheduleAppointment(date, data) {
     sender(message, data, true);
 }
 
+function sendNotification(data){
+    const message = data.mesage;
+
+    sender(message, data, false);
+    africas_sender(message, data, false);
+}
 
 
 module.exports = {
@@ -154,5 +160,8 @@ module.exports = {
     },
     sendPatientDocumentAuthorization(data, code) {
         sendPatientDocumentAuthorization(data, code);
+    },
+    sendNotification(data){
+        sendNotification(data);
     }
 };

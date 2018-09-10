@@ -283,6 +283,9 @@ const documentationAuthorization = require(
     './documentation-authorization/documentation-authorization.service.js');
 const nhisResports = require('./nhis-resports/nhis-resports.service.js');
 const crudLabInvestigationPrice = require('./crud-lab-investigation-price/crud-lab-investigation-price.service.js');
+const temporalChanelNames = require('./temporal-chanel-names/temporal-chanel-names.service.js');
+const communicate = require('./communicate/communicate.service.js');
+const communication = require('./communication/communication.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -483,4 +486,7 @@ module.exports = function(app) {
     app.configure(documentationAuthorization);
     app.configure(nhisResports);
     app.configure(crudLabInvestigationPrice);
+    app.configure(temporalChanelNames);
+    app.configure(communicate);
+    app.configure(communication);
 };
