@@ -84,7 +84,6 @@ class Service {
 
             while (i--) {
               const request = requests[i];
-              console.log(request);
               if (request.billingId !== undefined) {
                 const billing = await billingService.find({
                   query: {
@@ -92,7 +91,6 @@ class Service {
                     '_id': request.billingId._id
                   }
                 });
-                console.log(billing);
 
                 if (billing.data.length > 0) {
                   const billingItem = billing.data[0];
