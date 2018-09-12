@@ -288,6 +288,10 @@ const communicate = require('./communicate/communicate.service.js');
 const communication = require('./communication/communication.service.js');
 const message = require('./message/message.service.js');
 const chat = require('./chat/chat.service.js');
+const zoomMeeting = require('./zoom-meeting/zoom-meeting.service.js');
+const nhisReports = require('./nhis-reports/nhis-reports.service.js');
+const uploadExcelPatients = require('./upload-excel-patients/upload-excel-patients.service.js');
+const getPatientAppointments = require('./get-patient-appointments/get-patient-appointments.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -493,4 +497,8 @@ module.exports = function(app) {
     app.configure(communication);
     app.configure(message);
     app.configure(chat);
+    app.configure(zoomMeeting);
+    app.configure(nhisReports);
+    app.configure(uploadExcelPatients);
+    app.configure(getPatientAppointments);
 };

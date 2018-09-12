@@ -69,7 +69,6 @@ class Service {
             }
           });
         });
-
         if (billGroup.billingIds.length > 0) {
           billGroup.payments = [];
           billGroup.totalDiscount = data.discount;
@@ -207,6 +206,12 @@ class Service {
         if (data.invoice.payments.length > 0) {
           data.invoice.payments.push.apply(data.invoice.payments, data.inputedValue.paymentTxn);
         }
+        // console.log({billingIds: data.invoice.billingIds,
+        //   balance: data.invoice.balance,
+        //   payments: data.invoice.payments,
+        //   createdBy: data.createdBy,
+        //   paymentStatus: data.invoice.paymentStatus,
+        //   paymentCompleted: data.invoice.paymentCompleted});
         const patechedInvoice = await invoicesService.patch(data.invoice._id, {
           billingIds: data.invoice.billingIds,
           balance: data.invoice.balance,
