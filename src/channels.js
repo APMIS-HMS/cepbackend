@@ -15,11 +15,7 @@ module.exports = function (app) {
     // real-time connection, e.g. when logging in via REST
         if (connection) {
             // Obtain the logged in user from the connection
-            const user = connection.user;
-
-            console.log('==========Testing connection via socket=============\n',connection);
-
-            console.log('\n==========Testing User via socket=============\n',user);
+            //const user = connection.user;
 
             // The connection is no longer anonymous, remove it
             app.channel('anonymous').leave(connection);
@@ -28,10 +24,6 @@ module.exports = function (app) {
             app.channel('authenticated').join(connection);
 
             // Channels can be named anything and joined on any condition
-
-            let cha = app.channels;
-
-            console.log('\n==========Channels.js=============\n',cha);
 
             // E.g. to send real-time events only to admins use
             // if(user.isAdmin) { app.channel('admins').join(connection); }
@@ -120,8 +112,9 @@ module.exports = function (app) {
         return app.channel(data.facilityId);
     });
 
-    app.service('communication').publish((data) => {
-        return app.channel(data.channel);
+    app.service('message').publish((data, context) => {
+        //console.log('==========********=============\n','******\n',context,'******\n',app.channel(`rooms/${data.room}`));
+        return app.channel(`rooms/${data.room}`);
     });
 
 };

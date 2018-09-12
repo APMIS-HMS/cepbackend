@@ -632,7 +632,7 @@ function emailReorderTemplate(themeMessage, titleMessage, data) {
     return tem;
 }
 
-function emailCommunicateFacility(themeMessage, titleMessage, data){
+function emailNotification(themeMessage, titleMessage, data){
     let tem = `<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #f5f8fa; min-width: 350px; font-size: 1px; line-height: normal;">
     <tr>
       <td align="center" valign="top">
@@ -674,7 +674,7 @@ function emailCommunicateFacility(themeMessage, titleMessage, data){
 
                           <div style="height: 21px; line-height: 21px; font-size: 19px;">&nbsp;</div> <font face="'Source Sans Pro', sans-serif" color="#000000" style="font-size: 20px; line-height: 28px;">
                                 <span style="font-family: 'Source Sans Pro', Arial, Tahoma, Geneva, sans-serif; color: #000000; font-size: 20px; line-height: 28px;">
-                                Hey ${data.facilityName},
+                                Dear ${data.name},
                                 </span>
                             </font>
 
@@ -879,10 +879,10 @@ function reorderLevel(data){
 }
 
 function notification(data){
-    let title = 'APMIS';
+    let title = 'APMIS-NOTIFICATION';
     let message = data.message;
-    let tem = emailCommunicateFacility(message,title,data);
-    sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+    let tem = emailNotification(message,title,data);
+    sendEmailViaApi(data.sender, data.email, title, tem);
 }
 
 

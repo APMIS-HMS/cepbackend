@@ -135,8 +135,7 @@ function sendScheduleAppointment(date, data) {
 }
 
 function sendNotification(data){
-    const message = data.mesage;
-
+    const message = data.message;
     sender(message, data, false);
     africas_sender(message, data, false);
 }

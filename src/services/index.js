@@ -286,6 +286,8 @@ const crudLabInvestigationPrice = require('./crud-lab-investigation-price/crud-l
 const temporalChanelNames = require('./temporal-chanel-names/temporal-chanel-names.service.js');
 const communicate = require('./communicate/communicate.service.js');
 const communication = require('./communication/communication.service.js');
+const message = require('./message/message.service.js');
+const chat = require('./chat/chat.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -489,4 +491,6 @@ module.exports = function(app) {
     app.configure(temporalChanelNames);
     app.configure(communicate);
     app.configure(communication);
+    app.configure(message);
+    app.configure(chat);
 };

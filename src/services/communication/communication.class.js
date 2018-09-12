@@ -21,30 +21,60 @@ class Service {
     }
 
     async create(data, params) {
-        const communicateService = this.app.service('communicate');
-        let createCommunicate;
-        let communicateTem = {};
+        const messageService = this.app.service('message');
+        //const chatService = this.app.service('chat');
+        let con = this.app.channel('authenticated').connections;
+        console.log('=====Got here=======\n',data);
+        let user = con[0].user.personId;
+                
+        //if(Array.isArray(user.rooms)) user.rooms.forEach(room => this.app.channel(`rooms/${room.id}`).join(channel));
+
+        let createMessage, createChat;
+        let messageObj = {};
+        let channelObj = {};
+        //Initialise channel names
+        channelObj.email = user.email;
+        channelObj.id = user.personId;
+        data.email = data.reciever;
+        // Set message object
+        messageObj.reciever = data.reciever;
+        messageObj.sender = data.sender;
+        messageObj.messageChannel = data.messageChannel;
+        messageObj.facilityId = data.facilityId;
+        messageObj.messageStatus = data.messageStatus;
+        messageObj.message = data.message;
+        //console.log('\n=====messageObj=======\n',messageObj);
+        //console.log('=====Got =====here=======\n',data);
+        
         try {
-            if (params.query.label.toString() == emailLabel.emailType.notification.toString()) {
+            if (data.messageChannel === 'email') {
                 emailerTemplate.notification(data);
-            } else if (params.query.label.toString() == smsLabel.smsType.notification.toString()) {
+            } else if (data.messageChannel === 'sms'){
                 smsTemplate.sendNotification(data);
-            } else {
-                let channel = data.channel;
-                let con = this.app.channel(channel).connections;
-                con.send(data.message);
-                createCommunicate = await communicateService.create(communicateTem);
-                console.log('\n createCommunicate: \n', createCommunicate);
             }
+            else if(data.messageChannel === 'broadcast'){
+                //console.log('======connection User========\n',con[0].user);
+                let channel = data.facilityId;
+                let con = this.app.channel(channel);
+                con.send(data.message);
+                createMessage = await messageService.create(messageObj);
+                //console.log('\n createMessage: \n', createMessage);
+            }
+            else{
+                let channel = this.app.channel(user);
+                channel.send(data.message);
+                createChat = await messageService.create(messageObj);
+                console.log('\n createChat: \n', createChat);
+            }
+            let result = {};
+            result.message = createMessage;
+            result.chat = createChat;
+
+            return jsend.success(result);
         } catch (error) {
-            jsend.error(error);
+            return jsend.error('Error found chat');
         }
-
-        if (Array.isArray(data)) {
-            return Promise.all(data.map(current => this.create(current, params)));
-        }
-
-        return Promise.resolve(createCommunicate);
+        
     }
 
     update(id, data, params) {
