@@ -6,7 +6,8 @@ class Service {
     }
 
     find(params) {
-        return Promise.resolve([]);
+        let result = this.app.channels;
+        return Promise.resolve(result);
     }
 
     get(id, params) {
@@ -29,9 +30,11 @@ class Service {
         const facilityId = data._id;
         // let departmentChannel,unitChannel,workspace,personal;
         let dept = data.dept;
-        const getAllChannels = await channelNamesService.find({ query: { facilityId: facilityId } });
 
-        let facilityChannels = getAllChannels.data[0];
+        //console.log('*******************************\n',dept);
+        //const getAllChannels = await channelNamesService.find({ query: { facilityId: facilityId } });
+
+        //let facilityChannels = getAllChannels.data[0];
 
         if (consFilter.length > 0) {
             loggedInConnection = consFilter[0];
@@ -42,27 +45,44 @@ class Service {
 
             channel.join(loggedInConnection);
 
+            dept.forEach(element => {
+                //channelNames.push(element.name);
+                let departmentChannel = this.app.channel(element.name);
+                departmentChannel.join(loggedInConnection);
+                channelObj.push({id:element._id,name:element.name});
+                let units = element.units;
+                if (units.length > 0) {
+                    //Create Unit channel
+                    units.forEach(unit => {
+                        //channelNames.push(unit.name);
+                        let unitChannel = this.app.channel(unit.name);
+                        unitChannel.join(loggedInConnection);
+                        channelObj.push({id:unit._id,name:unit.name});
+                    });
+                }
+            });
+
 
             // Filter all proposed channels
-            if (facilityChannels.channels.length > 0) {
-                dept.forEach(element => {
-                    //console.log('=========********************===============\n',element);
-                    channelNames.push(element.name);
-                    let departmentChannel = this.app.channel(element.name);
-                    departmentChannel.join(person);
-                    channelObj.push({id:element._id,name:element.name});
-                    let units = element.units;
-                    if (units.length > 0) {
-                        //Create Unit channel
-                        units.forEach(unit => {
-                            channelNames.push(unit.name);
-                            let unitChannel = this.app.channel(unit.name);
-                            unitChannel.join(person);
-                            channelObj.push({id:unit._id,name:unit.name});
-                        });
-                    }
-                });
-            }
+            // if (facilityChannels.channels.length > 0) {
+            //     dept.forEach(element => {
+            //         //console.log('=========********************===============\n',element);
+            //         channelNames.push(element.name);
+            //         let departmentChannel = this.app.channel(element.name);
+            //         departmentChannel.join(person);
+            //         channelObj.push({id:element._id,name:element.name});
+            //         let units = element.units;
+            //         if (units.length > 0) {
+            //             //Create Unit channel
+            //             units.forEach(unit => {
+            //                 channelNames.push(unit.name);
+            //                 let unitChannel = this.app.channel(unit.name);
+            //                 unitChannel.join(person);
+            //                 channelObj.push({id:unit._id,name:unit.name});
+            //             });
+            //         }
+            //     });
+            // }
 
             //let newChannels = [];
             //let existingChannels = [];
@@ -132,10 +152,9 @@ class Service {
             // }
         }
 
-        let result = this.app.channels;
-        console.log('=========Channels==================\n', result);
+        //let result = this.app.channels;
         return Promise.resolve({
-            result
+            channelObj
         });
     }
 
