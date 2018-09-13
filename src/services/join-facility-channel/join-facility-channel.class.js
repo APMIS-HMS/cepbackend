@@ -28,6 +28,7 @@ class Service {
         let loggedInConnection;
         let person = cons[0].user.email;
         const facilityId = data._id;
+        const facilityName = data.facilityName;
         // let departmentChannel,unitChannel,workspace,personal;
         let dept = data.dept;
 
@@ -61,7 +62,7 @@ class Service {
                     });
                 }
             });
-
+            channelObj.push({id:data._id,name:data.facilityName});
 
             // Filter all proposed channels
             // if (facilityChannels.channels.length > 0) {
@@ -86,10 +87,10 @@ class Service {
 
             //let newChannels = [];
             //let existingChannels = [];
-            let addChannelNames = {
-                facilityId: facilityId,
-                channels: []
-            };
+            // let addChannelNames = {
+            //     facilityId: facilityId,
+            //     channels: []
+            // };
 
             //Check if facility channels exist
 
@@ -152,7 +153,7 @@ class Service {
             // }
         }
 
-        //let result = this.app.channels;
+        let result = this.app.channels;
         return Promise.resolve({
             channelObj
         });
