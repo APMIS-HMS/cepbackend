@@ -154,6 +154,8 @@ class Service {
         }
 
         let result = this.app.channels;
+        console.log('******************addChannels******************\n', channelObj);
+        console.log('\n******************result******************\n', result);
         return Promise.resolve({
             channelObj
         });
