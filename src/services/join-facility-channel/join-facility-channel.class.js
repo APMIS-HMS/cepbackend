@@ -1,12 +1,14 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
+const jsend = require('jsend');
 class Service {
     constructor(options) {
         this.options = options || {};
     }
 
     find(params) {
-        return Promise.resolve([]);
+        let result = this.app.channels;
+        return Promise.resolve(result);
     }
 
     get(id, params) {
@@ -27,11 +29,14 @@ class Service {
         let loggedInConnection;
         let person = cons[0].user.email;
         const facilityId = data._id;
+        const facilityName = data.facilityName;
         // let departmentChannel,unitChannel,workspace,personal;
         let dept = data.dept;
-        const getAllChannels = await channelNamesService.find({ query: { facilityId: facilityId } });
 
-        let facilityChannels = getAllChannels.data[0];
+        //console.log('*******************************\n',dept);
+        //const getAllChannels = await channelNamesService.find({ query: { facilityId: facilityId } });
+
+        //let facilityChannels = getAllChannels.data[0];
 
         if (consFilter.length > 0) {
             loggedInConnection = consFilter[0];
@@ -42,34 +47,51 @@ class Service {
 
             channel.join(loggedInConnection);
 
+            dept.forEach(element => {
+                //channelNames.push(element.name);
+                let departmentChannel = this.app.channel(element.name);
+                departmentChannel.join(loggedInConnection);
+                channelObj.push({id:element._id,name:element.name});
+                let units = element.units;
+                if (units.length > 0) {
+                    //Create Unit channel
+                    units.forEach(unit => {
+                        //channelNames.push(unit.name);
+                        let unitChannel = this.app.channel(unit.name);
+                        unitChannel.join(loggedInConnection);
+                        channelObj.push({id:unit._id,name:unit.name});
+                    });
+                }
+            });
+            channelObj.push({id:data._id,name:data.facilityName});
 
             // Filter all proposed channels
-            if (facilityChannels.channels.length > 0) {
-                dept.forEach(element => {
-                    //console.log('=========********************===============\n',element);
-                    channelNames.push(element.name);
-                    let departmentChannel = this.app.channel(element.name);
-                    departmentChannel.join(person);
-                    channelObj.push({id:element._id,name:element.name});
-                    let units = element.units;
-                    if (units.length > 0) {
-                        //Create Unit channel
-                        units.forEach(unit => {
-                            channelNames.push(unit.name);
-                            let unitChannel = this.app.channel(unit.name);
-                            unitChannel.join(person);
-                            channelObj.push({id:unit._id,name:unit.name});
-                        });
-                    }
-                });
-            }
+            // if (facilityChannels.channels.length > 0) {
+            //     dept.forEach(element => {
+            //         //console.log('=========********************===============\n',element);
+            //         channelNames.push(element.name);
+            //         let departmentChannel = this.app.channel(element.name);
+            //         departmentChannel.join(person);
+            //         channelObj.push({id:element._id,name:element.name});
+            //         let units = element.units;
+            //         if (units.length > 0) {
+            //             //Create Unit channel
+            //             units.forEach(unit => {
+            //                 channelNames.push(unit.name);
+            //                 let unitChannel = this.app.channel(unit.name);
+            //                 unitChannel.join(person);
+            //                 channelObj.push({id:unit._id,name:unit.name});
+            //             });
+            //         }
+            //     });
+            // }
 
             //let newChannels = [];
             //let existingChannels = [];
-            let addChannelNames = {
-                facilityId: facilityId,
-                channels: []
-            };
+            // let addChannelNames = {
+            //     facilityId: facilityId,
+            //     channels: []
+            // };
 
             //Check if facility channels exist
 
@@ -132,11 +154,8 @@ class Service {
             // }
         }
 
-        let result = this.app.channels;
-        console.log('=========Channels==================\n', result);
-        return Promise.resolve({
-            result
-        });
+        //let result = this.app.channels;
+        return jsend.success(channelObj);
     }
 
     update(id, data, params) {
