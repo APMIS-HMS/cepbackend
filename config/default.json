@@ -27,6 +27,6 @@
             "passwordField": "password"
         }
     },
-    "mongodb": "mongodb://apmistest:nH9gRx666RMrGJ8qYgQ0ymeq3frpWTzke0vWG6tOVvR9GeNhA8rt9GRpcUrz4XHnQ2OXbyVsbRuGCznvSR9BHA==@apmistest.documents.azure.com:10255/apmisapiv_2?ssl=true&replicaSet=globaldb"
+    "mongodb": "mongodb://apmistest:x3EAhfBsNigOCQqYePLHIykZZQGZeWIrZpzxFcsaocEt0icqEJ6d8twf4VFeMeac1MMaNB0ze7fZTtiWDSVnwQ==@apmistest.documents.azure.com:10255/apmisapiv_2?ssl=true&replicaSet=globaldb"
 
 }
