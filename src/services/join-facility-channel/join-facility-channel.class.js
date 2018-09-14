@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
+const jsend = require('jsend');
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -154,9 +155,7 @@ class Service {
         }
 
         //let result = this.app.channels;
-        return Promise.resolve({
-            channelObj
-        });
+        return jsend.success(channelObj);
     }
 
     update(id, data, params) {
