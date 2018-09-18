@@ -4,167 +4,175 @@ const querystring = require('querystring');
 const https = require('https');
 
 function sender(mesage, data, isScheduler) {
-  var url =
+    var url =
     'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' +
     mesage + '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
-  if (isScheduler == true) {
-    url =
+    if (isScheduler == true) {
+        url =
       'http://portal.bulksmsnigeria.net/api/?username=apmis&password=apmis&message=' +
       mesage + '&action=scheduled' +
       '&sender=APMIS&mobiles=@@' + data.primaryContactPhoneNo + '@@';
-  }
-  request.get(url, null, (error, response, body) => {
-    if (error) {
-      console.log(error);
     }
-    if (response && body) {}
-  });
+    request.get(url, null, (error, response, body) => {
+        if (error) {
+            console.log(error);
+        }
+        if (response && body) {}
+    });
 }
 
 function getPhoneNumber(number) {
-  if (number.length === 11) {
-    var inNumber = number.substring(1);
-    return '+234' + inNumber;
-  }
-  return number;
+    if (number.length === 11) {
+        var inNumber = number.substring(1);
+        return '+234' + inNumber;
+    }
+    return number;
 }
 
 function africas_sender(message, data, isScheduler) {
-  var username = process.env.AFRICASTALKINGUSERNAME;
-  var apikey = process.env.AFRICASTALKINGKEY;
-  var to = getPhoneNumber(data.primaryContactPhoneNo);
-  var post_data = querystring.stringify({
-    'username': username,
-    'to': to,
-    'from': 34461,
-    'message': message
-  });
-
-  var post_options = {
-    host: 'api.africastalking.com',
-    path: '/version1/messaging',
-    method: 'POST',
-
-    rejectUnauthorized: false,
-    requestCert: true,
-    agent: false,
-
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': post_data.length,
-      'Accept': 'application/json',
-      'apikey': apikey
-    }
-  };
-
-  var post_req = https.request(post_options, function (res) {
-    res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      var jsObject = JSON.parse(chunk);
-      var recipients = jsObject.SMSMessageData.Recipients;
-      if (recipients.length > 0) {
-        console.log(12);
-        // for (var i = 0; i < recipients.length; ++i) {
-        //     var logStr = 'number=' + recipients[i].number;
-        //     logStr += ';cost=' + recipients[i].cost;
-        //     logStr += ';status=' + recipients[i].status; // status is either
-        //     "Success" or "error message" console.log(logStr);
-        // }
-      } else {
-        // console.log('Error while sending: ' +
-        // jsObject.SMSMessageData.Message);
-      }
+    var username = process.env.AFRICASTALKINGUSERNAME;
+    var apikey = process.env.AFRICASTALKINGKEY;
+    var to = getPhoneNumber(data.primaryContactPhoneNo);
+    var post_data = querystring.stringify({
+        'username': username,
+        'to': to,
+        'from': 34461,
+        'message': message
     });
-  });
 
-  // Add post parameters to the http request
-  post_req.write(post_data);
+    var post_options = {
+        host: 'api.africastalking.com',
+        path: '/version1/messaging',
+        method: 'POST',
 
-  post_req.end();
+        rejectUnauthorized: false,
+        requestCert: true,
+        agent: false,
+
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': post_data.length,
+            'Accept': 'application/json',
+            'apikey': apikey
+        }
+    };
+
+    var post_req = https.request(post_options, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            var jsObject = JSON.parse(chunk);
+            var recipients = jsObject.SMSMessageData.Recipients;
+            if (recipients.length > 0) {
+                console.log(12);
+                // for (var i = 0; i < recipients.length; ++i) {
+                //     var logStr = 'number=' + recipients[i].number;
+                //     logStr += ';cost=' + recipients[i].cost;
+                //     logStr += ';status=' + recipients[i].status; // status is either
+                //     "Success" or "error message" console.log(logStr);
+                // }
+            } else {
+                // console.log('Error while sending: ' +
+                // jsObject.SMSMessageData.Message);
+            }
+        });
+    });
+
+    // Add post parameters to the http request
+    post_req.write(post_data);
+
+    post_req.end();
 }
 
 function sendToken(data) {
-  const message =
+    const message =
     'Kindly login to www.apmis.com with your APMISID or email address to complete your registration by verifing your account with this OTP code: ' +
     data.verificationToken + ' to complete your registration';
-  sender(message, data, false);
+    sender(message, data, false);
 }
 
 function sendPasswordResetToken(data) {
-  const message =
+    const message =
     'Complete your password reset by verifing your account with this OTP: ' +
     data.verificationToken + ' to complete your registration';
-  sender(message, data, false);
+    sender(message, data, false);
 }
 
 function sendApmisId(data) {
-  const message = 'This is to notify you that ' + data.apmisId +
+    const message = 'This is to notify you that ' + data.apmisId +
     ' is your personal APMIS identification number. Visit www.apmis.ng/details for details';
-  sender(message, data, false);
+    sender(message, data, false);
 }
 
 function sendApmisId(data, password) {
-  const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
+    const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
     ' Password: ' + password + ' ,kindly change your password';
-  sender(message, data, false);
+    sender(message, data, false);
 }
 
 function sendAutoGeneratorPassword(data, password) {
-  const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
+    const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
     ' Password: ' + password + ' ,kindly change your password';
-  sender(message, data, false);
-  // const message = 'APMIS Auto-generated password: ' + password +
-  //     ' kindly change your password';
-  // sender(message, data, false);
+    sender(message, data, false);
+    // const message = 'APMIS Auto-generated password: ' + password +
+    //     ' kindly change your password';
+    // sender(message, data, false);
 }
 
 function sendPatientDocumentAuthorization(data, code) {
-  const message = 'This is to notify you that ' + code +
+    const message = 'This is to notify you that ' + code +
     ' is your documentation authorization code.';
-  console.log('am sending');
-  sender(message, data, false);
-  africas_sender(message, data, false);
+    console.log('am sending');
+    sender(message, data, false);
+    africas_sender(message, data, false);
 }
 
 function sendScheduleAppointment(date, data) {
-  var message = '';
-  if (data.doctorId != undefined) {
-    message = 'This is to notify you of your appointment with ' +
+    var message = '';
+    if (data.doctorId != undefined) {
+        message = 'This is to notify you of your appointment with ' +
       data.providerDetails.personDetails.title + ' ' +
       data.providerDetails.personDetails.lastName + ' ' +
       data.providerDetails.personDetails.firstName +
       ' scheduled for: ' + data.startDate + ' at ' +
       data.patientDetails.facilityObj.name + ' ' + data.clinicId + ' clinic';
-  } else {
-    message = 'This is to notify you of your appointment scheduled for: ' +
+    } else {
+        message = 'This is to notify you of your appointment scheduled for: ' +
       data.startDate + ' at ' + data.patientDetails.facilityObj.name +
       ' in ' + data.clinicId + ' clinic';
-  }
-  data.primaryContactPhoneNo =
+    }
+    data.primaryContactPhoneNo =
     data.patientDetails.personDetails.primaryContactPhoneNo;
-  africas_sender(message, data, true);
-  sender(message, data, true);
+    africas_sender(message, data, true);
+    sender(message, data, true);
+}
+
+function sendNotification(data){
+    const message = data.message;
+    sender(message, data, false);
+    africas_sender(message, data, false);
 }
 
 
-
 module.exports = {
-  sendToken(data) {
-    sendToken(data);
-  },
-  sendPasswordResetToken(data) {
-    sendPasswordResetToken(data);
-  },
-  sendApmisId(data) {
-    sendApmisId(data);
-  },
-  sendAutoGeneratorPassword(data, password) {
-    sendAutoGeneratorPassword(data, password);
-  },
-  sendScheduleAppointment(date, data) {
-    sendScheduleAppointment(date, data);
-  },
-  sendPatientDocumentAuthorization(data, code) {
-    sendPatientDocumentAuthorization(data, code);
-  }
+    sendToken(data) {
+        sendToken(data);
+    },
+    sendPasswordResetToken(data) {
+        sendPasswordResetToken(data);
+    },
+    sendApmisId(data) {
+        sendApmisId(data);
+    },
+    sendAutoGeneratorPassword(data, password) {
+        sendAutoGeneratorPassword(data, password);
+    },
+    sendScheduleAppointment(date, data) {
+        sendScheduleAppointment(date, data);
+    },
+    sendPatientDocumentAuthorization(data, code) {
+        sendPatientDocumentAuthorization(data, code);
+    },
+    sendNotification(data){
+        sendNotification(data);
+    }
 };
