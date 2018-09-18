@@ -74,37 +74,58 @@ class Service {
         if (hmo.data[0].hmos[index].enrolleeList.length > 0) {
           let updatedData = JSON.parse(JSON.stringify(hmo.data[0]));
           if (id !== '') {
-              let verifyUpdate = false;
-            updatedData.hmos[index].enrolleeList.forEach(element => {
-                if(verifyUpdate === false){
-                    verifyUpdate = true;
-                    element.enrollees[id].firstname = data.firstname.toUpperCase();
-                    element.enrollees[id].surname = data.surname.toUpperCase();
-                    element.enrollees[id].category = data.category.toUpperCase();
-                    element.enrollees[id].serial = data.serial;
-                    element.enrollees[id].sponsor = data.sponsor.toUpperCase();
-                    element.enrollees[id].type = data.type.toUpperCase();
-                    element.enrollees[id].plan = data.plan.toUpperCase();
-                    element.enrollees[id].gender = data.gender.toUpperCase();
-                    element.enrollees[id].filNo = data.filNo.toUpperCase();
-                    element.enrollees[id].date = data.date;
-                    element.enrollees[id].status = data.status;
-                }
-            });
+            for (let indx = 0; indx < updatedData.hmos[index].enrolleeList.length; indx++) {
+              const enrolleeIndex = updatedData.hmos[index].enrolleeList[indx].enrollees.findIndex(x => x.filNo.toString() === data.filNo);
+              if (enrolleeIndex > -1) {
+                let rowObj = updatedData.hmos[index].enrolleeList[indx].enrollees[enrolleeIndex];
+                rowObj.serial = data.serial;
+                rowObj.surname = data.surname.toUpperCase();
+                rowObj.firstname = data.firstname.toUpperCase();
+                rowObj.gender = data.gender;
+                rowObj.filNo = data.filNo;
+                rowObj.category = data.category.toUpperCase();
+                rowObj.sponsor = data.sponsor.toUpperCase();
+                rowObj.plan = data.plan.toUpperCase();
+                rowObj.type = data.type;
+                rowObj.status = true;
+              }
+            }
           } else {
-            updatedData.hmos[index].enrolleeList[updatedData.hmos[index].enrolleeList.length -1].enrollees.push({
-              firstname: data.firstname.toUpperCase(),
-              surname: data.surname.toUpperCase(),
-              category: data.category.toUpperCase(),
-              serial: (updatedData.hmos[index].enrolleeList.length + 1),
-              sponsor: data.sponsor.toUpperCase(),
-              type: data.type.toUpperCase(),
-              plan: data.plan.toUpperCase(),
-              gender: data.gender.toUpperCase(),
-              filNo: data.filNo.toUpperCase(),
-              date: new Date(),
-              status: data.status
-            });
+            let dt = new Date(data.date);
+            let lastMonthEnrolleesIndex = updatedData.hmos[index].enrolleeList.findIndex(x => x.month === dt.getMonth() && x.year === dt.getFullYear());
+            if (lastMonthEnrolleesIndex > -1) {
+              updatedData.hmos[index].enrolleeList[lastMonthEnrolleesIndex].enrollees.push({
+                firstname: data.firstname.toUpperCase(),
+                surname: data.surname.toUpperCase(),
+                category: data.category.toUpperCase(),
+                serial: (updatedData.hmos[index].enrolleeList.length + 1),
+                sponsor: data.sponsor.toUpperCase(),
+                type: data.type,
+                plan: data.plan.toUpperCase(),
+                gender: data.gender,
+                filNo: data.filNo,
+                status: data.status
+              });
+            } else {
+              let enrolleeList = {
+                month: new Date().getMonth(),
+                year: new Date().getFullYear(),
+                enrollees: []
+              };
+              enrolleeList.enrollees.push({
+                firstname: data.firstname.toUpperCase(),
+                surname: data.surname.toUpperCase(),
+                category: data.category.toUpperCase(),
+                serial: (updatedData.hmos[index].enrolleeList.length + 1),
+                sponsor: data.sponsor.toUpperCase(),
+                type: data.type,
+                plan: data.plan.toUpperCase(),
+                gender: data.gender,
+                filNo: data.filNo,
+                status: data.status
+              });
+              updatedData.hmos[index].enrolleeList.push(enrolleeList);
+            }
           }
 
           let _updatedData = JSON.parse(JSON.stringify(updatedData));

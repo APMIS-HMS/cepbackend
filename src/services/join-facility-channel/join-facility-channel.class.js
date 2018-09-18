@@ -19,6 +19,8 @@ class Service {
     }
 
     async create(data, params) {
+        console.log(data);
+
         let cons = this.app.channel('authenticated').connections;
         const channelNamesService = this.app.service('temporal-chanel-names');
 
