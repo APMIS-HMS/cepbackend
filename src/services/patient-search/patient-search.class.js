@@ -183,7 +183,6 @@ class Service {
         batch: true,
         cache: true
       });
-      console.log(commentsLoaderAwait);
       const postRecords = await patientService.find({
         query: {
           facilityId: facilityId,
