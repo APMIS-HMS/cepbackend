@@ -293,6 +293,7 @@ const nhisReports = require('./nhis-reports/nhis-reports.service.js');
 const uploadExcelPatients = require('./upload-excel-patients/upload-excel-patients.service.js');
 const getPatientAppointments = require('./get-patient-appointments/get-patient-appointments.service.js');
 const adminDashboardChart = require('./admin-dashboard-chart/admin-dashboard-chart.service.js');
+const getPersonPrescriptions = require('./get-person-prescriptions/get-person-prescriptions.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -503,4 +504,5 @@ module.exports = function(app) {
     app.configure(uploadExcelPatients);
     app.configure(getPatientAppointments);
     app.configure(adminDashboardChart);
+    app.configure(getPersonPrescriptions);
 };
