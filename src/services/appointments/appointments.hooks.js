@@ -1,5 +1,9 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
-const { fastJoin } = require('feathers-hooks-common');
+const {
+    authenticate
+} = require('@feathersjs/authentication').hooks;
+const {
+    fastJoin
+} = require('feathers-hooks-common');
 var startOfDay = require('date-fns/start_of_day');
 var endOfDay = require('date-fns/end_of_today');
 var isToday = require('date-fns/is_today');
@@ -15,7 +19,6 @@ const resolvers = {
                 await sms.sendScheduleAppointment(new Date(), appointment);
             }
             if (context.method === 'create' || context.method === 'update') {
-                console.log('am in now');
                 await emailer.appointment(appointment);
             }
         },
@@ -29,7 +32,9 @@ const resolvers = {
         immunizationRecords: () => async(appointment, context) => {
             const recordResult =
                 await context.app.service('immunization-records').find({
-                    query: { 'patientId': appointment.patientId }
+                    query: {
+                        'patientId': appointment.patientId
+                    }
                 });
             if (recordResult.data.length > 0) {
                 const records = recordResult.data[0].immunizations.filter(
@@ -50,8 +55,13 @@ const resolvers = {
                 await context.app.service('documentations').find({
                     query: {
                         'documentations.patientId': appointment.patientId,
-                        'documentations.document.body.vitals.updatedAt': { '$gte': start, '$lt': end },
-                        $select: { 'documentations.document.body.vitals.$': 1 }
+                        'documentations.document.body.vitals.updatedAt': {
+                            '$gte': start,
+                            '$lt': end
+                        },
+                        $select: {
+                            'documentations.document.body.vitals.$': 1
+                        }
                     }
                 });
             if (patientDocumentations.data.length > 0) {
