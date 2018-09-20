@@ -19,7 +19,6 @@ const resolvers = {
                 await sms.sendScheduleAppointment(new Date(), appointment);
             }
             if (context.method === 'create' || context.method === 'update') {
-                console.log('am in now');
                 await emailer.appointment(appointment);
             }
         },
