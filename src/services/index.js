@@ -510,4 +510,5 @@ module.exports = function(app) {
     app.configure(getPersonPrescriptions);
     app.configure(clinicCharts);
     app.configure(drugInteractions);
-}
+    app.configure(inventorySummaryCounts);
+};
