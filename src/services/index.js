@@ -294,6 +294,8 @@ const uploadExcelPatients = require('./upload-excel-patients/upload-excel-patien
 const getPatientAppointments = require('./get-patient-appointments/get-patient-appointments.service.js');
 const adminDashboardChart = require('./admin-dashboard-chart/admin-dashboard-chart.service.js');
 const getPersonPrescriptions = require('./get-person-prescriptions/get-person-prescriptions.service.js');
+const inventorySummaryCounts = require('./inventory-summary-counts/inventory-summary-counts.service.js');
+const clinicCharts = require('./clinic-charts/clinic-charts.service.js');
 const drugInteractions = require('./drug-interactions/drug-interactions.service.js');
 module.exports = function(app) {
     app.configure(users);
@@ -506,5 +508,6 @@ module.exports = function(app) {
     app.configure(getPatientAppointments);
     app.configure(adminDashboardChart);
     app.configure(getPersonPrescriptions);
+    app.configure(clinicCharts);
     app.configure(drugInteractions);
-};
+}

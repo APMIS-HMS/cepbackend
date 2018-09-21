@@ -60,6 +60,7 @@ const resolvers = {
           }
         }
         data.reorder = getProductReorder.data[0].reOrderLevel;
+        data.reOrderSizeId = getProductReorder.data[0].reOrderSizeId;
 
       } catch (e) {
         // console.log(e);
@@ -70,7 +71,7 @@ const resolvers = {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
+    all: [],//authenticate('jwt')],
     find: [],
     get: [],
     create: [],
