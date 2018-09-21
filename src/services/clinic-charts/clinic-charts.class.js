@@ -47,7 +47,7 @@ class Service {
         nonFilteredCheckOut.push({
           name: element.clinicId,
           count: 1,
-          date: element.attendance.dateCheckIn
+          date: (element.attendance !== undefined) ? element.attendance.dateCheckIn : element.createdAt
         })
       } else {
         check[0].count += 1;
