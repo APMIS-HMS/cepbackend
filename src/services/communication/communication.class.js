@@ -8,25 +8,39 @@ const jsend = require('jsend');
 class Service {
     constructor(options) {
         this.options = options || {};
+        //this.events = ['status'];
     }
 
-    find(params) {
-        return Promise.resolve([]);
+    async find(params) {
+        const messageService = this.app.service('message');
+
+        let findAllMessage;
+        try {
+            findAllMessage = await messageService.find({ query: { reciever: params.query.name } });
+        } catch (error) {
+            jsend.error({ message: 'Find all failed!', code: 419, data: { status: 'Error', error: error } });
+        }
+        return jsend.success({data:findAllMessage});
     }
 
-    get(id, params) {
-        return Promise.resolve({
-            id, text: `A new message with ID: ${id}!`
-        });
+    async get(id, params) {
+        const messageService = this.app.service('message');
+        let getMessage;
+        try {
+            getMessage = await messageService.find({query: { _id:id}});
+        } catch (error) {
+            jsend.error({ message: 'Find single failed!', code: 419, data: { status: 'Error', error: error } });
+        }
+        return jsend.success(getMessage);
     }
 
     async create(data, params) {
         const messageService = this.app.service('message');
         //const chatService = this.app.service('chat');
         let con = this.app.channel('authenticated').connections;
-        console.log('=====Got here=======\n',data);
+        console.log('=====Got here=======\n', data);
         let user = con[0].user.personId;
-                
+
         //if(Array.isArray(user.rooms)) user.rooms.forEach(room => this.app.channel(`rooms/${room.id}`).join(channel));
 
         let createMessage, createChat;
@@ -45,14 +59,14 @@ class Service {
         messageObj.message = data.message;
         //console.log('\n=====messageObj=======\n',messageObj);
         //console.log('=====Got =====here=======\n',data);
-        
+
         try {
             if (data.messageChannel === 'email') {
                 emailerTemplate.notification(data);
-            } else if (data.messageChannel === 'sms'){
+            } else if (data.messageChannel === 'sms') {
                 smsTemplate.sendNotification(data);
             }
-            else if(data.messageChannel === 'broadcast'){
+            else if (data.messageChannel === 'broadcast') {
                 //console.log('======connection User========\n',con[0].user);
                 let channel = data.facilityId;
                 let con = this.app.channel(channel);
@@ -60,7 +74,7 @@ class Service {
                 createMessage = await messageService.create(messageObj);
                 //console.log('\n createMessage: \n', createMessage);
             }
-            else{
+            else {
                 let channel = this.app.channel(user);
                 channel.send(data.message);
                 createChat = await messageService.create(messageObj);
@@ -74,19 +88,35 @@ class Service {
         } catch (error) {
             return jsend.error('Error found chat');
         }
-        
+
     }
 
     update(id, data, params) {
+        // const messageService = this.app.service('message');
         return Promise.resolve(data);
     }
 
-    patch(id, data, params) {
-        return Promise.resolve(data);
+    async patch(id, data, params) {
+        const messageService = this.app.service('message');
+        let messageStatus;
+        try {
+            messageStatus = await messageService.patch(id, { messageStatus: data.status });
+        } catch (error) {
+            jsend.error({ message: 'Modification not successful!', code: 914, data: { status: 'Error', error: error } });
+        }
+        return jsend.success(messageStatus);
     }
 
-    remove(id, params) {
-        return Promise.resolve({ id });
+    async remove(id, params) {
+        const messageService = this.app.service('message');
+        let deleteMessage;
+        try {
+            deleteMessage = await messageService.remove(id);
+        } catch (error) {
+            jsend.error({ message: 'Delete failed!', code: 914, data: { status: 'Error', error: error } });
+
+        }
+        return jsend.success({ message: 'Message successfully removed!' });
     }
 
     setup(app) {
