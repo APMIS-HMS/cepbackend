@@ -297,6 +297,7 @@ const getPersonPrescriptions = require('./get-person-prescriptions/get-person-pr
 const inventorySummaryCounts = require('./inventory-summary-counts/inventory-summary-counts.service.js');
 const clinicCharts = require('./clinic-charts/clinic-charts.service.js');
 const drugInteractions = require('./drug-interactions/drug-interactions.service.js');
+const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -510,4 +511,5 @@ module.exports = function(app) {
     app.configure(getPersonPrescriptions);
     app.configure(clinicCharts);
     app.configure(drugInteractions);
+    app.configure(salesQtiesStatistics);
 }
