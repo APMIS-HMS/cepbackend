@@ -21,7 +21,6 @@ class Service {
         const accessToken = params.accessToken;
         const facilityId = params.query.facilityId;
         const searchText = params.query.searchText;
-        console.log(params.query.searchText);
         const patientTable = (params.query.patientTable === true) ? params.query.patientTable : false;
         let patientz = [];
 
@@ -187,7 +186,7 @@ class Service {
             const postRecords = await patientService.find({
                 query: {
                     facilityId: facilityId,
-                    $select: ['personId'],
+                    $select: ['personId', 'clientsNo'],
                     $limit: false
                 },
                 excludePopulate: true
@@ -196,8 +195,6 @@ class Service {
 
             const personIds = postRecords.data.map(x => x.personId);
             const post = await commentsLoaderAwait.loadMany(personIds);
-
-
 
             const peopleIds = post.filter(x => x !== null).map(x => x._id);
             const patientLoaderAwait = new BatchLoader(async keys => {

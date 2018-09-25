@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
 const jsend = require('jsend');
+const BatchLoader = require('@feathers-plus/batch-loader');
+const {
+    getResultsByKey,
+    getUniqueKeys
+} = BatchLoader;
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -21,9 +26,13 @@ class Service {
         let features = await facilityAccessControlService.find({
             query: {
                 facilityId: facilityId,
-                _id: { $in: userRoles },
+                _id: {
+                    $in: getUniqueKeys(userRoles)
+                },
                 $limit: 200
             }
+        }).catch(err => {
+            // console.log(err.params.query);
         });
         let outArray = [];
         outArray = outArray.concat(features.data.map(x => x.features));
@@ -44,7 +53,9 @@ class Service {
         try {
             const modules = await facilityModuleService.find({
                 query: {
-                    _id: { $in: [...new Set(result)] },
+                    _id: {
+                        $in: [...new Set(result)]
+                    },
                     $limit: 25
                 }
             });
@@ -203,7 +214,9 @@ class Service {
     }
 
     remove(id, params) {
-        return Promise.resolve({ id });
+        return Promise.resolve({
+            id
+        });
     }
 
     setup(app) {

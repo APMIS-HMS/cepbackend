@@ -42,6 +42,7 @@ const resolvers = {
           }
           patient.age = age;
           patient.personDetails = person;
+          patient.personDetails.clientsNo = patient.clientsNo;
         }
       }
 
