@@ -19,7 +19,6 @@ class Service {
     }
 
     async create(data, params) {
-        console.log(data);
 
         let cons = this.app.channel('authenticated').connections;
         const channelNamesService = this.app.service('temporal-chanel-names');
@@ -40,7 +39,7 @@ class Service {
 
         //let facilityChannels = getAllChannels.data[0];
 
-        if (consFilter.length > 0) {
+        if (consFilter.length > 0 && dept !== undefined) {
             loggedInConnection = consFilter[0];
             let channel = this.app.channel(facilityId);
             let authenticatedChannel = this.app.channel('authenticated');
@@ -53,7 +52,10 @@ class Service {
                 //channelNames.push(element.name);
                 let departmentChannel = this.app.channel(element.name);
                 departmentChannel.join(loggedInConnection);
-                channelObj.push({id:element._id,name:element.name});
+                channelObj.push({
+                    id: element._id,
+                    name: element.name
+                });
                 let units = element.units;
                 if (units.length > 0) {
                     //Create Unit channel
@@ -61,11 +63,17 @@ class Service {
                         //channelNames.push(unit.name);
                         let unitChannel = this.app.channel(unit.name);
                         unitChannel.join(loggedInConnection);
-                        channelObj.push({id:unit._id,name:unit.name});
+                        channelObj.push({
+                            id: unit._id,
+                            name: unit.name
+                        });
                     });
                 }
             });
-            channelObj.push({id:data._id,name:data.facilityName});
+            channelObj.push({
+                id: data._id,
+                name: data.facilityName
+            });
 
             // Filter all proposed channels
             // if (facilityChannels.channels.length > 0) {
@@ -106,7 +114,7 @@ class Service {
             //         console.log('************Unsaved roomsppppppppppp***********\n', newChannels);
 
             //     } else {
-            //         //Return default channels just incase logged in user doesn't have a role 
+            //         //Return default channels just incase logged in user doesn't have a role
             //         let result = this.app.channels;
             //         return Promise.resolve({ result });
             //     }
@@ -144,7 +152,7 @@ class Service {
             //     if (facilityId !== undefined) {
             //         console.log('******************addChannelNames******************\n', addChannelNames);
             //         let addChannels = await channelNamesService.create(addChannelNames);
-                    
+
             //         let allChannel;
             //         // Add user to all channels that concerns the user
             //         channelNames.forEach(e => {
@@ -169,14 +177,16 @@ class Service {
     }
 
     remove(id, params) {
-        return Promise.resolve({ id });
+        return Promise.resolve({
+            id
+        });
     }
     setup(app) {
         this.app = app;
     }
 }
 
-module.exports = function (options) {
+module.exports = function(options) {
     return new Service(options);
 };
 
