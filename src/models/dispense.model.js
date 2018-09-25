@@ -10,6 +10,7 @@ module.exports = function(app) {
     const { Schema } = mongooseClient;
     const dispense = new Schema({
         facilityId: { type: Schema.Types.ObjectId, required: true },
+        storeId: { type: Schema.Types.ObjectId, required: false },
         prescription: prescriptionItem,
         nonPrescription: nonPrescriptionItem,
         isPrescription: { type: Boolean, 'default': false }
