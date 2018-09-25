@@ -22,7 +22,9 @@ class Service {
         $sort: { updatedAt: -1 }
       }
     });
+    console.log(awaitBills);
     let results = await facilityItemService.create(awaitBills.data, {});
+    console.log(results);
     return fixedGroupExisting(results);
   }
 

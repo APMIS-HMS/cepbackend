@@ -22,6 +22,9 @@ class Service {
     let expiredProduct = await inventoriesService.find({
       query: {
         storeId: id,
+        availableQuantity: {
+          $gt: 0
+        },
         $limit: false
       }
     });

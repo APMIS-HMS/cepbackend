@@ -7,16 +7,16 @@ class Service {
     }
 
     async find(params) {
-        let drugInteractionUri = 'https://rxnav.nlm.nih.gov/REST/interaction/interaction.json?rxcui=' + params.query.rxcui;
+        let drugInteractionUri = 'https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=' + params.query.rxcuis.join('+');
         const options = {
             method: 'GET',
             uri: drugInteractionUri
         };
         try {
-            if (params.query.rxcui !== undefined) {
+            if (params.query.rxcuis !== undefined) {
                 let interactions = await request(options);
                 let parsed = JSON.parse(interactions);
-                return jsend.success(parsed.interactionTypeGroup);
+                return jsend.success(parsed.fullInteractionTypeGroup);
             } else {
                 return jsend.success({});
             }
