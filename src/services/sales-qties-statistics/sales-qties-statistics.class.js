@@ -22,35 +22,56 @@ class Service {
         $limit: false
       }
     });
-    //get all products in a particular store
-    let products = await inventoriesService.find({
-      query: {
-        storeId: id,
-        $limit: false
+    let products = {};
+    if (isNaN(id) !== true) {
+      if (params.query.storeId !== undefined) {
+        //get all products in a particular store
+        products = await inventoriesService.find({
+          query: {
+            storeId: params.query.storeId,
+            $limit: false
+          }
+        });
+      } else if (params.query.facilityId !== undefined) {
+        //get all products in a particular store
+        products = await inventoriesService.find({
+          query: {
+            facilityId: params.query.facilityId,
+            $limit: false
+          }
+        });
       }
-    });
-    let batchTxns = [];
-    products.data.map(x => x.transactions.map(y => {
-      if (y.batchTransactions.length > 0) {
-        batchTxns.push.apply(batchTxns, y.batchTransactions);
-      }
-    }));
-    batchTxns.map(x => transactionTypes.data.map(y => {
-      if (y._id.toString() === x.inventorytransactionTypeId.toString()) {
-        x.inventorytransactionType = y.name;
-        return x;
-      }
-    }));
-
-    const dispenseItems = batchTxns.filter(x => {
-      if (x.inventorytransactionType === "dispense" && differenceInCalendarDays(new Date(), new Date(x.updatedAt)) <= params.query.days) {
-        return x;
-      }
-    });
-    return jsend.success({
-      no_of_txns: dispenseItems.length
-    });
-
+      
+      let batchTxns = [];
+      products.data.map(x => x.transactions.map(y => {
+        if (y.batchTransactions.length > 0) {
+          batchTxns.push.apply(batchTxns, y.batchTransactions);
+        }
+      }));
+      batchTxns.map(x => transactionTypes.data.map(y => {
+        if (y._id.toString() === x.inventorytransactionTypeId.toString()) {
+          x.inventorytransactionType = y.name;
+          return x;
+        }
+      }));
+      let sum = 0;
+      const dispenseItems = batchTxns.filter(x => {
+        if (x.inventorytransactionType === "dispense" && differenceInCalendarDays(new Date(), new Date(x.updatedAt)) <= id) {
+          sum += x.price;
+          return x;
+        }
+      });
+      return jsend.success({
+        txns_no: dispenseItems.length,
+        total_txns_sum: (isNaN(sum) === true) ? 0 : sum
+      });
+    } else {
+      return jsend.error({
+        code: 400,
+        message: 'Invalid *days parameter',
+        data: false
+      });
+    }
   }
 
   create(data, params) {

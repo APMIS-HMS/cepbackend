@@ -8,6 +8,7 @@ const batchTransactionSchema = new Schema({
   postQuantity: { type: Number, required: true }, // After Operation.
   quantity: { type: Number, require: true }, // Operational qty.
   comment: { type: String, require: false },
+  price: { type: Number, require: false },
   referenceId: { type: String, required: false }, // Dispense id, Transfer id...
   referenceService: { type: String, required: false }, // Dispense, Transfer...
   inventorytransactionTypeId: { type: Schema.Types.ObjectId, require: false },
