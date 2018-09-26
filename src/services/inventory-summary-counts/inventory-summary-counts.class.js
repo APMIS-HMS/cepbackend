@@ -63,7 +63,7 @@ class Service {
       total: products.data.length,
       batches: productTransactions.length,
       colour:"#008000",
-      url: '/'
+      url: 'inventory-count-details'
     },
     {
       key:'Expired Items',
@@ -72,20 +72,20 @@ class Service {
       url: '/'
     },
     {
-      key:'About to expired',
+      key:'About to Expired',
       batches: aboutExpiredProductCounter,
       colour:"#D95B5B",
       url: '/'
     },
     {
       key:'Require Reorder',
-      batches: aboutOutOfOrderProductCounter,
+      total: aboutOutOfOrderProductCounter,
       colour:"#A1638F",
       url: '/'
     },
     {
       key:'Out of Stock',
-      batches: outOfOrderProductCounter,
+      total: outOfOrderProductCounter,
       colour:"#581845",
       url: '/'
     });
