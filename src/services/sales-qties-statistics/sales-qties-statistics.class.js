@@ -15,6 +15,7 @@ class Service {
   }
 
   async get(id, params) {
+    console.log(params);
     const inventoriesService = this.app.service('inventories');
     const inventoryTxnService = this.app.service('inventory-transaction-types');
     let transactionTypes = await inventoryTxnService.find({

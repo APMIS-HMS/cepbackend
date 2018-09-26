@@ -16,13 +16,18 @@ class Service {
 
   async get(id, params) {
     const inventoriesService = this.app.service('inventories');
+    const salesService = this.app.service('sales-qties-statistics');
     let expiredProductCounter = 0;
     let aboutExpiredProductCounter = 0;
     let outOfOrderProductCounter = 0;
     let aboutOutOfOrderProductCounter = 0;
     let products = await inventoriesService.find({
       query: {
-        storeId: id,
+        $or: [{
+          storeId: params.query.storeId
+        }, {
+          facilityId: params.query.facilityId
+        }],
         availableQuantity: {
           $gt: 0
         },
@@ -34,7 +39,7 @@ class Service {
       productTransactions.push(z);
     }));
 
-    productTransactions.map(x => {      
+    productTransactions.map(x => {
       let diffInDays = differenceInDays(new Date(x.expiryDate), new Date());
       if (diffInDays <= 15 && diffInDays >= 0) {
         aboutExpiredProductCounter += 1;
@@ -57,39 +62,42 @@ class Service {
       }
     });
 
+    const sales = await salesService.get(id, {
+      query: {
+        facilityId: params.query.facilityId,
+        storeId: params.query.storeId
+      }
+    });
+
     let result = [];
     result.push({
-      key:'Inventory',
+      key: 'Inventory',
       total: products.data.length,
       batches: productTransactions.length,
-      colour:"#008000",
+      colour: "#008000",
       url: 'inventory-count-details'
-    },
-    {
-      key:'Expired Items',
+    }, {
+      key: 'Expired Items',
       batches: expiredProductCounter,
-      colour:"#FF0000",
+      colour: "#FF0000",
       url: '/'
-    },
-    {
-      key:'About to Expired',
+    }, {
+      key: 'About to Expired',
       batches: aboutExpiredProductCounter,
-      colour:"#D95B5B",
+      colour: "#D95B5B",
       url: '/'
-    },
-    {
-      key:'Require Reorder',
+    }, {
+      key: 'Require Reorder',
       total: aboutOutOfOrderProductCounter,
-      colour:"#A1638F",
-      url: '/'
-    },
-    {
-      key:'Out of Stock',
+      colour: "#A1638F",
+      url: 'out-of-stock-count-details?isReorder/1'
+    }, {
+      key: 'Out of Stock',
       total: outOfOrderProductCounter,
-      colour:"#581845",
-      url: '/'
+      colour: "#581845",
+      url: 'out-of-stock-count-details?isReorder/0'
     });
-    
+
 
     return jsend.success(result);
   }
