@@ -57,29 +57,39 @@ class Service {
       }
     });
 
-    let result = {
-      inventories: {
-        total: products.data.length,
-        batches: productTransactions.length,
-        url: '/'
-      },
-      expired: {
-        total: expiredProductCounter,
-        url: '/'
-      },
-      about_to_expire: {
-        total: aboutExpiredProductCounter,
-        url: '/'
-      },
-      near_reorder_level: {
-        total: aboutOutOfOrderProductCounter,
-        url: '/'
-      },
-      past_reorder_level: {
-        total: outOfOrderProductCounter,
-        url: '/'
-      }
-    }
+    let result = [];
+    result.push({
+      key:'Inventory',
+      total: products.data.length,
+      batches: productTransactions.length,
+      colour:"#008000",
+      url: '/'
+    },
+    {
+      key:'Expired Items',
+      batches: expiredProductCounter,
+      colour:"#FF0000",
+      url: '/'
+    },
+    {
+      key:'About to expired',
+      batches: aboutExpiredProductCounter,
+      colour:"#D95B5B",
+      url: '/'
+    },
+    {
+      key:'Require Reorder',
+      batches: aboutOutOfOrderProductCounter,
+      colour:"#A1638F",
+      url: '/'
+    },
+    {
+      key:'Out of Stock',
+      batches: outOfOrderProductCounter,
+      colour:"#581845",
+      url: '/'
+    });
+    
 
     return jsend.success(result);
   }
