@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const jsend = require('jsend');
+const differenceInDays = require('date-fns/difference_in_days');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -19,7 +20,7 @@ class Service {
     let aboutExpiredProductCounter = 0;
     let outOfOrderProductCounter = 0;
     let aboutOutOfOrderProductCounter = 0;
-    let expiredProduct = await inventoriesService.find({
+    let products = await inventoriesService.find({
       query: {
         storeId: id,
         availableQuantity: {
@@ -28,44 +29,56 @@ class Service {
         $limit: false
       }
     });
-    console.log(expiredProduct);
-    const currentDate = new Date();
-    for (let index = 0; index < expiredProduct.data.length; index++) {
-      const element = expiredProduct.data[index];
-      for (let indx = 0; indx < element.transactions.length; indx++) {
-        const element2 = element.transactions[indx];
-        let productExpiryDate = new Date(element2.expiryDate);
-        if (productExpiryDate.getFullYear() <= currentDate.getFullYear()) {
-          if (productExpiryDate.getMonth() < currentDate.getMonth()) {
-            expiredProductCounter += 1;
-          } else if (productExpiryDate.getMonth() == currentDate.getMonth()) {
-            if (productExpiryDate.getFullYear() < currentDate.getFullYear()) {
-              expiredProductCounter += 1;
-            } else if (productExpiryDate.getFullYear() == currentDate.getFullYear()) {
-              aboutExpiredProductCounter += 1;
-            }
-          }
-        }
+    let productTransactions = [];
+    products.data.map(x => x.transactions.map(z => {
+      productTransactions.push(z);
+    }));
+
+    productTransactions.map(x => {      
+      let diffInDays = differenceInDays(new Date(x.expiryDate), new Date());
+      if (diffInDays <= 15 && diffInDays >= 0) {
+        aboutExpiredProductCounter += 1;
+      } else if (diffInDays < 0) {
+        expiredProductCounter += 1;
       }
-      if (element.reOrderSizeId !== undefined) {
-        let filter = element.productObject.productConfigObject.find(x => x._id !== undefined && x._id.toString() === element.reOrderSizeId.toString());
+    });
+
+    products.data.map(x => {
+      if (x.reOrderSizeId !== undefined) {
+        const filter = x.productObject.productConfigObject.find(y => y._id !== undefined && y._id.toString() === x.reOrderSizeId.toString());
         if (filter !== undefined) {
-          let size = (filter.size) * element.reOrderLevel;
-          if (size > element.availableQuantity) {
+          let size = (filter.size) * x.reOrderLevel;
+          if (size > x.availableQuantity) {
             outOfOrderProductCounter += 1;
-          } else if (size === element.availableQuantity) {
+          } else if ((size + (size / 4)) <= x.availableQuantity && size === x.availableQuantity) {
             aboutOutOfOrderProductCounter += 1;
           }
-
         }
       }
-    }
+    });
 
     let result = {
-      expired: expiredProductCounter,
-      about_to_expire: aboutExpiredProductCounter,
-      near_reorder_level: aboutOutOfOrderProductCounter,
-      past_reorder_level: outOfOrderProductCounter
+      inventories: {
+        total: products.data.length,
+        batches: productTransactions.length,
+        url: '/'
+      },
+      expired: {
+        total: expiredProductCounter,
+        url: '/'
+      },
+      about_to_expire: {
+        total: aboutExpiredProductCounter,
+        url: '/'
+      },
+      near_reorder_level: {
+        total: aboutOutOfOrderProductCounter,
+        url: '/'
+      },
+      past_reorder_level: {
+        total: outOfOrderProductCounter,
+        url: '/'
+      }
     }
 
     return jsend.success(result);
