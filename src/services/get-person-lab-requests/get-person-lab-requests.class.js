@@ -1,18 +1,21 @@
 /* eslint-disable no-unused-vars */
 class Service {
-  constructor(options) {
+  constructor (options) {
     this.options = options || {};
   }
 
-  setup(app) {
+  setup(app){
     this.app = app;
   }
 
-  async find(params) {
+  find (params) {
+    return Promise.resolve([]);
+  }
 
+  async get (id, params) {
     const patientService = this.app.service('patients');
-    const appointmentService = this.app.service('appointments');
-
+    const labService = this.app.service('laboratory-requests');
+    
     let patientIds = await patientService.find({
       query: {
         personId: params.query.personId,
@@ -20,22 +23,17 @@ class Service {
       }
     });
     let strPatients = [];
-
-    strPatients.push.apply(strPatients, patientIds.data);
-
-    let appointments = await appointmentService.find({
+    strPatients.push.apply(strPatients,patientIds.data);
+        
+    let labRequest = await labService.find({
       query: {
         patientId: strPatients
       }
     });
-    return appointments;
+    return labRequest;
   }
 
-  get(id, params) {
-
-  }
-
-  create(data, params) {
+  create (data, params) {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current, params)));
     }
@@ -43,18 +41,16 @@ class Service {
     return Promise.resolve(data);
   }
 
-  update(id, data, params) {
+  update (id, data, params) {
     return Promise.resolve(data);
   }
 
-  patch(id, data, params) {
+  patch (id, data, params) {
     return Promise.resolve(data);
   }
 
-  remove(id, params) {
-    return Promise.resolve({
-      id
-    });
+  remove (id, params) {
+    return Promise.resolve({ id });
   }
 }
 

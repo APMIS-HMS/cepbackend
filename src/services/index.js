@@ -300,6 +300,7 @@ const drugInteractions = require('./drug-interactions/drug-interactions.service.
 const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
 const batchTransactions = require('./batch-transactions/batch-transactions.service.js');
 const outOfStockCountDetails = require('./out-of-stock-count-details/out-of-stock-count-details.service.js');
+const getPersonLabRequests = require('./get-person-lab-requests/get-person-lab-requests.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -517,4 +518,5 @@ module.exports = function (app) {
   app.configure(outOfStockCountDetails);
   app.configure(salesQtiesStatistics);
   app.configure(batchTransactions);
+  app.configure(getPersonLabRequests);
 };
