@@ -33,14 +33,24 @@ class Service {
       if (x.reOrderSizeId !== undefined) {
         const filter = x.productObject.productConfigObject.find(y => y._id !== undefined && y._id.toString() === x.reOrderSizeId.toString());
         if (filter !== undefined) {
-          let size = (filter.size) * x.reOrderLevel;
-          if (id === 0) {
+          let size = (filter.size) * x.reorder;
+          if (id.toString() === '0') {
             if (size > x.availableQuantity) {
-              reorders.push(x.productObject);
+              x.productObject.availableQuantity = x.availableQuantity
+              x.productObject.reorderValue = x.reorder;
+              const value = JSON.parse(JSON.stringify(x.productObject));
+              delete value.productConfigObject;
+              value.productConfig = filter;
+              reorders.push(value);
             }
           } else {
-            if ((size + (size / 4)) <= x.availableQuantity && size === x.availableQuantity) {
-              reorders.push(x.productObject);
+            if ((size + (size / 4)) >= x.availableQuantity && size <= x.availableQuantity) {
+              x.productObject.availableQuantity = x.availableQuantity
+              x.productObject.reorderValue = x.reorder;
+              const value = JSON.parse(JSON.stringify(x.productObject));
+              delete value.productConfigObject;
+              value.productConfig = filter;
+              reorders.push(value);
             }
           }
         }

@@ -52,10 +52,10 @@ class Service {
       if (x.reOrderSizeId !== undefined) {
         const filter = x.productObject.productConfigObject.find(y => y._id !== undefined && y._id.toString() === x.reOrderSizeId.toString());
         if (filter !== undefined) {
-          let size = (filter.size) * x.reOrderLevel;
+          let size = (filter.size) * x.reorder;
           if (size > x.availableQuantity) {
             outOfOrderProductCounter += 1;
-          } else if ((size + (size / 4)) <= x.availableQuantity && size === x.availableQuantity) {
+          } else if ((size + (size / 4)) >= x.availableQuantity && size <= x.availableQuantity) {
             aboutOutOfOrderProductCounter += 1;
           }
         }
@@ -80,22 +80,32 @@ class Service {
       key: 'Expired Items',
       batches: expiredProductCounter,
       colour: "#FF0000",
-      url: '/'
+      url: 'inventory-expired-product-details'
     }, {
       key: 'About to Expired',
       batches: aboutExpiredProductCounter,
       colour: "#D95B5B",
-      url: '/'
+      url: 'inventory-about-to-expire-product-details?numberOfDays=' + id
     }, {
       key: 'Require Reorder',
       total: aboutOutOfOrderProductCounter,
       colour: "#A1638F",
-      url: 'out-of-stock-count-details?isReorder/1'
+      url: 'out-of-stock-count-details/1'
     }, {
       key: 'Out of Stock',
       total: outOfOrderProductCounter,
       colour: "#581845",
-      url: 'out-of-stock-count-details?isReorder/0'
+      url: 'out-of-stock-count-details/0'
+    }, {
+      key: 'Transaction',
+      total: sales.data.txns_no,
+      colour: "#ABDCA2",
+      url: '/'
+    }, {
+      key: 'Revenue',
+      total: sales.data.total_txns_sum,
+      colour: "#6A9A61",
+      url: '/'
     });
 
 
