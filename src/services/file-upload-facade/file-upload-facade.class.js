@@ -28,7 +28,7 @@ class Service {
         let facilityId = data.facilityId;
         let fileType = data.fileType;
         let docName = data.docName;
-        let id = data.patientId;
+        let id = data.id;
 
         var rawdata = data.base64;
         var matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
@@ -37,23 +37,13 @@ class Service {
         var buffer = new Buffer(matches[2], 'base64');
         const container = data.container;
 
-        //Get the facility. This can be done within the context it is to be used but
-        // 'await' clause throws exception within a promise. Since the clause by itself is a promise, no need
-        // to bother so much.
-        let getFacility = await facilityService.get(facilityId);
-
-        //Get the patient object from DB outside the promise
-        let getPatient = await facilityService.get(id);
-
-        //Get the patient object from DB outside the promise
-
-        //let getPerson = await peoplesService.get(id);
-
-
         var ext = fileType.split('/');
         if(data.container !== null){
             fileName = id + '_'+docType+ '_' + Date.now() +'.'+ ext[1];
-
+            //Get facility
+            let getFacility = facilityService.get(facilityId);
+            //Get Person
+            let getProfile = peoplesService.get(id);
             return new Promise(function (resolve, reject) {
                 try {
                     blobSvc.createBlockBlobFromText(container, fileName,buffer,{ contentType: contentType }, (error,result) => {
@@ -62,14 +52,8 @@ class Service {
                             if(error){
                                 reject(error);
                             }else{
-                                //Update facilty collection locally
-                                if(data.container === 'logocontainer'){
-                                    getFacility.logoObject = file;
-                                    let updateFacilityLogo = facilityService.update(facilityId, getFacility);
-                                    result.data = updateFacilityLogo;
-                                } // Insert ino docupload collection locally
-                                else if(data.container === 'personcontainer'){
-                                    let person =  {
+                                if(data.container === 'personcontainer'){
+                                    let doc = {
                                         patientId: id,
                                         facilityId: facilityId,
                                         docType: docType,
@@ -78,16 +62,37 @@ class Service {
                                         fileType: fileType
                                     };
                     
-                                    let createDoc = docUploadService.create(person);
+                                    let createDoc = docUploadService.create(doc);
+                                    // return createDoc; 
                                     result.data = createDoc;
-                                    console.log('\n====result=====\n',result);
-                                }
-                                //Updata person record locally
-                                else if(data.container === 'personprofilecontainer'){
-                                    getPatient.image = file;
-                                    let updatePerson = peoplesService.update(id,getPatient);
+                                    //return jsend.success(result); 
+                                
+                                }else if(data.container === 'logocontainer'){
+                                    
+                                    var promise = new Promise(function(resolve, reject) {
+                                        if(getFacility._id !== undefined){
+                                            resolve(getFacility);
+                                        }
+                                        else {
+                                            reject(Error('Failed'));
+                                        }
+                                    });
+                                    promise.then(function(result){
+                                        getFacility.logoObject = file;
+                                        let facUpdateLogo = facilityService.update(facilityId,getFacility);
 
-                                    result.data = updatePerson;
+                                        if(facUpdateLogo !== undefined){
+                                            //console.log('====facUpdateLogo===\n',facUpdateLogo);
+                                        }
+                                    });
+                                    
+                                }
+                                else if(data.container === 'personprofilecontainer'){
+                                    let profile = {};
+                                    
+                                    if(getProfile._id !== undefined){
+                                        //console.log('====getProfile=====\n',getProfile);
+                                    }
                                 }
                                 resolve(result);
                             }
