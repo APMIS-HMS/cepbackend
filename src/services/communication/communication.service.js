@@ -4,18 +4,18 @@ const hooks = require('./communication.hooks');
 
 module.exports = function (app) {
   
-  const paginate = app.get('paginate');
+    const paginate = app.get('paginate');
 
-  const options = {
-    paginate,
-    app:app
-  };
+    const options = {
+        paginate,
+        app:app
+    };
 
-  // Initialize our service with any options it requires
-  app.use('/communication', createService(options));
+    // Initialize our service with any options it requires
+    app.use('/communication', createService(options));
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('communication');
+    // Get our initialized service so that we can register hooks
+    const service = app.service('communication');
 
-  service.hooks(hooks);
+    service.hooks(hooks);
 };
