@@ -299,6 +299,10 @@ const clinicCharts = require('./clinic-charts/clinic-charts.service.js');
 const drugInteractions = require('./drug-interactions/drug-interactions.service.js');
 const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
 const batchTransactions = require('./batch-transactions/batch-transactions.service.js');
+const inventoryCountDetails = require('./inventory-count-details/inventory-count-details.service.js');
+const inventoryExpiredProductDetails = require('./inventory-expired-product-details/inventory-expired-product-details.service.js');
+const inventoryAboutToExpireProductDetails = require('./inventory-about-to-expire-product-details/inventory-about-to-expire-product-details.service.js');
+const inventoryBatchTransactionDetails = require('./inventory-batch-transaction-details/inventory-batch-transaction-details.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -513,4 +517,8 @@ module.exports = function(app) {
     app.configure(clinicCharts);
     app.configure(drugInteractions);
     app.configure(inventorySummaryCounts);
+    app.configure(inventoryCountDetails);
+    app.configure(inventoryExpiredProductDetails);
+    app.configure(inventoryAboutToExpireProductDetails);
+    app.configure(inventoryBatchTransactionDetails);
 };
