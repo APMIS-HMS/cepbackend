@@ -106,13 +106,13 @@ class Service {
       total: sales.data.txns_no,
       hex: "#ABDCA2",
       rgb:"rgb(171,220,162)",
-      url: '/'
+      url: 'inventory-batch-transaction-details'
     }, {
       key: 'Revenue',
       total: sales.data.total_txns_sum,
       hex: "#6A9A61",
       rgb:"rgb(106,154,97)",
-      url: '/'
+      url: 'inventory-batch-transaction-details'
     });
 
 
