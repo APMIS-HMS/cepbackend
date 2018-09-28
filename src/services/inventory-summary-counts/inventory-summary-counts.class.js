@@ -74,38 +74,45 @@ class Service {
       key: 'Inventory',
       total: products.data.length,
       batches: productTransactions.length,
-      colour: "#008000",
+      hex: "#008000",
+      rgb:"rgb(0,128,0)",
       url: 'inventory-count-details'
     }, {
       key: 'Expired Items',
       batches: expiredProductCounter,
-      colour: "#FF0000",
+      hex: "#FF0000",
+      rgb:"rgb(255,0,0)",
       url: 'inventory-expired-product-details'
     }, {
       key: 'About to Expired',
       batches: aboutExpiredProductCounter,
-      colour: "#D95B5B",
+      hex: "#D95B5B",
+      rgb:"rgb(217,91,91)",
       url: 'inventory-about-to-expire-product-details?numberOfDays=' + id
     }, {
       key: 'Require Reorder',
       total: aboutOutOfOrderProductCounter,
-      colour: "#A1638F",
+      hex: "#A1638F",
+      rgb:"rgb(161,99,143)",
       url: 'out-of-stock-count-details/1'
     }, {
       key: 'Out of Stock',
       total: outOfOrderProductCounter,
-      colour: "#581845",
+      hex: "#581845",
+      rgb:"rgb(88,24,69)",
       url: 'out-of-stock-count-details/0'
     }, {
       key: 'Transaction',
       total: sales.data.txns_no,
-      colour: "#ABDCA2",
-      url: '/'
+      hex: "#ABDCA2",
+      rgb:"rgb(171,220,162)",
+      url: 'inventory-batch-transaction-details'
     }, {
       key: 'Revenue',
       total: sales.data.total_txns_sum,
-      colour: "#6A9A61",
-      url: '/'
+      hex: "#6A9A61",
+      rgb:"rgb(106,154,97)",
+      url: 'inventory-batch-transaction-details'
     });
 
 
