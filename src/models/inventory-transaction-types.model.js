@@ -6,8 +6,8 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const inventoryTransactionTypes = new Schema({
-    name: { type: String, required: true },
-    inorout: { type: String, required: true }
+    name: { type: String, required: [true,'Name is required'] },
+    inorout: { type: String, required: [true, 'inorout field is required'] }
   }, {
     timestamps: true
   });

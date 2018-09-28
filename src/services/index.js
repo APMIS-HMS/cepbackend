@@ -521,4 +521,6 @@ module.exports = function(app) {
     app.configure(inventoryExpiredProductDetails);
     app.configure(inventoryAboutToExpireProductDetails);
     app.configure(inventoryBatchTransactionDetails);
+    app.configure(salesQtiesStatistics);
+    app.configure(batchTransactions);
 };
