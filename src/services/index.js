@@ -303,6 +303,7 @@ const inventoryCountDetails = require('./inventory-count-details/inventory-count
 const inventoryExpiredProductDetails = require('./inventory-expired-product-details/inventory-expired-product-details.service.js');
 const inventoryAboutToExpireProductDetails = require('./inventory-about-to-expire-product-details/inventory-about-to-expire-product-details.service.js');
 const inventoryBatchTransactionDetails = require('./inventory-batch-transaction-details/inventory-batch-transaction-details.service.js');
+const fileUploadFacade = require('./file-upload-facade/file-upload-facade.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -523,4 +524,5 @@ module.exports = function(app) {
     app.configure(inventoryBatchTransactionDetails);
     app.configure(salesQtiesStatistics);
     app.configure(batchTransactions);
+    app.configure(fileUploadFacade);
 };
