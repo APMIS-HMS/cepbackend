@@ -81,7 +81,7 @@ class Service {
                                         patientId: id,
                                         facilityId: facilityId,
                                         docType: docType,
-                                        docName: docName,
+                                        docName: fileName,
                                         docUrl: file,
                                         fileType: mimeType
                                     };
