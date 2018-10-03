@@ -87,7 +87,7 @@ class Service {
                         };
                         let payload = JSON.stringify(doc);
 
-                        createDoc = await docUploadService.create(payload); 
+                       // createDoc = await docUploadService.create(payload); 
                         
                         return jsend.success(doc); 
 
