@@ -72,46 +72,128 @@ class Service {
     let result = [];
     result.push({
       key: 'Inventory',
-      total: products.data.length,
-      batches: productTransactions.length,
+      values: [{
+          key: 'Products',
+          value: products.data.length,
+        },
+        {
+          key: 'Batches',
+          value: productTransactions.length,
+        }
+      ],
+      method: 'find',
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#008000",
-      rgb:"rgb(0,128,0)",
+      rgb: "rgb(0,128,0)",
       url: 'inventory-count-details'
     }, {
       key: 'Expired Items',
-      batches: expiredProductCounter,
+      values: [
+      {
+        key: 'Batches',
+        value: expiredProductCounter,
+      }
+    ],
+    method: 'find',
+    query: {
+      params: {
+        storeId: params.query.storeId
+      }
+    },
       hex: "#FF0000",
-      rgb:"rgb(255,0,0)",
+      rgb: "rgb(255,0,0)",
       url: 'inventory-expired-product-details'
     }, {
       key: 'About to Expired',
-      batches: aboutExpiredProductCounter,
+      values: [
+        {
+          key: 'Batches',
+          value: aboutExpiredProductCounter,
+        }
+      ],
+      method: 'find',
+      query: {
+        params: {
+          numberOfDays:id,
+          storeId: params.query.storeId
+        }
+      },
       hex: "#D95B5B",
-      rgb:"rgb(217,91,91)",
-      url: 'inventory-about-to-expire-product-details?numberOfDays=' + id
+      rgb: "rgb(217,91,91)",
+      url: 'inventory-about-to-expire-product-details'
     }, {
       key: 'Require Reorder',
-      total: aboutOutOfOrderProductCounter,
+      values: [
+        {
+          key: 'Batches',
+          value: aboutOutOfOrderProductCounter,
+        }
+      ],
+      method: 'get',
+      getId:1,
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#A1638F",
-      rgb:"rgb(161,99,143)",
-      url: 'out-of-stock-count-details/1'
+      rgb: "rgb(161,99,143)",
+      url: 'out-of-stock-count-details'
     }, {
       key: 'Out of Stock',
-      total: outOfOrderProductCounter,
+      values: [
+        {
+          key: 'Batches',
+          value: outOfOrderProductCounter,
+        }
+      ],
+      method: 'get',
+      getId:0,
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#581845",
-      rgb:"rgb(88,24,69)",
-      url: 'out-of-stock-count-details/0'
+      rgb: "rgb(88,24,69)",
+      url: 'out-of-stock-count-details'
     }, {
       key: 'Transaction',
-      total: sales.data.txns_no,
+      values: [
+        {
+          key: 'Transaction',
+          value: sales.data.txns_no,
+        }
+      ],
+      method: 'find',
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#ABDCA2",
-      rgb:"rgb(171,220,162)",
+      rgb: "rgb(171,220,162)",
       url: 'inventory-batch-transaction-details'
     }, {
       key: 'Revenue',
-      total: sales.data.total_txns_sum,
+      values: [
+        {
+          key: 'Amount',
+          value: sales.data.total_txns_sum,
+        }
+      ],
+      method: 'find',
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#6A9A61",
-      rgb:"rgb(106,154,97)",
+      rgb: "rgb(106,154,97)",
       url: 'inventory-batch-transaction-details'
     });
 
