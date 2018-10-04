@@ -190,7 +190,7 @@ class Service {
             reader.readAsDataURL(file);
             reader.onload = (res) => {
                 console.log('************Result*************', res);
-                return jsend.success({data:reader.result});
+                return jsend.success(reader.result);
 
             };
             reader.onerror = function (error) {
