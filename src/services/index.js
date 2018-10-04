@@ -304,6 +304,7 @@ const inventoryExpiredProductDetails = require('./inventory-expired-product-deta
 const inventoryAboutToExpireProductDetails = require('./inventory-about-to-expire-product-details/inventory-about-to-expire-product-details.service.js');
 const inventoryBatchTransactionDetails = require('./inventory-batch-transaction-details/inventory-batch-transaction-details.service.js');
 const fileUploadFacade = require('./file-upload-facade/file-upload-facade.service.js');
+const getPersonLabRequest = require('./get-person-lab-requests/get-person-lab-requests.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -525,4 +526,5 @@ module.exports = function(app) {
     app.configure(salesQtiesStatistics);
     app.configure(batchTransactions);
     app.configure(fileUploadFacade);
+    app.configure(getPersonLabRequest);
 };
