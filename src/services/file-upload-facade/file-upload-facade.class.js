@@ -96,7 +96,7 @@ class Service {
                             patientId: data.id,
                             facilityId: facilityId,
                             docType: docType,
-                            //docName: fileName,
+                            docName: fileName,
                             docUrl: file,
                             fileType: mimeType
                         };
