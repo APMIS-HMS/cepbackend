@@ -305,6 +305,7 @@ const inventoryAboutToExpireProductDetails = require('./inventory-about-to-expir
 const inventoryBatchTransactionDetails = require('./inventory-batch-transaction-details/inventory-batch-transaction-details.service.js');
 const fileUploadFacade = require('./file-upload-facade/file-upload-facade.service.js');
 const azureBlob = require('./azure-blob/azure-blob.service.js');
+const getPersonLabRequest = require('./get-person-lab-requests/get-person-lab-requests.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -527,4 +528,5 @@ module.exports = function (app) {
   app.configure(batchTransactions);
   app.configure(fileUploadFacade);
   app.configure(azureBlob);
+  app.configure(getPersonLabRequest);
 };

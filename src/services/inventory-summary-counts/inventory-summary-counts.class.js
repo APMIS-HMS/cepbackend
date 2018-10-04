@@ -16,11 +16,16 @@ class Service {
 
   async get(id, params) {
     const inventoriesService = this.app.service('inventories');
-    const salesService = this.app.service('sales-qties-statistics');
+    const inventoryTxnService = this.app.service('inventory-transaction-types');
     let expiredProductCounter = 0;
     let aboutExpiredProductCounter = 0;
     let outOfOrderProductCounter = 0;
     let aboutOutOfOrderProductCounter = 0;
+    let transactionTypes = await inventoryTxnService.find({
+      query: {
+        $limit: false
+      }
+    });
     let products = await inventoriesService.find({
       query: {
         $or: [{
@@ -62,12 +67,47 @@ class Service {
       }
     });
 
-    const sales = await salesService.get(id, {
-      query: {
-        facilityId: params.query.facilityId,
-        storeId: params.query.storeId
-      }
-    });
+    let sales = {};
+    
+    if (isNaN(id) !== true) {
+      let batchTxns = [];
+      products.data.map(x => x.transactions.map(y => {
+        if (y.batchTransactions.length > 0) {
+          batchTxns.push.apply(batchTxns, y.batchTransactions);
+        }
+      }));
+      
+      batchTxns.map(x => transactionTypes.data.map(y => {
+        if (y._id.toString() === x.inventorytransactionTypeId.toString()) {
+          x.inventorytransactionType = y.name;
+          return x;
+        }
+      }));
+      
+      let sum = 0;
+      const dispenseItems = batchTxns.filter(x => {
+        if (x.inventorytransactionType === "dispense" && differenceInDays(new Date(), new Date(x.updatedAt)) <= id) {
+          sum += x.price;
+          return x;
+        }
+      });
+      
+      sales = {
+        txns_no: dispenseItems.length,
+        total_txns_sum: (isNaN(sum) === true) ? 0 : sum
+      };
+    } else {
+      return jsend.error({
+        code: 400,
+        message: 'Invalid *days parameter',
+        data: false
+      });
+    }
+
+
+
+
+
 
     let result = [];
     result.push({
@@ -92,33 +132,29 @@ class Service {
       url: 'inventory-count-details'
     }, {
       key: 'Expired Items',
-      values: [
-      {
+      values: [{
         key: 'Batches',
         value: expiredProductCounter,
-      }
-    ],
-    method: 'find',
-    query: {
-      params: {
-        storeId: params.query.storeId
-      }
-    },
+      }],
+      method: 'find',
+      query: {
+        params: {
+          storeId: params.query.storeId
+        }
+      },
       hex: "#FF0000",
       rgb: "rgb(255,0,0)",
       url: 'inventory-expired-product-details'
     }, {
       key: 'About to Expired',
-      values: [
-        {
-          key: 'Batches',
-          value: aboutExpiredProductCounter,
-        }
-      ],
+      values: [{
+        key: 'Batches',
+        value: aboutExpiredProductCounter,
+      }],
       method: 'find',
       query: {
         params: {
-          numberOfDays:id,
+          numberOfDays: id,
           storeId: params.query.storeId
         }
       },
@@ -127,14 +163,12 @@ class Service {
       url: 'inventory-about-to-expire-product-details'
     }, {
       key: 'Require Reorder',
-      values: [
-        {
-          key: 'Batches',
-          value: aboutOutOfOrderProductCounter,
-        }
-      ],
+      values: [{
+        key: 'Batches',
+        value: aboutOutOfOrderProductCounter,
+      }],
       method: 'get',
-      getId:1,
+      getId: 1,
       query: {
         params: {
           storeId: params.query.storeId
@@ -145,14 +179,12 @@ class Service {
       url: 'out-of-stock-count-details'
     }, {
       key: 'Out of Stock',
-      values: [
-        {
-          key: 'Batches',
-          value: outOfOrderProductCounter,
-        }
-      ],
+      values: [{
+        key: 'Batches',
+        value: outOfOrderProductCounter,
+      }],
       method: 'get',
-      getId:0,
+      getId: 0,
       query: {
         params: {
           storeId: params.query.storeId
@@ -163,12 +195,10 @@ class Service {
       url: 'out-of-stock-count-details'
     }, {
       key: 'Transaction',
-      values: [
-        {
-          key: 'Transaction',
-          value: sales.data.txns_no,
-        }
-      ],
+      values: [{
+        key: 'Transaction',
+        value: sales.txns_no,
+      }],
       method: 'find',
       query: {
         params: {
@@ -180,12 +210,10 @@ class Service {
       url: 'inventory-batch-transaction-details'
     }, {
       key: 'Revenue',
-      values: [
-        {
-          key: 'Amount',
-          value: sales.data.total_txns_sum,
-        }
-      ],
+      values: [{
+        key: 'Amount',
+        value: sales.total_txns_sum,
+      }],
       method: 'find',
       query: {
         params: {
