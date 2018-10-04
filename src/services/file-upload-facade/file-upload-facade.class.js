@@ -96,7 +96,7 @@ class Service {
                             patientId: data.id,
                             facilityId: facilityId,
                             docType: docType,
-                            docName: fileName,
+                            //docName: fileName,
                             docUrl: file,
                             fileType: mimeType
                         };
@@ -109,7 +109,7 @@ class Service {
                         let getFacility = await facilityService.get(facilityId);
                         id = facilityId;
                         let logoObject = {
-                            originalname: docName,
+                            //originalname: docName,
                             encoding: 'base64',
                             mimetype: mimeType,
                             destination: destination,
@@ -132,7 +132,7 @@ class Service {
                         let getProfile = await peopleService.get(id);
                         
                         let profileImageObject = {
-                            originalname: docName,
+                            //originalname: docName,
                             encoding: 'base64',
                             mimetype: mimeType,
                             destination: destination,
