@@ -20,7 +20,7 @@ class Service {
     }
 
     async create(data, params) {
-        console.log('********************888data**********\n',data);
+        
         const facilityService = this.app.service('facilities');
         const peopleService = this.app.service('people');
         const docUploadService = this.app.service('doc-upload');
@@ -39,10 +39,7 @@ class Service {
         let id = data.id;
         let uploadType = data.uploadType;
         
-        let rawdata = this.getBase64(data.base64);
-
-        console.log('****************Rawdata******************\n', rawdata);
-
+        let rawdata = data.base64;
 
         //let rawdata = data.base64;
         let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
@@ -181,37 +178,7 @@ class Service {
     setup(app) {
         this.app = app;
     }
-    /* global FileReader */
-    /* global window */
-    getBase64(file) {
-        let reader = new FileReader();
-        console.log('***************reader************\n',reader);
-        try {
-            reader.readAsDataURL(file);
-            reader.onload = (res) => {
-                console.log('************Result*************', res);
-                return jsend.success(reader.result);
-
-            };
-            reader.onerror = function (error) {
-                console.log('Error: ', error);
-                return jsend.error({
-                    message: 'File convertion process in getBase64 method onError msg',
-                    code: 501,
-                    data: { error: error }
-                });
-
-            };
-        } catch (error) {
-            return jsend.error({
-                message: 'File convertion process in getBase64 method failed',
-                code: 502,
-                data: { error: error }
-            });
-        }
-
-
-    }
+    
 
 }
 
