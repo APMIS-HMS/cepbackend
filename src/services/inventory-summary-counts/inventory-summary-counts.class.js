@@ -91,7 +91,7 @@ class Service {
           return x;
         }
       });
-      console.log(dispenseItems);
+      
       sales = {
         txns_no: dispenseItems.length,
         total_txns_sum: (isNaN(sum) === true) ? 0 : sum
