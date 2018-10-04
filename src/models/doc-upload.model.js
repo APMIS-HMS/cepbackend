@@ -23,7 +23,7 @@ module.exports = function (app) {
     },
     docName: {
       type: String,
-      required: true
+      required: false
     },
     description: {
       type: String,

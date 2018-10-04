@@ -21,7 +21,8 @@ class Service {
 
         const facilityService = this.app.service('facilities');
         const peopleService = this.app.service('people');
-        let docUploadService = this.app.service('doc-upload');
+        const docUploadService = this.app.service('doc-upload');
+        const azureBlobService = this.app.service('azure-blob');
 
         //Get azure Key used for establishing connection to APMIS VM
         const ACCESS_KEY = process.env.AZURE_STORAGE_ACCESS_KEY;
@@ -33,12 +34,13 @@ class Service {
         let facilityId = data.facilityId;
         let mimeType = data.mimeType;
         let docName = data.docName;
-        let id = data.id;
+        let id=data.id;
+        let uploadType = data.uploadType;
 
-        var rawdata = data.base64;
-        var matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
-        var contentType = matches[1];
-        var buffer = new Buffer(matches[2], 'base64');
+        let rawdata = data.base64;
+        let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
+        let contentType = matches[1];
+        let buffer = new Buffer(matches[2], 'base64');
         const container = data.container;
         let destination;
         const user = data.user;
@@ -52,118 +54,108 @@ class Service {
         //Container is the azure db for the file that is to be uploaded
         if (data.container !== null) {
             //Genarate a unique name for the file that is to be uploaded
-            //fileName  = mongoose.Types.ObjectId() +'.'+ ext[1];
+            fileName  = mongoose.Types.ObjectId() +'.'+ ext[1];
 
-            let fileNewName  = mongoose.Types.ObjectId() +'.'+ ext[1];
-            
-            fileName = id + '_' + docType + '_' + fileNewName;
+            //let fileNewName = mongoose.Types.ObjectId() + '.' + ext[1];
+
+            //fileName = data.id + '_' + docType + '_' + fileNewName;
             //Define the destination of the upload file (its actually the path to the image/doc)
-            //destination = user + '/' + id + '/' + fileName;
-            //Get facility.
-            let getFacility = await facilityService.get(facilityId);
-            //Get Person
-            let getProfile = await  peopleService.get(id);
-            let finalResponse={};
-            return new Promise(function (resolve, reject) {
-                try {
-                    //upload file
-                    blobSvc.createBlockBlobFromText(container, fileName, buffer, { contentType: contentType }, (error, result) => {
-                        if (result !== null) {
-                            file = blobSvc.getUrl(result.container, result.name);
-                            // Reject if there is error else resolve
-                            if (error) {
-                                reject(error);
-                            } else {
-                                //If no error (upload successful), save to local db
-                                if (data.container === 'personcontainer') {
-                                    //If it's patients
-                                    let doc = {
-                                        patientId: id,
-                                        facilityId: facilityId,
-                                        docType: docType,
-                                        docName: fileName,
-                                        docUrl: file,
-                                        fileType: mimeType
-                                    };
-
-                                    let createDoc = docUploadService.create(doc); 
-                                    result.data = createDoc;
-                                    finalResponse.result = result;
-                                    return jsend.success(finalResponse); 
-
-                                } else if (data.container === 'logocontainer') {
-                                    let logoObject = {
-                                        originalname: docName,
-                                        encoding: 'base64',
-                                        mimetype: mimeType,
-                                        destination: destination,
-                                        filename: fileName,
-                                        path: file,
-                                        size: data.size,
-                                        thumbnail: file,
-                                        detailthumbnail: file
-                                    };
-
-                                    getFacility.logoObject = logoObject;
-
-                                    var promise = new Promise(function (resolve, reject) {
-
-                                        facUpdateLogo = facilityService.update(facilityId, getFacility, {});
-                                        if (facUpdateLogo !== undefined) {
-                                            resolve(facUpdateLogo);
-                                        }
-                                        else {
-                                            reject(Error('Failed'));
-                                        }
-                                    });
-                                    promise.then(function (result) {
-                                        finalResponse.facility = result;
-                                    });
-
-                                }
-                                else if (data.container === 'laboratorycontainer') {
-                                    let profileImageObject = {
-                                        originalname: docName,
-                                        encoding: 'base64',
-                                        mimetype: mimeType,
-                                        destination: destination,
-                                        filename: fileName,
-                                        path: file,
-                                        size: data.size,
-                                        thumbnail: file,
-                                        detailthumbnail: file
-                                    };
-                                    getProfile.profileImageObject =profileImageObject;
-
-                                    var profilePromise = new Promise(function(resolve, reject) {
-                                        profilePixObj = peopleService.update(id,getProfile,{});
-                                        if(profilePixObj!== undefined){
-                                            resolve(profilePixObj);
-                                        }
-                                        else {
-                                            reject(Error('Failed'));
-                                        }  
-                                    });
-                                    profilePromise.then(function(result){
-                                        finalResponse.profile = result;
-                                    });
-                                }
-                                resolve(result);
-                            }
-
-                        }
-                    });
-
-                } catch (error) {
-                    return jsend.error({ message: 'Upload failed', code: 208, data: { error: error } });
-                }
-            }).then(function(response){
-                finalResponse = response;
-                //finalResponse.facility = facUpdateLogo;
-                //finalResponse.personProfile = profilePixObj;
-                return jsend.success(finalResponse);
-            });
+            const facilityPath = id+'/'+uploadType+'/'+fileName;
+            const personPath = user + '/' + id + '/'+uploadType+'/' + fileName;
+            if(id === facilityId){
+                destination =  facilityPath; 
+            }else{
+                destination = personPath;
+            }
+             
             
+            
+            let finalResponse = {};
+            let createDoc;
+
+            try {
+                //upload file
+                const blob = {
+                    blobSvc: blobSvc,
+                    container: container,
+                    fileName: destination,
+                    buffer: buffer,
+                    contentType: contentType
+                };
+                const blolSvcCall_ = await azureBlobService.create(blob, {});
+                // console.log(blolSvcCall_);
+                file = blobSvc.getUrl(blolSvcCall_.container, blolSvcCall_.name);
+                
+               
+                if (blolSvcCall_.name !== undefined) {
+
+                    //If no error (upload successful), save to local db
+                    if (data.container === 'personfolder') {
+
+                        let doc = {
+                            patientId: data.id,
+                            facilityId: facilityId,
+                            docType: docType,
+                            //docName: fileName,
+                            docUrl: file,
+                            fileType: mimeType
+                        };
+                        createDoc = await docUploadService.create(doc); 
+
+                        return jsend.success(createDoc);
+
+                    } else if (data.container === 'facilityfolder') {
+                        //Get facility.
+                        let getFacility = await facilityService.get(facilityId);
+                        id = facilityId;
+                        let logoObject = {
+                            //originalname: docName,
+                            encoding: 'base64',
+                            mimetype: mimeType,
+                            destination: destination,
+                            filename: fileName,
+                            path: file,
+                            size: data.size,
+                            thumbnail: file,
+                            detailthumbnail: file
+                        };
+
+                        getFacility.logoObject = logoObject;
+
+                        facUpdateLogo = await facilityService.update(facilityId, getFacility, {});
+                        finalResponse = facUpdateLogo;
+                        return jsend.success(finalResponse);
+                    }
+                    else if (data.uploadType === 'profilePicture') {
+                        //Get Person
+                        id = data.id;
+                        let getProfile = await peopleService.get(id);
+                        
+                        let profileImageObject = {
+                            //originalname: docName,
+                            encoding: 'base64',
+                            mimetype: mimeType,
+                            destination: destination,
+                            filename: fileName,
+                            path: file,
+                            size: data.size,
+                            thumbnail: file,
+                            detailthumbnail: file
+                        };
+                        getProfile.profileImageObject = profileImageObject;
+
+                        profilePixObj = await peopleService.update(id, getProfile, {});
+
+                        finalResponse.profile = profilePixObj;
+                        return jsend.success(finalResponse);
+
+                    }
+                }
+
+            } catch (error) {
+                return jsend.error({ message: 'Upload failed', code: 208, data: { error: error } });
+            }
+
         }
     }
 
