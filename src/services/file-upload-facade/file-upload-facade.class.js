@@ -20,7 +20,7 @@ class Service {
     }
 
     async create(data, params) {
-
+        console.log('********************888data**********\n',data);
         const facilityService = this.app.service('facilities');
         const peopleService = this.app.service('people');
         const docUploadService = this.app.service('doc-upload');
@@ -38,7 +38,7 @@ class Service {
         let docName = data.docName;
         let id = data.id;
         let uploadType = data.uploadType;
-        /* global FileReader */
+        
         let rawdata = this.getBase64(data.base64);
 
         console.log('****************Rawdata******************\n', rawdata);
