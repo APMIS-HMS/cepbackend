@@ -300,6 +300,7 @@ const drugInteractions = require('./drug-interactions/drug-interactions.service.
 const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
 const batchTransactions = require('./batch-transactions/batch-transactions.service.js');
 const fileUploadFacade = require('./file-upload-facade/file-upload-facade.service.js');
+const azureBlob = require('./azure-blob/azure-blob.service.js');
 module.exports = function(app) {
     app.configure(users);
     app.configure(facilityOwnerships);
@@ -515,4 +516,5 @@ module.exports = function(app) {
     app.configure(drugInteractions);
     app.configure(inventorySummaryCounts);
     app.configure(fileUploadFacade);
+    app.configure(azureBlob);
 };
