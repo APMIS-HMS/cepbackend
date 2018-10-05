@@ -22,26 +22,22 @@ class Service {
         $limit: false
       }
     });
-    let products = {};
+    // let products = {};
     if (isNaN(id) !== true) {
-      if (params.query.storeId !== undefined) {
-        //get all products in a particular store
-        products = await inventoriesService.find({
-          query: {
-            storeId: params.query.storeId,
-            $limit: false
-          }
-        });
-      } else if (params.query.facilityId !== undefined) {
-        //get all products in a particular store
-        products = await inventoriesService.find({
-          query: {
-            facilityId: params.query.facilityId,
-            $limit: false
-          }
-        });
-      }
-      
+      const products = await inventoriesService.find({
+        query: {
+          $or: [{
+            storeId: params.query.storeId
+          }, {
+            facilityId: params.query.facilityId
+          }],
+          availableQuantity: {
+            $gt: 0
+          },
+          $limit: false
+        }
+      });
+          
       let batchTxns = [];
       products.data.map(x => x.transactions.map(y => {
         if (y.batchTransactions.length > 0) {
