@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-var azure = require('azure-storage');
-let jsend = require('jsend');
+const azure = require('azure-storage');
+const jsend = require('jsend');
 const mongoose = require('mongoose');
-var FileReader = require('filereader');
 
 class Service {
     constructor(options) {
@@ -20,7 +19,7 @@ class Service {
     }
 
     async create(data, params) {
-        
+
         const facilityService = this.app.service('facilities');
         const peopleService = this.app.service('people');
         const docUploadService = this.app.service('doc-upload');
@@ -35,11 +34,14 @@ class Service {
         let docType = data.docType;
         let facilityId = data.facilityId;
         let mimeType = data.mimeType;
-        let docName = data.docName;
         let id = data.id;
         let uploadType = data.uploadType;
-        
-        let rawdata = data.base64;
+        let rawdata = 'data:'+mimeType+';base64,';
+
+        rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
+
+        //console.log('Raw Data', rawdata);
+        // let rawdata = data.base64;
 
         //let rawdata = data.base64;
         let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
