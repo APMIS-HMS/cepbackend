@@ -22,9 +22,8 @@ class Service {
             if(data.container === 'facilityfolder' || data.container === 'personfolder'){
                 return new Promise((resolve, reject) => {
                     data.blobSvc.createBlockBlobFromText(data.container, data.fileName, data.buffer, { contentType: data.contentType }, (error, result) => {
-                        console.log(error);
                         if(error){
-                            return resolve(error);
+                            return reject(error);
                         }
                         return resolve(result);
                     },err=>{
@@ -38,8 +37,6 @@ class Service {
             }
         }
        
-        //console.log(data);
-
     }
 
     update(id, data, params) {
