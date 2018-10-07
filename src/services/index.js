@@ -308,6 +308,7 @@ const azureBlob = require('./azure-blob/azure-blob.service.js');
 const getPersonLabRequest = require('./get-person-lab-requests/get-person-lab-requests.service.js');
 const dailyOpd = require('./daily-opd/daily-opd.service.js');
 const outOfStockCountDetails = require('./out-of-stock-count-details/out-of-stock-count-details.service.js');
+const healthCoveredBillHistories = require('./health-covered-bill-histories/health-covered-bill-histories.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -526,11 +527,12 @@ module.exports = function (app) {
   app.configure(inventoryExpiredProductDetails);
   app.configure(inventoryAboutToExpireProductDetails);
   app.configure(inventoryBatchTransactionDetails);
-//   app.configure(salesQtiesStatistics);
+  //   app.configure(salesQtiesStatistics);
   app.configure(batchTransactions);
   app.configure(fileUploadFacade);
   app.configure(azureBlob);
   app.configure(getPersonLabRequest);
   app.configure(dailyOpd);
   app.configure(outOfStockCountDetails);
+  app.configure(healthCoveredBillHistories);
 };
