@@ -18,19 +18,25 @@ class Service {
     }
 
     create(data, params) {
-        return new Promise((resolve, reject) => {
-            data.blobSvc.createBlockBlobFromText(data.container, data.fileName, data.buffer, { contentType: data.contentType }, (error, result) => {
-                console.log(result);
-                if(error){
-                    reject(error);
-                }
-                return resolve(result);
-            },err=>{
-                return reject(err);
-            });
-        });
-        //console.log(data);
-
+        if(data.container !== null){
+            if(data.container === 'facilityfolder' || data.container === 'personfolder'){
+                return new Promise((resolve, reject) => {
+                    data.blobSvc.createBlockBlobFromText(data.container, data.fileName, data.buffer, { contentType: data.contentType }, (error, result) => {
+                        if(error){
+                            return reject(error);
+                        }
+                        return resolve(result);
+                    },err=>{
+                        return reject(err);
+                    });
+                }); 
+            }else{
+                return new Promise((resolve,reject)=>{
+                    reject('Invalid container supplied');
+                });
+            }
+        }
+       
     }
 
     update(id, data, params) {

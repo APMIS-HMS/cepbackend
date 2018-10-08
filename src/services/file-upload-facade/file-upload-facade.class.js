@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
-var azure = require('azure-storage');
-let jsend = require('jsend');
+const azure = require('azure-storage');
+const jsend = require('jsend');
 const mongoose = require('mongoose');
+
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -33,11 +34,16 @@ class Service {
         let docType = data.docType;
         let facilityId = data.facilityId;
         let mimeType = data.mimeType;
-        let docName = data.docName;
-        let id=data.id;
+        let id = data.id;
         let uploadType = data.uploadType;
+        let rawdata = 'data:'+mimeType+';base64,';
 
-        let rawdata = data.base64;
+        rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
+
+        //console.log('Raw Data', rawdata);
+        // let rawdata = data.base64;
+
+        //let rawdata = data.base64;
         let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
         let contentType = matches[1];
         let buffer = new Buffer(matches[2], 'base64');
@@ -54,22 +60,22 @@ class Service {
         //Container is the azure db for the file that is to be uploaded
         if (data.container !== null) {
             //Genarate a unique name for the file that is to be uploaded
-            fileName  = mongoose.Types.ObjectId() +'.'+ ext[1];
+            fileName = mongoose.Types.ObjectId() + '.' + ext[1];
 
             //let fileNewName = mongoose.Types.ObjectId() + '.' + ext[1];
 
             //fileName = data.id + '_' + docType + '_' + fileNewName;
             //Define the destination of the upload file (its actually the path to the image/doc)
-            const facilityPath = id+'/'+uploadType+'/'+fileName;
-            const personPath = user + '/' + id + '/'+uploadType+'/' + fileName;
-            if(id === facilityId){
-                destination =  facilityPath; 
-            }else{
+            const facilityPath = id + '/' + uploadType + '/' + fileName;
+            const personPath = user + '/' + id + '/' + uploadType + '/' + fileName;
+            if (id === facilityId) {
+                destination = facilityPath;
+            } else {
                 destination = personPath;
             }
-             
-            
-            
+
+
+
             let finalResponse = {};
             let createDoc;
 
@@ -85,8 +91,8 @@ class Service {
                 const blolSvcCall_ = await azureBlobService.create(blob, {});
                 // console.log(blolSvcCall_);
                 file = blobSvc.getUrl(blolSvcCall_.container, blolSvcCall_.name);
-                
-               
+
+
                 if (blolSvcCall_.name !== undefined) {
 
                     //If no error (upload successful), save to local db
@@ -96,11 +102,11 @@ class Service {
                             patientId: data.id,
                             facilityId: facilityId,
                             docType: docType,
-                            //docName: fileName,
+                            docName: fileName,
                             docUrl: file,
                             fileType: mimeType
                         };
-                        createDoc = await docUploadService.create(doc); 
+                        createDoc = await docUploadService.create(doc);
 
                         return jsend.success(createDoc);
 
@@ -130,7 +136,7 @@ class Service {
                         //Get Person
                         id = data.id;
                         let getProfile = await peopleService.get(id);
-                        
+
                         let profileImageObject = {
                             //originalname: docName,
                             encoding: 'base64',
@@ -174,6 +180,8 @@ class Service {
     setup(app) {
         this.app = app;
     }
+    
+
 }
 
 module.exports = function (options) {
