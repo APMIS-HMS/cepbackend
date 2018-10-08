@@ -14,12 +14,19 @@ class Service {
   async find(params) {
     const billingService = this.app.service('billings');
     const endDate = format(params.query.endDate);
+
     const startDate = format(params.query.startDate);
     const bills = await billingService.find({
       query: {
         isCoveredPage: true,
         facilityId: params.query.facilityId,
-        'billItems.covered.coverType': params.query.coverType,
+        $or: [{
+          'billItems.covered.hmoId': params.query.hmoId
+        }, {
+          'billItems.covered.familyId': params.query.hmoId
+        },{
+          'billItems.covered.companyId': params.query.hmoId
+        }],
         $and: [{
             updatedAt: {
               $gte: startDate
@@ -30,9 +37,11 @@ class Service {
               $lte: endDate
             }
           }
-        ]
+        ],
+        $select:['coverFile','billItems.covered','billItems.patientId','billItems.facilityServiceId','billItems.serviceId']
       }
     });
+    
     bills.data.map(element => {
       const index = element.billItems.map(x => x.covered.isVerify !== undefined);
       if (index.length === 0) {
@@ -41,9 +50,12 @@ class Service {
         element.isPending = false;
       }
     });
-    pendingBills = bills.data.map(x => x.isPending === true );
-    historyBills = bill.data.map(x => x.isPending === false);
-    return jsend.success({pendingBills:pendingBills,historyBills:historyBills});
+    const pendingBills = bills.data.filter(x => x.isPending === true);
+    const historyBills = bills.data.filter(x => x.isPending === false);
+    return jsend.success({
+      pendingBills: pendingBills,
+      historyBills: historyBills
+    });
   }
 
   get(id, params) {
