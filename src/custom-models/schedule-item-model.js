@@ -30,6 +30,10 @@ const scheduleItemSchema = new Schema({
     type: String,
     required: false
   },
+  slots: {
+    type: [Schema.Types.Mixed],
+    required: false
+  },
   createdAt: {
     type: Date,
     'default': Date.now
