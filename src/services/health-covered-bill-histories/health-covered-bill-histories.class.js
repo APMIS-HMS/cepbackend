@@ -24,7 +24,7 @@ class Service {
           'billItems.covered.hmoId': params.query.hmoId
         }, {
           'billItems.covered.familyId': params.query.hmoId
-        },{
+        }, {
           'billItems.covered.companyId': params.query.hmoId
         }],
         $and: [{
@@ -38,10 +38,10 @@ class Service {
             }
           }
         ],
-        $select:['coverFile','billItems.covered','billItems.patientId','billItems.facilityServiceId','billItems.serviceId']
+        $select: ['coverFile', 'billItems.covered', 'billItems.patientId', 'billItems.facilityServiceId', 'billItems.serviceId']
       }
     });
-    
+
     bills.data.map(element => {
       const index = element.billItems.map(x => x.covered.isVerify !== undefined);
       if (index.length === 0) {
