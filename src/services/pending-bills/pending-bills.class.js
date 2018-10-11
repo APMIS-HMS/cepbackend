@@ -24,10 +24,12 @@ class Service {
           },
           'billItems.isBearerConfirmed': true,
           $or: [{
-            'billItems.covered.coverType': 'wallet'
-          }, {
-            'billItems.covered.coverType': 'family'
-          }],
+              'billItems.covered.coverType': 'wallet'
+            },
+            {
+              'billItems.covered.coverType': 'family'
+            }
+          ],
           $sort: {
             updatedAt: -1
           }
@@ -35,8 +37,8 @@ class Service {
       });
     }
 
-    awaitedBills.data.forEach(element => {
-      const index = patientIds.filter(x => x.id.toString() === element.patientId.toString());
+    awaitedBills.data.forEach((element) => {
+      const index = patientIds.filter((x) => x.id.toString() === element.patientId.toString());
       if (index.length === 0) {
         patientIds.push({
           id: element.patientId
@@ -55,26 +57,25 @@ class Service {
             {
               'billItems.covered.coverType': 'family'
             }
-          ],
+          ]
         }
       });
       patientBills.push.apply(patientBills, awaitedBillItems.data);
-
     }
 
     const retVal = GetBillData(patientBills);
-    const billItemArrays = retVal.data.map(x => x.billItems);
+    const billItemArrays = retVal.data.map((x) => x.billItems);
     const distinctBillItems = [].concat.apply([], billItemArrays);
-    const facilityServiceIds = distinctBillItems.map(x => x.facilityServiceId);
+    const facilityServiceIds = distinctBillItems.map((x) => x.facilityServiceId);
 
     const awaitedServices = await this.app.service('organisation-services').find({
       query: {
-        '_id': {
+        _id: {
           $in: facilityServiceIds
-        },
+        }
       }
     });
-    distinctBillItems.forEach(bill => {
+    distinctBillItems.forEach((bill) => {
       bill.serviceObj = this.getService(awaitedServices, bill.serviceId);
     });
 
@@ -97,7 +98,9 @@ class Service {
       if (awaitedServices.data[0].categories.length > 0) {
         const len2 = awaitedServices.data[0].categories.length - 1;
         for (let index2 = 0; index2 <= len2; index2++) {
-          const val = awaitedServices.data[0].categories[index2].services.filter(x => x._id.toString() == serviceId);
+          const val = awaitedServices.data[0].categories[index2].services.filter(
+            (x) => x._id.toString() == serviceId
+          );
           if (val.length > 0) {
             retVal = val[0];
           }
@@ -106,7 +109,6 @@ class Service {
     }
     return retVal;
   }
-
 
   async get(id, params) {
     let patientIds = [];
@@ -117,18 +119,12 @@ class Service {
     const patientIdsService = this.app.service('db-patientids');
     const peopleService = this.app.service('people');
 
+    let keepPatientRecord = {};
     if (params.query.name === undefined) {
       awaitedBills = await billingsService.find({
         query: {
           facilityId: id,
           'billItems.isBearerConfirmed': true,
-          $or: [{
-              'billItems.covered.coverType': 'wallet'
-            },
-            {
-              'billItems.covered.coverType': 'family'
-            }
-          ],
           $sort: {
             updatedAt: -1
           }
@@ -141,12 +137,73 @@ class Service {
           searchQuery: params.query.name
         }
       });
+      keepPatientRecord = awaitedPatientIdItems;
       if (Array.isArray(awaitedPatientIdItems.data)) {
+        const billsPromiseYetResolved = Promise.all(
+          awaitedPatientIdItems.data.map((current) =>
+            billingsService.find({
+              query: {
+                facilityId: id,
+                patientId: current.patientId,
+                'billItems.isBearerConfirmed': true,
+                $or: [{
+                    'billItems.covered.coverType': 'wallet'
+                  },
+                  {
+                    'billItems.covered.coverType': 'family'
+                  }
+                ],
+                $sort: {
+                  updatedAt: -1
+                }
+              }
+            })
+          )
+        );
+        const _awaitedBills = await billsPromiseYetResolved;
+        awaitedBills = _awaitedBills[0];
+      }
+    }
 
-        const billsPromiseYetResolved = Promise.all(awaitedPatientIdItems.data.map(current => billingsService.find({
+    if (
+      awaitedBills !== undefined &&
+      keepPatientRecord !== undefined &&
+      awaitedBills.data.length === 0 &&
+      keepPatientRecord.data.length > 0
+    ) {
+      let foundPatients = [];
+      for (let i = 0; i < keepPatientRecord.data.length; i++) {
+        let _inPatient = await patientService.get(keepPatientRecord.data[i].patientId, {});
+        _inPatient.personDetails = keepPatientRecord.data[i].person;
+        let principalObject = _inPatient;
+        foundPatients.push({
+          principalObject: principalObject,
+          grandTotal: 0,
+          billItems: [],
+          grandTotalExcludeInvoice: 0,
+          subTotal: 0,
+          updatedAt: new Date()
+        });
+      }
+      return jsend.success({
+        reason: 'Empty bill record',
+        data: foundPatients
+      });
+    } else {
+      awaitedBills.data.forEach((element) => {
+        const index = patientIds.filter((x) => x.id.toString() === element.patientId.toString());
+        if (index.length === 0) {
+          patientIds.push({
+            id: element.patientId
+          });
+        }
+      });
+      const counter = patientIds.length - 1;
+      for (let i = 0; i <= counter; i++) {
+        const awaitedBillItems = await billingsService.find({
           query: {
+            patientId: patientIds[i].id,
             facilityId: id,
-            patientId: current.patientId,
             'billItems.isBearerConfirmed': true,
             $or: [{
                 'billItems.covered.coverType': 'wallet'
@@ -154,72 +211,40 @@ class Service {
               {
                 'billItems.covered.coverType': 'family'
               }
-            ],
-            $sort: {
-              updatedAt: -1
-            }
+            ]
           }
-        })));
-        const _awaitedBills = await billsPromiseYetResolved;
-        awaitedBills = _awaitedBills[0];
-      }
-    }
-    awaitedBills.data.forEach(element => {
-      const index = patientIds.filter(x => x.id.toString() === element.patientId.toString());
-      if (index.length === 0) {
-        patientIds.push({
-          id: element.patientId
         });
+        patientBills.push.apply(patientBills, awaitedBillItems.data);
+        // awaitedBillItems.data.forEach(item => {
+        //   patientBills.push(item);
+        // });
       }
-    });
-    const counter = patientIds.length - 1;
-    for (let i = 0; i <= counter; i++) {
-      const awaitedBillItems = await billingsService.find({
-        query: {
-          patientId: patientIds[i].id,
-          facilityId: id,
-          'billItems.isBearerConfirmed': true,
-          $or: [{
-              'billItems.covered.coverType': 'wallet'
-            },
-            {
-              'billItems.covered.coverType': 'family'
-            }
-          ],
+      let uniquePatients = [];
+      patientBills.forEach((item) => {
+        const indx = uniquePatients.filter((x) => x.patientId.toString() === item.patientId.toString());
+        if (indx.length > 0) {
+          let _billExisting = JSON.parse(JSON.stringify(item));
+          _billExisting.billItems = [];
+          _billExisting.billItems = item.billItems.filter((x) => x.isInvoiceGenerated === false);
+          if (_billExisting.billItems.length > 0) {
+            indx[0].billItems.push.apply(indx[0].billItems, item.billItems);
+          }
+        } else {
+          let _bill = JSON.parse(JSON.stringify(item));
+          _bill.billItems = [];
+          _bill.billItems = item.billItems.filter((x) => x.isInvoiceGenerated === false);
+          if (_bill.billItems.length > 0) {
+            uniquePatients.push(_bill);
+          }
         }
       });
-      patientBills.push.apply(patientBills, awaitedBillItems.data);
-      // awaitedBillItems.data.forEach(item => {
-      //   patientBills.push(item);
-      // });
-
+      return GetBillData(uniquePatients);
     }
-    let uniquePatients = [];
-    patientBills.forEach(item => {
-      const indx = uniquePatients.filter(x => x.patientId.toString() === item.patientId.toString());
-      if (indx.length > 0) {
-        let _billExisting = JSON.parse(JSON.stringify(item));
-        _billExisting.billItems = [];
-        _billExisting.billItems = item.billItems.filter(x => x.isInvoiceGenerated === false);
-        if (_billExisting.billItems.length > 0) {
-          indx[0].billItems.push.apply(indx[0].billItems, item.billItems);
-        }
-      } else {
-        let _bill = JSON.parse(JSON.stringify(item));;
-        _bill.billItems = [];
-        _bill.billItems = item.billItems.filter(x => x.isInvoiceGenerated === false);
-        if (_bill.billItems.length > 0) {
-          uniquePatients.push(_bill);
-        }
-      }
-    });
-
-    return GetBillData(uniquePatients);
   }
 
   create(data, params) {
     if (Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current)));
+      return Promise.all(data.map((current) => this.create(current)));
     }
 
     return Promise.resolve(data);
@@ -251,7 +276,10 @@ function GetBillData(result) {
       result[j].grandTotalExcludeInvoice = 0;
       let len2 = result[j].billItems.length - 1;
       for (let k = len2; k >= 0; k--) {
-        if (result[j].billItems[k].isInvoiceGenerated === false && result[j].billItems[k].isBearerConfirmed === true) {
+        if (
+          result[j].billItems[k].isInvoiceGenerated === false &&
+          result[j].billItems[k].isBearerConfirmed === true
+        ) {
           result[j].grandTotalExcludeInvoice += parseInt(result[j].billItems[k].totalPrice.toString());
         }
       }
@@ -261,6 +289,5 @@ function GetBillData(result) {
   } else {
     return jsend.success([]);
   }
-
 }
 module.exports.Service = Service;

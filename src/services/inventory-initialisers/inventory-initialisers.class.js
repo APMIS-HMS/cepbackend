@@ -20,7 +20,6 @@ class Service {
   }
 
   async create(data, params) {
-    console.log(data);
     const inventoriesService = this.app.service('inventories');
     const productsService = this.app.service('products');
     const orgService = this.app.service('organisation-services');
@@ -28,7 +27,7 @@ class Service {
       query: {
         facilityId: data.product.facilityId,
         productId: data.product.productObject.id,
-        storeId:data.storeId
+        storeId: data.storeId
       }
     });
     if (inventory.data.length > 0) {

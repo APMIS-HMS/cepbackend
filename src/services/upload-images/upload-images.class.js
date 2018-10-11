@@ -14,24 +14,20 @@ class Service {
       var blobSvc = azure.createBlobService('apmisstorageaccount', ACCESS_KEY);
       let blobUrl = blobSvc.getUrl(params.query.container, params.query.fileName);
       resolve(blobUrl);
-      
+
     });
 
   }
 
-  get(id, params) {
-  }
+  get(id, params) {}
 
   setup(app) {
     this.app = app;
   }
 
   async create(data, params) {
-    console.log(data);
     const dataString = data.data;
-    console.log(dataString);
     data = JSON.parse(dataString);
-    console.log(data);
     const ACCESS_KEY = process.env.AZURE_STORAGE_ACCESS_KEY;
     var blobSvc = azure.createBlobService('apmisstorageaccount', ACCESS_KEY);
     const fileName = params.query.fileName;
@@ -43,7 +39,9 @@ class Service {
 
     return new Promise(function (resolve, reject) {
 
-      blobSvc.createBlockBlobFromText(container, fileName, buffer, { contentType: type }, function (error, result, response) {
+      blobSvc.createBlockBlobFromText(container, fileName, buffer, {
+        contentType: type
+      }, function (error, result, response) {
 
         if (error) {
           reject(error);
@@ -66,7 +64,9 @@ class Service {
   }
 
   remove(id, params) {
-    return Promise.resolve({ id });
+    return Promise.resolve({
+      id
+    });
   }
 }
 
