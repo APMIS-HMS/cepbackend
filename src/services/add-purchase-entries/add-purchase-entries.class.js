@@ -21,7 +21,6 @@ class Service {
   }
 
   async create(data, params) {
-    console.log(data);
 
     const inventoriesService = this.app.service('inventories');
     const purchaseEntriesService = this.app.service('purchase-entries');
@@ -43,10 +42,8 @@ class Service {
 
     let inventories = [];
     let existingInventories = [];
-    console.log(data.productForms);
     for (let index = 0; index < data.productForms.length; index++) {
       let productObj = data.productForms[index];
-      console.log(productObj);
       if (productObj.productObject.config !== undefined) {
         delete productObj.productObject.config;
       }
@@ -74,7 +71,6 @@ class Service {
         }
       });
       const inventory = existingInventory.data[0];
-      console.log(inventory);
       inventory.totalQuantity = inventory.totalQuantity + productObj.qty;
       inventory.availableQuantity = inventory.availableQuantity + productObj.qty;
       const inventoryTransaction = {};
