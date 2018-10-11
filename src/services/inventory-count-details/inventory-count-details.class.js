@@ -20,9 +20,7 @@ class Service {
         $limit: false
       }
     });
-    console.log(inventoryProducts);
     const retValue = inventoryProducts.data.map(x => {
-      console.log(x);
       return {
         batches: x.transactions.map(u => {
           return {

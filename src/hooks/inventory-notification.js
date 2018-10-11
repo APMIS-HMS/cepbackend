@@ -3,10 +3,8 @@
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return async (context) => {
-    console.log('Inv');
-    console.log(context);
+
     const productService = context.app.service('product-reorder');
-    console.log(context.app.service('patients'));
     let reorderIsh;
     try {
       reorderIsh = await productService.find({
@@ -16,10 +14,7 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
           productId: context.result.productId
         }
       })
-    } catch(e) {
-      console.log(e);
-    }
-    console.log('reorder: ', reorderIsh);
+    } catch (e) {}
     return Promise.resolve(context);
   };
 };
