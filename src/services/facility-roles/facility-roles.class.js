@@ -1,6 +1,11 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
 const jsend = require('jsend');
+const BatchLoader = require('@feathers-plus/batch-loader');
+const {
+    getResultsByKey,
+    getUniqueKeys
+} = BatchLoader;
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -21,9 +26,13 @@ class Service {
         let features = await facilityAccessControlService.find({
             query: {
                 facilityId: facilityId,
-                _id: { $in: userRoles },
+                _id: {
+                    $in: getUniqueKeys(userRoles)
+                },
                 $limit: 200
             }
+        }).catch(err => {
+            // console.log(err.params.query);
         });
         let outArray = [];
         outArray = outArray.concat(features.data.map(x => x.features));
@@ -44,7 +53,9 @@ class Service {
         try {
             const modules = await facilityModuleService.find({
                 query: {
-                    _id: { $in: [...new Set(result)] },
+                    _id: {
+                        $in: [...new Set(result)]
+                    },
                     $limit: 25
                 }
             });
@@ -134,11 +145,16 @@ class Service {
         const roleCount = selectedUser.data[0].userRoles.length;
         data.roles.forEach((indx, i) => {
             if (index > -1) {
-                selectedUser.data[0].userRoles[index].roles.forEach(ind => {
+                let roleFil = selectedUser.data[0].userRoles[index].roles.filter(m => m === indx);
+                if (roleFil.length === 0) {
+                    selectedUser.data[0].userRoles[index].roles.push(indx);
+                }
+                /* selectedUser.data[0].userRoles[index].roles.forEach(ind => {
+                    console.log(ind)
                     if (ind != indx) {
-                        selectedUser.data[0].userRoles[index].roles.push(indx);
+
                     }
-                });
+                }); */
             } else {
                 if (selectedUser.data[0].userRoles.length === 0) {
                     let userRole = {
@@ -171,7 +187,6 @@ class Service {
                 selectedUser = this.removeRole(selectedUser, role, index);
             }
         }
-
         let updatedUser = await usersService.patch(selectedUser.data[0]._id, {
             userRoles: selectedUser.data[0].userRoles
         });
@@ -199,7 +214,9 @@ class Service {
     }
 
     remove(id, params) {
-        return Promise.resolve({ id });
+        return Promise.resolve({
+            id
+        });
     }
 
     setup(app) {

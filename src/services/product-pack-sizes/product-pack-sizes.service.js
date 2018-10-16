@@ -5,12 +5,13 @@ const hooks = require('./product-pack-sizes.hooks');
 
 module.exports = function (app) {
   const Model = createModel(app);
-  const paginate = app.get('paginate');
+  let paginate = app.get('paginate');
+  paginate.default = 20;
 
   const options = {
     name: 'product-pack-sizes',
     Model,
-    paginate
+    paginate,
   };
 
   // Initialize our service with any options it requires

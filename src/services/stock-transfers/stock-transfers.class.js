@@ -21,21 +21,22 @@ class Service {
 
   async create(data, params) {
     const inventoriesService = this.app.service('inventories');
+    const reqProductService = this.app.service('store-requisitions');
     const inventoryTransfersService = this.app.service('inventory-transfers');
     let inventoryTransfers = await inventoryTransfersService.create(data);
     let inventory = {};
-    if (inventoryTransfers != null) {
-      if (inventoryTransfers.inventoryTransferTransactions != undefined) {
+    if (inventoryTransfers._id !== undefined) {
+      if (inventoryTransfers.inventoryTransferTransactions !== undefined) {
         if (inventoryTransfers.inventoryTransferTransactions.length > 0) {
           let len = inventoryTransfers.inventoryTransferTransactions.length - 1;
           for (let index = len; index >= 0; index--) {
             inventory = await inventoriesService.get(inventoryTransfers.inventoryTransferTransactions[index].inventoryId);
-            if (inventory != null) {
-              if (inventory.transactions != undefined) {
+            if (inventory._id !== undefined) {
+              if (inventory.transactions !== undefined) {
                 if (inventory.transactions.length > 0) {
                   let len2 = inventory.transactions.length - 1;
                   for (let index2 = len2; index2 >= 0; index2--) {
-                    if (inventory.transactions[index2]._id.toString() == inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString()) {
+                    if (inventory.transactions[index2]._id.toString() === inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString()) {
                       inventory.transactions[index2].availableQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
                       inventory.availableQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
                     }
@@ -48,6 +49,11 @@ class Service {
             availableQuantity: inventory.availableQuantity,
             transactions: inventory.transactions
           });
+          if (data.requistionId !== null) {
+            const requis = await reqProductService.patch(data.requistionId, {
+              isSupplied: true
+            });
+          }
           let result = {
             inventoryTransfers: inventoryTransfers,
             inventory: updatedInv
@@ -71,7 +77,7 @@ class Service {
     const inventoriesService = this.app.service('inventories');
     let inventoryTransfers = await transferService.patch(id, data);
     let inventory = {};
-    
+
     let batchDetail = {};
     if (inventoryTransfers != null) {
       if (inventoryTransfers.inventoryTransferTransactions != undefined) {
@@ -139,6 +145,7 @@ class Service {
                           categoryId: updatedInv.categoryId,
                           facilityServiceId: updatedInv.facilityServiceId,
                           productId: updatedInv.productId,
+                          productObject: updatedInv.productObject,
                           transactions: [],
                           totalQuantity: inventoryTransfers.inventoryTransferTransactions[index].quantity,
                           availableQuantity: inventoryTransfers.inventoryTransferTransactions[index].quantity

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 class Service {
-  constructor (options) {
+  constructor(options) {
     this.options = options || {};
   }
 
@@ -8,16 +8,29 @@ class Service {
     this.app = app;
   }
 
-  async find (params) {
-    const productService = this.app.service('products');
-    const reorderService = this.app.service('product-reorders');
+  async find(params) {
+    console.log(params.query);
+    const productService = this.app.service('formulary-products');
+    const reorderService = this.app.service('product-configs');
     var value = {};
     value.data = [];
-    const products = await productService.find({query:{name:{$regex: params.query.name,'$options': 'i'}}});
-    const reorders = await reorderService.find({query:{facilityId:params.query.facilityId,storeId:params.query.storeId}});
+    const products = await productService.find({
+      query: {
+        name: params.query.name
+      }
+    });
+    console.log(products);
+    const reorders = await reorderService.find({
+      query: {
+        facilityId: params.query.facilityId
+      }
+    });
+    console.log(reorders);
     products.data.forEach(element => {
-      const filter = reorders.data.filter(x=>x.productId.toString() ===element._id.toString());
-      if(filter.length === 0){
+      console.log(element);
+      const filter = reorders.data.filter(x => x.productId.toString() === element.id.toString());
+      if (filter.length > 0) {
+        console.log(element);
         value.data.push(element);
       }
     });
@@ -25,13 +38,14 @@ class Service {
     return value;
   }
 
-  get (id, params) {
+  get(id, params) {
     return Promise.resolve({
-      id, text: `A new message with ID: ${id}!`
+      id,
+      text: `A new message with ID: ${id}!`
     });
   }
 
-  create (data, params) {
+  create(data, params) {
     if (Array.isArray(data)) {
       return Promise.all(data.map(current => this.create(current)));
     }
@@ -39,16 +53,18 @@ class Service {
     return Promise.resolve(data);
   }
 
-  update (id, data, params) {
+  update(id, data, params) {
     return Promise.resolve(data);
   }
 
-  patch (id, data, params) {
+  patch(id, data, params) {
     return Promise.resolve(data);
   }
 
-  remove (id, params) {
-    return Promise.resolve({ id });
+  remove(id, params) {
+    return Promise.resolve({
+      id
+    });
   }
 }
 

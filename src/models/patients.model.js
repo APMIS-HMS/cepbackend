@@ -3,6 +3,8 @@
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
 const paymentPlanSchema = require('../custom-models/payment-plan-model');
+const documentationAuthorizationSchema =
+    require('../custom-models/documentation-authorization-model');
 
 module.exports = function(app) {
     const mongooseClient = app.get('mongooseClient');
@@ -16,9 +18,8 @@ module.exports = function(app) {
         tags: [{ type: Schema.Types.Mixed, required: false }],
         clientsNo: [{ type: Schema.Types.Mixed }],
         timeLines: [{ type: Schema.Types.Mixed, required: false }],
-    }, {
-        timestamps: true
-    });
+        documentationAuthorizationCode: documentationAuthorizationSchema
+    }, { timestamps: true });
 
     return mongooseClient.model('patients', patients);
 };

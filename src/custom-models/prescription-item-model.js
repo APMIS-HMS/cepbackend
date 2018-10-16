@@ -5,16 +5,23 @@ const trackDispensed = require('./track-dispensed-model');
 
 const precribeItemSchema = new Schema({
     facilityId: { type: Schema.Types.ObjectId, required: false }, // Facility that dispensed the drug.
+    billId: { type: Schema.Types.ObjectId, required: false },
+    billItemId: { type: Schema.Types.ObjectId, required: false },
     productId: { type: Schema.Types.ObjectId, required: false },
-    productName: { type: String, required: false },
+    code: { type: String, required: true },
+    productName: { type: Schema.Types.Mixed, required: false },
     genericName: { type: String, required: true },
     ingredients: [productIngredient],
-    frequency: { type: String, required: true },
-    duration: { type: String, required: true },
+    regimen: [{
+      frequency: { type: String, required: true },
+      duration: { type: String, required: true },
+      durationUnit: { type: String, required: true }
+    }],
     dosage: { type: String, required: false },
     dosageUnit: { type: String, required: false },
     strength: { type: String, required: false },
     routeName: { type: String, required: false },
+    refillCount: { type: Number, required: false },
     startDate: { type: Date, required: false },
     quantity: { type: Number, required: false },
     quantityDispensed: { type: Number, required: false }, // I need to know the quantity that has been dispensed.

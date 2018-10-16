@@ -16,6 +16,8 @@ class Service {
   }
 
   async create(data, params) {
+    const dataString = data.data;
+    data = JSON.parse(dataString);
     if (data.uploadType === 'documentUpload') {
       var rawdata = data.base64;
       let docType = data.docType;
@@ -33,12 +35,27 @@ class Service {
         fileName = patientId + '_' + docType + '_' + Date.now() + '.' + ext[1];
       }
       const uploadImageService = this.app.service('upload-images');
-      var result = await uploadImageService.create(data, { fileName: fileName });
-      let blobUrl = await uploadImageService.find({
-        query: {
-          container: 'personcontainer', fileName: fileName
-        }
-      });
+      const UploadData = {};
+      let dta = JSON.parse(dataString);
+      dta.container = 'personcontainer';
+
+      UploadData.data = JSON.stringify(dta);
+      var result;
+      try {
+        result = await uploadImageService.create(UploadData, {query : { fileName: fileName }});
+      } catch(e) {
+        return e;
+      }
+      let blobUrl;
+      try {
+        blobUrl = await uploadImageService.find({
+          query: {
+            container: 'personcontainer', fileName: fileName
+          }
+        });
+      }catch(e){
+        return e;
+      }
       let doc = {
         patientId: patientId,
         facilityId: facilityId,
@@ -48,7 +65,6 @@ class Service {
         docUrl: blobUrl,
         fileType: fileType
       };
-
       let createDoc = await this.app.service('doc-upload').create(doc);
       return createDoc;
     } else {

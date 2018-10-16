@@ -22,18 +22,18 @@ const resolvers = {
                     for (let j = 0; j <= len2; j++) {
                         if (data.orderedProducts[j] !== undefined) {
                             try {
-                                const id = data.orderedProducts[j].productId;
-                                const getProduct = await context.app.service('products').get(id);
                                 const productConfig = await context.app.service('product-configs').find({
                                     query: {
-                                        facilityId: getProduct.facilityId,
-                                        productId: getProduct._id
+                                        facilityId: data.facilityId,
+                                        productId: data.orderedProducts[j].productId
                                     }
                                 });
                                 if (productConfig.data.length > 0) {
-                                    getProduct.productConfigObject = productConfig.data[0].packSizes;
+                                    data.orderedProducts[j].productObject.productConfigObject = productConfig.data[0].packSizes;
+                                }else{
+                                    data.orderedProducts[j].productObject.productConfigObject = {};
                                 }
-                                data.orderedProducts[j].productObject = getProduct;
+                                
                             } catch (e) {
                                 // console.log(e);
                             }

@@ -1,20 +1,67 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
+const {
+  authenticate
+} = require('@feathersjs/authentication').hooks;
+const invNotification = require('../../hooks/inventory-notification');
 
-const {fastJoin} = require('feathers-hooks-common');
+const {
+  fastJoin
+} = require('feathers-hooks-common');
+
+const emailer = require('../../templates/emailer');
 
 const resolvers = {
   joins: {
     productObject: () => async (data, context) => {
       try {
-        const getProduct = await context.app.service('products').get(data.productId);
+        // const getProduct = await context.app.service('formulary-products').get(data.productId, {});
+        // if (getProduct.data.id !== undefined) {
+        //   const productConfig = await context.app.service('product-configs').find({
+        //     query: {
+        //       facilityId: data.facilityId,
+        //       productId: data.productId
+        //     }
+        //   });
+        //   getProduct.data.productConfigObject = productConfig.data[0].packSizes;
+        //   data.productObject = getProduct.data;
+        // }
         const productConfig = await context.app.service('product-configs').find({
           query: {
-            facilityId: getProduct.facilityId,
-            productId: getProduct._id
+            facilityId: data.facilityId,
+            productId: data.productId
           }
         });
-        getProduct.productConfigObject = productConfig.data[0].packSizes;
-        data.productObject = getProduct;
+        data.productObject.productConfigObject = productConfig.data[0].packSizes;
+      } catch (e) {
+        // console.log(e);
+      }
+    },
+    productReorder: () => async (data, context) => {
+      try {
+        const getProductReorder = await context.app.service('product-reorders').find({
+          query: {
+            facilityId: data.facilityId,
+            productId: data.productId
+          }
+        });
+        if(context.method === 'patch' || context.method === 'update'){
+          if(getProductReorder.data[0].reOrderLevel >= data.availableQuantity){
+            
+            const facility = await context.app.service('facilities').find({
+              query: {
+                _id: data.facilityId
+              }
+            });
+            const emailData = JSON.parse(JSON.stringify(data));
+            const facilityData = facility.data[0];
+            emailData.email = facilityData.email;
+            emailData.facilityName = facilityData.name;
+            emailer.reorder(emailData);
+
+          }
+        }
+        data.reorder = getProductReorder.data[0].reOrderLevel;
+        data.reOrderSizeId = getProductReorder.data[0].reOrderSizeId;
+
       } catch (e) {
         // console.log(e);
       }
@@ -24,7 +71,7 @@ const resolvers = {
 
 module.exports = {
   before: {
-    all: [ authenticate('jwt') ],
+    all: [],//authenticate('jwt')],
     find: [],
     get: [],
     create: [],

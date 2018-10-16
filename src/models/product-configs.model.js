@@ -9,6 +9,8 @@ module.exports = function (app) {
   const productConfigs = new Schema({
     facilityId: { type: Schema.Types.ObjectId, require: true },
     productId: { type: Schema.Types.ObjectId, require: true },
+    productObject: { type: Schema.Types.Mixed, require: false },
+    rxCode:{ type: String, require: false },
     packSizes:[packageItem]
   }, {
     timestamps: true
