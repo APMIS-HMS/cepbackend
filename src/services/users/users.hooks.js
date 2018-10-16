@@ -8,7 +8,7 @@ const {
 module.exports = {
   before: {
     all: [],
-    find: [],//authenticate('jwt')],
+    find: [authenticate('jwt')],
     get: [],
     create: [hashPassword()],
     update: [hashPassword()],

@@ -13,13 +13,15 @@ class Service {
     let billGroups = {};
     const billingsService = this.app.service('billings');
     const facilityItemService = this.app.service('facility-service-items');
-    
+
     let awaitBills = await billingsService.find({
       query: {
         facilityId: params.query.facilityId,
         patientId: params.query.patientId,
         isinvoice: params.query.isinvoice,
-        $sort: { updatedAt: -1 }
+        $sort: {
+          updatedAt: -1
+        }
       }
     });
     let results = await facilityItemService.create(awaitBills.data, {});
@@ -68,7 +70,7 @@ class Service {
               qty: itemb.billObject.quantity,
               facilityServiceObject: itemb.billObject.facilityServiceObject,
               amountPaid: 0,
-              isSubCharge:false,
+              isSubCharge: false,
               totalPrice: itemb.billObject.totalPrice,
               balance: itemb.billObject.totalPrice,
               isPaymentCompleted: false,
@@ -91,9 +93,9 @@ class Service {
                   "modifierId": [],
                   "unitPrice": subCharge,
                   "totalPrice": subCharge,
-                  "isSubCharge":true,
+                  "isSubCharge": true,
                   "quantity": 1,
-                  "description": "Apmis Sub-charge on Invoice "+ awaitToken.result,
+                  "description": "Apmis Sub-charge on Invoice " + awaitToken.result,
                   "patientId": data.patientId,
                   "facilityId": data.facilityId,
                 }
@@ -109,7 +111,7 @@ class Service {
                   "category": "Apmis Sub-charge"
                 },
                 amountPaid: 0,
-                isSubCharge:true,
+                isSubCharge: true,
                 totalPrice: subCharge,
                 balance: subCharge,
                 isPaymentCompleted: false,
@@ -120,7 +122,7 @@ class Service {
           }
         });
       });
-     
+
       if (billGroup.billingIds.length > 0) {
         billGroup.totalDiscount = data.totalDiscount;
         billGroup.subTotal = data.subTotal;
@@ -236,7 +238,7 @@ function fixedGroupExisting(results) {
       }
     }
   }
-  
+
   let uniqueGroupedBill = [];
   billGroups.forEach(item => {
     const index = uniqueGroupedBill.filter(x => x.categoryId.toString() === item.categoryId.toString());

@@ -9,10 +9,10 @@ class Service {
   }
 
   async find(params) {
-    
+
     const patientService = this.app.service('patients');
     const appointmentService = this.app.service('appointments');
-    
+
     let patientIds = await patientService.find({
       query: {
         personId: params.query.personId,
@@ -20,11 +20,9 @@ class Service {
       }
     });
     let strPatients = [];
-    for (let index = 0; index < patientIds.data.length; index++) {
-      const element = patientIds.data[index];
-      strPatients.push(element._id);
-    }
-    
+
+    strPatients.push.apply(strPatients, patientIds.data);
+
     let appointments = await appointmentService.find({
       query: {
         patientId: strPatients
