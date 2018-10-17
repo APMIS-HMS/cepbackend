@@ -297,7 +297,7 @@ const getPersonPrescriptions = require('./get-person-prescriptions/get-person-pr
 const inventorySummaryCounts = require('./inventory-summary-counts/inventory-summary-counts.service.js');
 const clinicCharts = require('./clinic-charts/clinic-charts.service.js');
 const drugInteractions = require('./drug-interactions/drug-interactions.service.js');
-const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
+// const salesQtiesStatistics = require('./sales-qties-statistics/sales-qties-statistics.service.js');
 const batchTransactions = require('./batch-transactions/batch-transactions.service.js');
 const inventoryCountDetails = require('./inventory-count-details/inventory-count-details.service.js');
 const inventoryExpiredProductDetails = require('./inventory-expired-product-details/inventory-expired-product-details.service.js');
@@ -306,6 +306,10 @@ const inventoryBatchTransactionDetails = require('./inventory-batch-transaction-
 const fileUploadFacade = require('./file-upload-facade/file-upload-facade.service.js');
 const azureBlob = require('./azure-blob/azure-blob.service.js');
 const getPersonLabRequest = require('./get-person-lab-requests/get-person-lab-requests.service.js');
+const dailyOpd = require('./daily-opd/daily-opd.service.js');
+const outOfStockCountDetails = require('./out-of-stock-count-details/out-of-stock-count-details.service.js');
+const healthCoveredBillHistories = require('./health-covered-bill-histories/health-covered-bill-histories.service.js');
+const addHmoFacilities = require('./add-hmo-facilities/add-hmo-facilities.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -524,9 +528,13 @@ module.exports = function (app) {
   app.configure(inventoryExpiredProductDetails);
   app.configure(inventoryAboutToExpireProductDetails);
   app.configure(inventoryBatchTransactionDetails);
-  app.configure(salesQtiesStatistics);
+  //   app.configure(salesQtiesStatistics);
   app.configure(batchTransactions);
   app.configure(fileUploadFacade);
   app.configure(azureBlob);
   app.configure(getPersonLabRequest);
+  app.configure(dailyOpd);
+  app.configure(outOfStockCountDetails);
+  app.configure(healthCoveredBillHistories);
+  app.configure(addHmoFacilities);
 };
