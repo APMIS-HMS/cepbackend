@@ -13,6 +13,7 @@ class Service {
     }
 
     get(id, params) {
+
         return Promise.resolve({
             id, text: `A new message with ID: ${id}!`
         });
@@ -36,14 +37,16 @@ class Service {
         let mimeType = data.mimeType;
         let id = data.id;
         let uploadType = data.uploadType;
-        let rawdata = 'data:'+mimeType+';base64,';
-
-        rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
-
-        //console.log('Raw Data', rawdata);
-        // let rawdata = data.base64;
-
-        //let rawdata = data.base64;
+        let rawdata;
+        var uploadFile = data.base64;
+        var contains = uploadFile.includes('data:'+mimeType+';base64,');
+        if(contains){
+            rawdata = data.base64;
+        }else{
+            rawdata = 'data:'+mimeType+';base64,';
+            rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
+        }
+        
         let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
         let contentType = matches[1];
         let buffer = new Buffer(matches[2], 'base64');
