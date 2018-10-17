@@ -107,7 +107,7 @@ module.exports = {
     get: [iscovered()],
     create: [],
     update: [],
-    patch: [fastJoin(fixedEditPrice)],
+    patch: [iscovered(),fastJoin(fixedEditPrice)],
     remove: []
   },
 
