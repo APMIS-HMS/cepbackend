@@ -38,7 +38,7 @@ class Service {
             }
           }
         ],
-        $select: ['coverFile', 'billItems.covered', 'billItems.patientId', 'billItems.facilityServiceId', 'billItems.serviceId']
+        $select: ['coverFile', 'billItems.covered', 'billItems.patientId', 'billItems.facilityServiceId', 'billItems.serviceId','billItems.totalPrice']
       }
     });
 
