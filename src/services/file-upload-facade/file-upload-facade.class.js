@@ -99,7 +99,7 @@ class Service {
                 if (blolSvcCall_.name !== undefined) {
 
                     //If no error (upload successful), save to local db
-                    if (data.container === 'personfolder' && data.uploadType !== 'profilePicture') {
+                    if (data.container === 'personfolder' && data.uploadType === 'documentation') {
 
                         let doc = {
                             patientId: data.id,
@@ -113,7 +113,7 @@ class Service {
 
                         return jsend.success(createDoc);
 
-                    } else if (data.container === 'facilityfolder') {
+                    } else if (data.container === 'facilityfolder'&& data.uploadType === 'logo') {
                         //Get facility.
                         let getFacility = await facilityService.get(facilityId);
                         id = facilityId;
