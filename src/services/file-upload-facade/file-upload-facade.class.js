@@ -99,7 +99,7 @@ class Service {
                 if (blolSvcCall_.name !== undefined) {
 
                     //If no error (upload successful), save to local db
-                    if (data.container === 'personfolder') {
+                    if (data.container === 'personfolder' && data.uploadType !== 'profilePicture') {
 
                         let doc = {
                             patientId: data.id,
@@ -135,7 +135,7 @@ class Service {
                         finalResponse = facUpdateLogo;
                         return jsend.success(finalResponse);
                     }
-                    else if (data.uploadType === 'profilePicture') {
+                    else if (data.container === 'personfolder' && data.uploadType === 'profilePicture') {
                         //Get Person
                         id = data.id;
                         let getProfile = await peopleService.get(id);
