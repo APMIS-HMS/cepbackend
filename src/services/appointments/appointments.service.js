@@ -19,5 +19,11 @@ module.exports = function (app) {
     // Get our initialized service so that we can register hooks and filters
     const service = app.service('appointments');
 
+    service.emit('doctorAppointment', {
+        type: 'doctorAppointment',
+        data: 'New appointed has been assigned to you'
+    });
+
+
     service.hooks(hooks);
 };

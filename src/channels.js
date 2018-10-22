@@ -1,18 +1,18 @@
 module.exports = function (app) {
     if (typeof app.channel !== 'function') {
-    // If no real-time functionality has been configured just return
+        // If no real-time functionality has been configured just return
         return;
     }
     app.on('connection', connection => {
-    // On a new real-time connection, add it to the anonymous channel
+        // On a new real-time connection, add it to the anonymous channel
         app.channel('anonymous').join(connection);
     });
 
     app.on('login', (authResult, {
         connection
     }) => {
-    // connection can be undefined if there is no
-    // real-time connection, e.g. when logging in via REST
+        // connection can be undefined if there is no
+        // real-time connection, e.g. when logging in via REST
         if (connection) {
             // Obtain the logged in user from the connection
             //const user = connection.user;
@@ -114,10 +114,22 @@ module.exports = function (app) {
 
     app.service('message').publish((data, context) => {
         //console.log('==========********=============\n','******\n',context,'******\n',app.channel(`rooms/${data.room}`));
-        return app.channel(`rooms/${data.room}`);
+        return app.channel(`rooms/${data.facilityId}`);
     });
 
-    app.service('appointments').publish('created',(data)=>{
-        return app.channel(data);
+    app.service('appointments').publish((data) => {
+        if (data.doctorId !== undefined) {
+            app.channel(data.doctorId).join(data.doctorId);
+        }
+        if (data.patientId !== undefined) {
+            app.channel(data.patientId).join(data.patientId);
+        }
+        
+        return app.channel(data.doctorId);
+    });
+
+    app.service('notification').publish((data)=>{
+        console.log('==========********=============\n',data.receiverId);
+        return app.channel(data.receiver);
     });
 };
