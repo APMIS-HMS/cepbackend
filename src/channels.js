@@ -129,7 +129,6 @@ module.exports = function (app) {
     });
 
     app.service('notification').publish((data)=>{
-        console.log('==========********=============\n',data.receiverId);
-        return app.channel(data.receiver);
+        return app.channel(data.receiverId);
     });
 };

@@ -110,8 +110,7 @@ const resolvers = {
                 senderId: appointment.employee
             };
             if(context.method === 'create'){
-                const addNotification = await context.app.service('notification').create(appointment,{}); 
-                console.log('====================\n',addNotification);
+                await context.app.service('notification').create(appointment,{}); 
             }
             
         },
