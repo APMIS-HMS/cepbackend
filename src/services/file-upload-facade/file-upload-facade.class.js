@@ -13,6 +13,7 @@ class Service {
     }
 
     get(id, params) {
+
         return Promise.resolve({
             id, text: `A new message with ID: ${id}!`
         });
@@ -36,14 +37,16 @@ class Service {
         let mimeType = data.mimeType;
         let id = data.id;
         let uploadType = data.uploadType;
-        let rawdata = 'data:'+mimeType+';base64,';
-
-        rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
-
-        //console.log('Raw Data', rawdata);
-        // let rawdata = data.base64;
-
-        //let rawdata = data.base64;
+        let rawdata;
+        var uploadFile = data.base64;
+        var contains = uploadFile.includes('data:'+mimeType+';base64,');
+        if(contains){
+            rawdata = data.base64;
+        }else{
+            rawdata = 'data:'+mimeType+';base64,';
+            rawdata = rawdata + new Buffer(data.base64).toString('base64'); 
+        }
+        
         let matches = rawdata.match(/^data:([A-Za-z-+\\/]+);base64,(.+)$/);
         let contentType = matches[1];
         let buffer = new Buffer(matches[2], 'base64');
@@ -96,7 +99,7 @@ class Service {
                 if (blolSvcCall_.name !== undefined) {
 
                     //If no error (upload successful), save to local db
-                    if (data.container === 'personfolder') {
+                    if (data.container === 'personfolder' && data.uploadType === 'documentation') {
 
                         let doc = {
                             patientId: data.id,
@@ -110,7 +113,7 @@ class Service {
 
                         return jsend.success(createDoc);
 
-                    } else if (data.container === 'facilityfolder') {
+                    } else if (data.container === 'facilityfolder'&& data.uploadType === 'logo') {
                         //Get facility.
                         let getFacility = await facilityService.get(facilityId);
                         id = facilityId;
@@ -132,7 +135,7 @@ class Service {
                         finalResponse = facUpdateLogo;
                         return jsend.success(finalResponse);
                     }
-                    else if (data.uploadType === 'profilePicture') {
+                    else if (data.container === 'personfolder' && data.uploadType === 'profilePicture') {
                         //Get Person
                         id = data.id;
                         let getProfile = await peopleService.get(id);

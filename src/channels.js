@@ -117,4 +117,7 @@ module.exports = function (app) {
         return app.channel(`rooms/${data.room}`);
     });
 
+    app.service('appointments').publish('created',(data)=>{
+        return app.channel(data);
+    });
 };
