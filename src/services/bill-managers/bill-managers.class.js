@@ -190,7 +190,7 @@ class Service {
                                 if (index3.length > 0) {
                                     if (index3[0].modifierType === 'Percentage') {
                                         index3[0].modifierValue = data.price.others[t].price;
-                                    } else if (index3[0].modifierValue === 'Amount') {
+                                    } else if (index3[0].modifierType === 'Amount') {
                                         index3[0].modifierValue = data.price.others[t].price;
                                     }
                                 }
