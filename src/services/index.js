@@ -310,11 +310,7 @@ const dailyOpd = require('./daily-opd/daily-opd.service.js');
 const outOfStockCountDetails = require('./out-of-stock-count-details/out-of-stock-count-details.service.js');
 const healthCoveredBillHistories = require('./health-covered-bill-histories/health-covered-bill-histories.service.js');
 const addHmoFacilities = require('./add-hmo-facilities/add-hmo-facilities.service.js');
-<<<<<<< HEAD
-const facilityBedOccupancy = require('./facility-bed-occupancy/facility-bed-occupancy.service.js');
-=======
 const extractFacilityData = require('./extract-facility-data/extract-facility-data.service.js');
->>>>>>> fca988de323e6869e39616cea2c0095b4aabc4af
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
