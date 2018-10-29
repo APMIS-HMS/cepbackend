@@ -41,14 +41,18 @@ class Service {
 
     let billCreatorPrecedure = {};
     let billCreatorMed = {};
-    
-    const treatmentSheet = await treatmentSheetsService.create(data);
 
+    const treatmentSheet = await treatmentSheetsService.create(data);
+    console.log(1,treatmentSheet);
 
     if (data.treatmentSheet.investigations !== undefined) {
+      console.log('a');
       data.treatmentSheet.investigations.forEach(investigation => {
+        console.log('b');
         let bill = {};
+        console.log('c');
         if (investigation.isBilled === true) {
+          console.log('d');
           bill = {
             unitPrice: 0,
             facilityId: data.facilityId,
@@ -63,15 +67,21 @@ class Service {
               coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
             },
           };
+          console.log('e');
           if (investigation.investigation !== undefined) {
+            console.log('f');
             bill.unitPrice = (investigation.investigation.changedPrice !== null && investigation.investigation.changedPrice !== undefined) ? investigation.investigation.changedPrice : investigation.investigation.location.workbenches[0].price;
+            console.log('g');
             bill.totalPrice = bill.unitPrice;
+            console.log('h');
             if (investigation.investigation.changedPrice !== undefined) {
+              console.log('i');
               bill.unitPriceChanges.push({
                 currentPrice: investigation.investigation.changedPrice,
                 oldPrice: investigation.investigation.location.workbenches[0].price,
                 userId: params.user._id
               });
+              console.log('h');
             }
           }
 
@@ -92,8 +102,10 @@ class Service {
             facilityId: data.facilityId
           }
         }
+        console.log('j');
         investigationItems.push(item);
       });
+      console.log('bills.length '+ bills.length);
       if (bills.length > 0) {
         billCreator = await billCreatorsService.create(bills, {
           query: {
@@ -113,6 +125,7 @@ class Service {
       };
       labrequestService.create(laboratoryRequests);
     }
+    console.log(2);
     if (data.treatmentSheet.procedures !== undefined) {
       data.treatmentSheet.procedures.forEach(procedure => {
         const bill = {
@@ -139,6 +152,7 @@ class Service {
         }
       });
     }
+    console.log(3);
     if (data.treatmentSheet.medications !== undefined) {
       data.treatmentSheet.medications.forEach(medication => {
         if (medication.isBilled) {
@@ -175,12 +189,14 @@ class Service {
         });
       }
     }
+    console.log(4);
     const result = {
       investigations: billCreator,
       procedures: billCreatorPrecedure,
       medications: billCreatorMed,
       treatmentSheet: treatmentSheet
     }
+    console.log(5);
 
     return jsend.success(result);
   }
