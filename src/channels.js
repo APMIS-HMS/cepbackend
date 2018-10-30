@@ -94,6 +94,10 @@ module.exports = function (app) {
             }
         }
     });
+    app.service('fund-wallet').publish((data,context)=>{
+        return app.channel(data.facilityId);
+    });
+
     app.service('facility-roles').publish('created', (data, context) => {
         return app.channel(context.params.query.facilityId);
     });
