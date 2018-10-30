@@ -82,7 +82,7 @@ const fixedEditPrice = {
           billItem.unitPriceChanges.push({
             currentPrice: billItem.unitPrice,
             oldPrice: context.params.query.oldPrice,
-            userId: context.params.user._id
+            userId: context.params.query.createdBy
           });
           bill.billItems.map(x => {
             if (x._id == context.params.query._id) {

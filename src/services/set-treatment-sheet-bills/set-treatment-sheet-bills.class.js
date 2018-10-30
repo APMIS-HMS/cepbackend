@@ -79,7 +79,7 @@ class Service {
               bill.unitPriceChanges.push({
                 currentPrice: investigation.investigation.changedPrice,
                 oldPrice: investigation.investigation.location.workbenches[0].price,
-                userId: params.user._id
+                userId: data.createdBy
               });
               console.log('h');
             }
@@ -117,13 +117,13 @@ class Service {
       const laboratoryRequests = {
         facilityId: data.facilityId,
         patientId: patient.data[0]._id,
-        createdBy: params.user._id,
+        createdBy: data.createdBy,
         clinicalInformation: "N/A",
         diagnosis: "N/A",
         investigations: investigationItems,
         billingId: billCreator
       };
-      labrequestService.create(laboratoryRequests);
+      await labrequestService.create(laboratoryRequests);
     }
     console.log(2);
     if (data.treatmentSheet.procedures !== undefined) {
