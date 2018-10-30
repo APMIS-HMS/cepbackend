@@ -25,7 +25,7 @@ const resolvers = {
       }
     }
   }
-}
+};
 
 
 const getLoginFacilityId = require('../../hooks/get-login-facility-id');

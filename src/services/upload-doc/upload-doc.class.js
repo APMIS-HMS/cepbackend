@@ -22,7 +22,7 @@ class Service {
   async create(data, params) {
     const ACCESS_KEY = process.env.AZURE_STORAGE_ACCESS_KEY;
     var blobSvc = azure.createBlobService('apmisstorageaccount', ACCESS_KEY);
-    const fileExtArr = data.name.split(".");
+    const fileExtArr = data.name.split('.');
     const fileExt = fileExtArr[fileExtArr.length - 1];
     let fileName;
 
@@ -36,7 +36,7 @@ class Service {
     if (type === 'laboratory report') {
       fileName = data.labRequestId + '_' + data.investigationId + '.' + fileExt;
     } else if (type === 'logo') {
-
+      console.log('');
     }
 
     return new Promise(function (resolve, reject) {
@@ -55,7 +55,7 @@ class Service {
             });
           }
         }else{
-          reject([])
+          reject([]);
         }
       });
     });
