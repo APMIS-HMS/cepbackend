@@ -64,6 +64,8 @@ module.exports = function (app) {
   //   return app.channel(data._id);
   // });
   app.service('facilities').publish((data, context) => {
+      console.log('============Created============\n');
+      console.log('============Channels============\n',app.channels);
     if (context.params.user !== undefined) {
       return app.channel([context.params.user._id, data._id]);
     } else {
