@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 class Service {
+  
   constructor(options) {
     this.options = options || {};
   }
-
+  
   setup(app) {
     this.app = app;
   }
@@ -11,14 +12,17 @@ class Service {
   find(params) {
     const request = require('request');
     return new Promise(function (resolve, reject) {
-      let url = process.env.EMDEX_BASEURL + "/products/" + params.query.productId;
+      let url = process.env.EMDEX_BASEURL + '/products/' + params.query.productId;
       let args = {
         headers: {
-          "authorisation": process.env.EMDEX_AUTHORISATION_KEY
+          'authorisation': process.env.EMDEX_AUTHORISATION_KEY
         }
       };
       request.get(url, args, (error, response, body) => {
-        if (error) {}
+        if (error) {
+          console.log(error);
+          //do nothing
+        }
         if (response && body) {
           resolve(response);
         }
@@ -57,6 +61,7 @@ class Service {
 }
 
 module.exports = function (options) {
+  let app = [];
   return new Service(options);
 };
 

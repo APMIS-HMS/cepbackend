@@ -39,7 +39,7 @@ class Service {
               // ]
             }
           });
-
+          console.log(requests.data);
           if (requests.data.length > 0) {
             const text = new RegExp(searchText, 'i');
             requests = requests.data.filter(x => text.test(x.personDetails.firstName) || text.test(x.personDetails.lastName) || text.test(x.personDetails.apmisId) || text.test(x.personDetails.email));

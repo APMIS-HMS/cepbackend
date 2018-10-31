@@ -2,7 +2,7 @@
 //
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
-const labSchema = require('../custom-models/order-mgt-lab-model');
+//const labSchema = require('../custom-models/order-mgt-lab-model');
 
 module.exports = function(app) {
     const mongooseClient = app.get('mongooseClient');
