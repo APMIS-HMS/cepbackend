@@ -339,13 +339,31 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     let getPerson = {};
     if (data.inputedValue.paymentMethod.bearerPersonId !== undefined) {
       getPerson = await peopleService.get(data.inputedValue.paymentMethod.bearerPersonId, {});
+      const personWallet = await peopleService.get(data.destinationId, {
+        query: {
+          $select: ['wallet']
+        }
+      });
+      getPerson.wallet = personWallet.wallet;
     } else {
       getPerson = await peopleService.get(data.personId, {});
+      const personWallet = await peopleService.get(data.destinationId, {
+        query: {
+          $select: ['wallet']
+        }
+      });
+      getPerson.wallet = personWallet.wallet;
     }
 
     let patchedPerson, facility = {};
     if (existingSubscription.status === 'success') {
       facility = await facilitiesService.get(data.facilityId, {});
+      const facilityWallet = await facilityService.get(facilityId, {
+        query: {
+          $select: ['wallet']
+        }
+      });
+      facility.wallet = facilityWallet.wallet;
       if (existingSubscription.data.name === 'Subscription') {
         let apmis_sub_charge = data.subTotal * (existingSubscription.data.rate / 100);
         let currentBalance = parseInt(getPerson.wallet.balance) + (data.inputedValue.cost + apmis_sub_charge);
@@ -446,6 +464,12 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       patchedPerson.isPaid = false;
       patchedPerson.paidStatus = 'UNPAID';
     }
+    const personWallet2 = await peopleService.get(data.destinationId, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    patechedPerson.wallet = personWallet2.wallet;
     let returnObj = {
       person: patchedPerson,
       invoice: data.currentInvoice

@@ -3,8 +3,8 @@
 
 
 function randamApha() {
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for (var i = 0; i < 2; i++)
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     return text;
@@ -13,9 +13,9 @@ function randamApha() {
 function OrderId() {
     var number = Math.floor(Math.random() * 9999999) + 1;
     if (number.length < 7) {
-        number = String("0000000" + number).slice(-7);
+        number = String('0000000' + number).slice(-7);
     }
-    var retVal = "RQ" + number + "" + randamApha();
+    var retVal = 'RQ' + number + '' + randamApha();
     return retVal;
 }
 
@@ -28,8 +28,7 @@ async function generateUniqueOrderNumber(v) {
     } else {
         return generateUniqueOrderNumber(v);
     }
-
-};
+}
 
 
 module.exports = function (options = {}) { // eslint-disable-line no-unused-vars

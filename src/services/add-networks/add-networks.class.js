@@ -131,6 +131,7 @@ class Service {
     createNetwork(data, params) {
         const facilitiesService = this.app.service('facilities');
         var _memberFacilities = [];
+        var memberofs = [];
         if (params.query.isdelete.toString() == 'false') {
             return new Promise(function(resolve, reject) {
                 data.facilityIds.forEach((current, i) => {

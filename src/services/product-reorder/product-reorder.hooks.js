@@ -18,12 +18,12 @@ const resolvers = {
         item.productItemConfigObject = packDetails;
         item.productConfigObject = configItems.data[0].packSizes;
       }catch(Exception){
-
+        console.log(Exception);
       }
       
     }
   }
-}
+};
 
 module.exports = {
   before: {

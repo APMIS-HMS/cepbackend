@@ -8,6 +8,7 @@ const roomSchema = new Schema({
     facilityServiceId: { type: Schema.Types.ObjectId, required: false },
     service: { type: Schema.Types.Mixed, required: false },
     categoryId: { type: Schema.Types.ObjectId, required: false },
+    isDeleted: { type: Boolean, default: false, required: false },
     beds: [bed],
     description: { type: String, required: false },
 }, {
