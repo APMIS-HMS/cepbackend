@@ -464,6 +464,12 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       patchedPerson.isPaid = false;
       patchedPerson.paidStatus = 'UNPAID';
     }
+    const personWallet2 = await peopleService.get(data.destinationId, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    patechedPerson.wallet = personWallet2.wallet;
     let returnObj = {
       person: patchedPerson,
       invoice: data.currentInvoice
