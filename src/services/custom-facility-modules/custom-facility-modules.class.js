@@ -76,14 +76,14 @@ class Service {
             'isActive': true,
             'canDisable': true,
             'status': moduleStatus.status.pending
-          })
+          });
         } else {
           facility.facilitymoduleId.push({
             '_id': params.query.moduleId,
             'isActive': true,
             'canDisable': false,
             'status': moduleStatus.status.pending
-          })
+          });
         }
       }
     }

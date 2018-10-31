@@ -54,6 +54,7 @@
         "mongoose": "^4.13.6",
         "node-rest-client": "^3.1.0",
         "npm": "^5.8.0",
+        "p-iteration": "^1.1.7",
         "request": "^2.83.0",
         "request-promise": "^4.2.2",
         "rxjs": "^5.5.6",

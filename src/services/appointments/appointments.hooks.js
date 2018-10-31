@@ -132,6 +132,7 @@ const resolvers = {
     }
 };
 module.exports = {
+<<<<<<< HEAD
     before: {
         all: [authenticate('jwt')],
         find: [],
@@ -141,6 +142,17 @@ module.exports = {
         patch: [],
         remove: []
     },
+=======
+  before: {
+    all: [],//authenticate('jwt')],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+>>>>>>> 804b2048faaba5ac0a6fbf40fc0f12c98cd6b46f
 
     after: {
         all: [fastJoin(resolvers)],

@@ -21,7 +21,7 @@ class Service {
 
     while (tagsLength--) {
       if (tagsData[tagsLength].tagType !== undefined) {
-        if (tagsData[tagsLength].tagType.toLowerCase() !== "identification") {
+        if (tagsData[tagsLength].tagType.toLowerCase() !== 'identification') {
           tagsArr.push(tagsData[tagsLength]);
         }
       } else {

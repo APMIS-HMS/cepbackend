@@ -310,7 +310,8 @@ const dailyOpd = require('./daily-opd/daily-opd.service.js');
 const outOfStockCountDetails = require('./out-of-stock-count-details/out-of-stock-count-details.service.js');
 const healthCoveredBillHistories = require('./health-covered-bill-histories/health-covered-bill-histories.service.js');
 const addHmoFacilities = require('./add-hmo-facilities/add-hmo-facilities.service.js');
-const notification = require('./notification/notification.service.js');
+const setTreatmentSheetBills = require('./set-treatment-sheet-bills/set-treatment-sheet-bills.service.js');
+const extractFacilityData = require('./extract-facility-data/extract-facility-data.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -538,5 +539,3 @@ module.exports = function (app) {
   app.configure(outOfStockCountDetails);
   app.configure(healthCoveredBillHistories);
   app.configure(addHmoFacilities);
-  app.configure(notification);
-};
