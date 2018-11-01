@@ -1,17 +1,13 @@
-const {
-  authenticate
-} = require('@feathersjs/authentication').hooks;
-
-const treatmentSheetItemPatch = require('../../hooks/treatment-sheet-item-patch');
+const { authenticate } = require('@feathersjs/authentication').hooks;
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
-    find: [treatmentSheetItemPatch()],
+    all: [ authenticate('jwt') ],
+    find: [],
     get: [],
     create: [],
     update: [],
-    patch: [treatmentSheetItemPatch()],
+    patch: [],
     remove: []
   },
 
