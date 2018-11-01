@@ -111,6 +111,7 @@ class Service {
             }
             billGroup.billingIds.push(apmisSubChargeItem);
           }
+
           const awaitBillGroup = await invoicesService.create(billGroup);
           const len = data.inputedValue.paymentTxn.length - 1;
           const len2 = data.listedBillItems.length - 1;
@@ -138,12 +139,18 @@ class Service {
           let len4 = filterCheckedBills.length;
           let pds = [];
           for (let _indx = 0; _indx < len4; _indx++) {
-            const pd = await billingsService.patch(filterCheckedBills[_indx]._id, {
-              billItems: filterCheckedBills[_indx].billItems
-            });
-            pds.push(pd);
-          }
+            try {
+              const pd = await billingsService.patch(filterCheckedBills[_indx]._id, {
+                billItems: filterCheckedBills[_indx].billItems
+              }, {
+                query: {
+                  hasPriceChanged: false
+                }
+              });
+              pds.push(pd);
+            } catch (error) {}
 
+          }
 
 
           if (data.inputedValue.isWaved !== true) {
@@ -197,7 +204,6 @@ class Service {
             }
           }
         }
-
         data.invoice.balance = data.inputedValue.balance;
         data.inputedValue.paymentMethod.reason = data.reason;
         data.invoice.payments.forEach(element => {
@@ -206,12 +212,7 @@ class Service {
         if (data.invoice.payments.length > 0) {
           data.invoice.payments.push.apply(data.invoice.payments, data.inputedValue.paymentTxn);
         }
-        // console.log({billingIds: data.invoice.billingIds,
-        //   balance: data.invoice.balance,
-        //   payments: data.invoice.payments,
-        //   createdBy: data.createdBy,
-        //   paymentStatus: data.invoice.paymentStatus,
-        //   paymentCompleted: data.invoice.paymentCompleted});
+
         const patechedInvoice = await invoicesService.patch(data.invoice._id, {
           billingIds: data.invoice.billingIds,
           balance: data.invoice.balance,
@@ -339,7 +340,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     let getPerson = {};
     if (data.inputedValue.paymentMethod.bearerPersonId !== undefined) {
       getPerson = await peopleService.get(data.inputedValue.paymentMethod.bearerPersonId, {});
-      const personWallet = await peopleService.get(data.destinationId, {
+      const personWallet = await peopleService.get(data.personId, {
         query: {
           $select: ['wallet']
         }
@@ -347,22 +348,22 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       getPerson.wallet = personWallet.wallet;
     } else {
       getPerson = await peopleService.get(data.personId, {});
-      const personWallet = await peopleService.get(data.destinationId, {
+      const personWallet = await peopleService.get(data.personId, {
         query: {
           $select: ['wallet']
         }
       });
       getPerson.wallet = personWallet.wallet;
     }
-
     let patchedPerson, facility = {};
     if (existingSubscription.status === 'success') {
       facility = await facilitiesService.get(data.facilityId, {});
-      const facilityWallet = await facilityService.get(facilityId, {
+      const facilityWallet = await facilitiesService.get(data.facilityId, {
         query: {
           $select: ['wallet']
         }
       });
+
       facility.wallet = facilityWallet.wallet;
       if (existingSubscription.data.name === 'Subscription') {
         let apmis_sub_charge = data.subTotal * (existingSubscription.data.rate / 100);
@@ -379,6 +380,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           'balance': currentBalance,
           'ledgerBalance': currentBalance
         });
+
         patchedPerson = await peopleService.patch(getPerson._id, {
           wallet: getPerson.wallet
         });
@@ -400,36 +402,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
         //Code to POST apmisPercentage to Apmis Bank Account.
 
       } else if (existingSubscription.data.name === 'One-of-payment') {
-        let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
-        getPerson.wallet.balance = currentBalance;
-        getPerson.wallet.ledgerBalance = currentBalance;
-        getPerson.wallet.transactions.push({
-          'transactionType': data.inputedValue.transactionType,
-          'amount': data.inputedValue.amountPaid,
-          'refCode': ref,
-          'transactionMedium': data.inputedValue.paymentMethod.planType,
-          'description': description,
-          'transactionStatus': data.transactionStatus,
-          'balance': currentBalance,
-          'ledgerBalance': currentBalance
-        });
-        patchedPerson = await peopleService.patch(getPerson._id, {
-          wallet: getPerson.wallet
-        });
-        let facilityBalance = parseInt(facility.wallet.balance) + parseInt(data.inputedValue.amountPaid);
-        facility.wallet.balance = facilityBalance;
-        facility.wallet.ledgerBalance = facilityBalance;
-        facility.wallet.transactions.push({
-          'transactionType': data.inputedValue.transactionType,
-          'amount': parseInt(data.inputedValue.amountPaid),
-          'refCode': ref,
-          'description': description,
-          'transactionMedium': data.inputedValue.paymentMethod.planType,
-          'transactionStatus': data.transactionStatus,
-          'balance': facilityBalance,
-          'ledgerBalance': facilityBalance
-        });
-      } else if (existingSubscription.data.name === undefined) {
+
         let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
         getPerson.wallet.balance = currentBalance;
         getPerson.wallet.ledgerBalance = currentBalance;
@@ -447,6 +420,43 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           wallet: getPerson.wallet
         });
 
+        let facilityBalance = parseInt(facility.wallet.balance) + parseInt(data.inputedValue.amountPaid);
+        facility.wallet.balance = facilityBalance;
+        facility.wallet.ledgerBalance = facilityBalance;
+        facility.wallet.transactions.push({
+          'transactionType': data.inputedValue.transactionType,
+          'amount': parseInt(data.inputedValue.amountPaid),
+          'refCode': ref,
+          'description': description,
+          'transactionMedium': data.inputedValue.paymentMethod.planType,
+          'transactionStatus': data.transactionStatus,
+          'balance': facilityBalance,
+          'ledgerBalance': facilityBalance
+        });
+
+      } else if (existingSubscription.data.name === undefined) {
+        let currentBalance = parseInt(getPerson.wallet.balance) - parseInt(data.inputedValue.amountPaid);
+        getPerson.wallet.balance = currentBalance;
+        getPerson.wallet.ledgerBalance = currentBalance;
+        getPerson.wallet.transactions.push({
+          'transactionType': data.inputedValue.transactionType,
+          'amount': data.inputedValue.amountPaid,
+          'refCode': ref,
+          'transactionMedium': data.inputedValue.paymentMethod.planType,
+          'description': description,
+          'transactionStatus': data.transactionStatus,
+          'balance': currentBalance,
+          'ledgerBalance': currentBalance
+        });
+        patchedPerson = await peopleService.patch(getPerson._id, {
+          wallet: getPerson.wallet
+        });
+        const patchedPersonWallet = await peopleService.get(getPerson._id, {
+          query: {
+            $select: ['wallet']
+          }
+        });
+        patchedPerson.wallet = patchedPersonWallet.wallet;
       }
     } else {
       return jsend.fail({})
@@ -464,12 +474,12 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
       patchedPerson.isPaid = false;
       patchedPerson.paidStatus = 'UNPAID';
     }
-    const personWallet2 = await peopleService.get(data.destinationId, {
+    const personWallet2 = await peopleService.get(data.personId, {
       query: {
         $select: ['wallet']
       }
     });
-    patechedPerson.wallet = personWallet2.wallet;
+    patchedPerson.wallet = personWallet2.wallet;
     let returnObj = {
       person: patchedPerson,
       invoice: data.currentInvoice
