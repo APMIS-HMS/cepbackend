@@ -312,6 +312,7 @@ const healthCoveredBillHistories = require('./health-covered-bill-histories/heal
 const addHmoFacilities = require('./add-hmo-facilities/add-hmo-facilities.service.js');
 const setTreatmentSheetBills = require('./set-treatment-sheet-bills/set-treatment-sheet-bills.service.js');
 const extractFacilityData = require('./extract-facility-data/extract-facility-data.service.js');
+const facilityInitializer = require('./facility-initializer/facility-initializer.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -541,4 +542,5 @@ module.exports = function (app) {
   app.configure(addHmoFacilities);
   app.configure(setTreatmentSheetBills);
   app.configure(extractFacilityData);
+  app.configure(facilityInitializer);
 };
