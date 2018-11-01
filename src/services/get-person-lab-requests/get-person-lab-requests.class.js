@@ -24,11 +24,10 @@ class Service {
     });
     let strPatients = [];
     strPatients.push.apply(strPatients,patientIds.data);
-        
+    delete params.query.personId;
+    params.query.patientId = strPatients;
     let labRequest = await labService.find({
-      query: {
-        patientId: strPatients
-      }
+      query: params.query
     });
     return labRequest;
   }
