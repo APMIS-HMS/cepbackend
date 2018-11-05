@@ -9,7 +9,6 @@ class Service {
   }
 
   async find(params) {
-
     const patientService = this.app.service('patients');
     const appointmentService = this.app.service('appointments');
 
@@ -20,14 +19,10 @@ class Service {
       }
     });
     let strPatients = [];
-
     strPatients.push.apply(strPatients, patientIds.data);
-
-    let appointments = await appointmentService.find({
-      query: {
-        patientId: strPatients
-      }
-    });
+    delete params.query.personId;
+    params.query.patientId = strPatients;
+    let appointments = await appointmentService.find({query:params.query});
     return appointments;
   }
 
