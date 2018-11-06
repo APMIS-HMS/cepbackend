@@ -75,9 +75,10 @@ class Service {
           let updatedData = JSON.parse(JSON.stringify(hmo.data[0]));
           if (id !== '') {
             for (let indx = 0; indx < updatedData.hmos[index].enrolleeList.length; indx++) {
-              const enrolleeIndex = updatedData.hmos[index].enrolleeList[indx].enrollees.findIndex(x => x.filNo.toString() === data.filNo);
+              const enrolleeIndex = id; //updatedData.hmos[index].enrolleeList[indx].enrollees.findIndex(x => x.filNo.toString() === data.filNo);
               if (enrolleeIndex > -1) {
                 let rowObj = updatedData.hmos[index].enrolleeList[indx].enrollees[enrolleeIndex];
+
                 rowObj.serial = data.serial;
                 rowObj.surname = data.surname.toUpperCase();
                 rowObj.firstname = data.firstname.toUpperCase();
@@ -87,7 +88,14 @@ class Service {
                 rowObj.sponsor = data.sponsor.toUpperCase();
                 rowObj.plan = data.plan.toUpperCase();
                 rowObj.type = data.type;
-                rowObj.status = true;
+                rowObj.status = data.status;
+                rowObj.date = data.date;
+
+                updatedData.hmos[index].enrolleeList[indx].enrollees[enrolleeIndex] = rowObj;
+
+                let _updatedData = JSON.parse(JSON.stringify(updatedData));
+                let updatedBeneficiary = await hmoService.update(_updatedData._id, _updatedData, {});
+                return updatedBeneficiary;
               }
             }
           } else {
@@ -126,11 +134,11 @@ class Service {
               });
               updatedData.hmos[index].enrolleeList.push(enrolleeList);
             }
-          }
 
-          let _updatedData = JSON.parse(JSON.stringify(updatedData));
-          let updatedBeneficiary = await hmoService.patch(_updatedData._id, _updatedData, {});
-          return updatedBeneficiary;
+            let _updatedData = JSON.parse(JSON.stringify(updatedData));
+            let updatedBeneficiary = await hmoService.patch(_updatedData._id, _updatedData, {});
+            return updatedBeneficiary;
+          }
         }
       } else {
         return {};
