@@ -8,25 +8,55 @@ const {
 const fastJoinServerDate = {
   joins: {
     addServerDate: () => async (data, context) => {
-      console.log(context.params.query);
-      // console.log(data['treatmentSheet.investigations']);
-      console.log(data['treatmentSheet.investigations']);
-      if (context.params.query !== {}) {
-        if (context.params.query.isInvestigation && context.params.query.index !== undefined) {
-          data['treatmentSheet.investigations'][context.params.query.index].trackItem.createdAt = new Date();
-          data['treatmentSheet.investigations'][context.params.query.index].tracks.push(data['treatmentSheet.investigations'][context.params.query.index].trackItem);
-          delete data['treatmentSheet.investigations'][context.params.query.index].trackItem;
-          context.params.query = {};
+      console.log('Hook 1');
+      console.log(data.treatmentSheet);
+      data.treatmentSheet.investigations.map(x => {
+        if (x.tracks !== undefined) {
+          x.tracks.map(y => {
+            if (y.createdAt === undefined) {
+              y.createdAt = new Date();
+            }
+          });
         }
-      }
-
+      });
+      console.log('Hook 1');
+      data.treatmentSheet.medications.map(x => {
+        if (x.tracks !== undefined) {
+          x.tracks.map(y => {
+            if (y.createdAt === undefined) {
+              y.createdAt = new Date();
+            }
+          });
+        }
+      });
+      console.log('Hook 1');
+      data.treatmentSheet.procedures.map(x => {
+        if (x.tracks !== undefined) {
+          x.tracks.map(y => {
+            if (y.createdAt === undefined) {
+              y.createdAt = new Date();
+            }
+          });
+        }
+      });
+      console.log('Hook 1');
+      data.treatmentSheet.nursingCares.map(x => {
+        if (x.tracks !== undefined) {
+          x.tracks.map(y => {
+            if (y.createdAt === undefined) {
+              y.createdAt = new Date();
+            }
+          });
+        }
+      });
+      console.log(data);
     }
   }
 }
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
+    all: [], //authenticate('jwt')],
     find: [],
     get: [],
     create: [],

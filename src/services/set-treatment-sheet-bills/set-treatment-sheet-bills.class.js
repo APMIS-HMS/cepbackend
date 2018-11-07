@@ -251,7 +251,7 @@ class Service {
         $select: ['_id', 'clientsNo', 'paymentPlan']
       }
     });
-
+    console.log(patient);
 
     const prescriptionPriority = await prescriptionPriorityService.find({
       query: {
@@ -259,7 +259,7 @@ class Service {
         $select: ['_id', 'name']
       }
     });
-
+console.log(prescriptionPriority);
     let bills = [];
     let procedureBills = [];
     let medicationBills = [];
@@ -406,6 +406,7 @@ class Service {
                 coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
               },
             };
+            console.log(bill);
             if (medication.changedPrice !== undefined && medication.changedPrice !== null) {
               bill.unitPriceChanges.push({
                 currentPrice: medication.changedPrice,
@@ -424,6 +425,7 @@ class Service {
             patientId: patient.data[0]._id
           }
         });
+        console.log(billCreatorMed)
         billCreatorMed.billItems.map(x => {
           data.treatmentSheet.medications.map(y => {
             if (x.serviceId !== undefined && x.facilityServiceId !== undefined && x.serviceId.toString() === y.serviceId.toString() && x.facilityServiceId.toString() === y.facilityServiceId.toString()) {
@@ -432,6 +434,13 @@ class Service {
             }
           });
         });
+        console.log(billCreatorMed);
+
+        console.log(data.facilityId,
+          data.createdBy,
+          prescriptionPriority.data[0],
+          patient.data[0]._id,
+          data.treatmentSheet.medications);
         const prescribe = {
           facilityId: data.facilityId,
           employeeId: data.createdBy,
@@ -442,7 +451,10 @@ class Service {
           isAuthorised: true,
           prescriptionItems:  data.treatmentSheet.medications
         };
-        await prescriptionService.create(prescribe);
+        console.log(prescribe);
+
+        const yu = await prescriptionService.create(prescribe);
+        console.log(yu);
       }
     }
     console.log(4);
