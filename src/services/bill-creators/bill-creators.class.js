@@ -16,7 +16,6 @@ class Service {
     });
   }
   async create(data, params) {
-    console.log('QUERY', params.query);
     const patientsService = this.app.service('patients');
     const billingsService = this.app.service('billings');
     const familiesService = this.app.service('families');
@@ -80,27 +79,20 @@ class Service {
     }
     //Collection of Family BillItems
     if (family.length > 0) {
-      console.log(1);
       let familyPrincipal = {};
       len = family.length;
       for (let index = 0; index < len; index++) {
         const indx = family.filter(x => x.covered.familyId.toString() === family[index].covered.familyId.toString() && x.isPicked === undefined);
-        console.log('index', indx);
         if (indx.length > 0) {
           indx.forEach(x => {
             x.isPicked = true;
           });
-          console.log('After index');
           const patient = await patientsService.get(params.query.patientId);
-          console.log('patient', patient);
           const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.familyId !== undefined && x.planDetails.familyId.toString() === family[index].covered.familyId.toString());
-          console.log('patientPaymentType', patientPaymentType);
           const familyCoveredDetails = await familiesService.get(patientPaymentType[0].planDetails.familyId);
-          console.log('family', familyCoveredDetails);
           if (familyCoveredDetails !== null) {
             familyPrincipal = familyCoveredDetails.familyCovers.find(x => x.serial === 0);
           }
-          console.log('family Principal', familyPrincipal);
           const billModel = {
             'facilityId': params.query.facilityId,
             'patientId': familyPrincipal.patientId,
@@ -116,7 +108,6 @@ class Service {
           billGroup.push(billModel);
         }
       }
-      console.log(2);
     }
 
     //Collection of Wallet Billitems
@@ -133,9 +124,7 @@ class Service {
       };
       billGroup.push(billModel);
     }
-    console.log(billGroup, wallet);
     const bills = await billingsService.create(billGroup);
-    console.log(bills);
     return bills;
   }
   update(id, data, params) {
