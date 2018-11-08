@@ -9,7 +9,12 @@ const fastJoinServerDate = {
   joins: {
     addServerDate: () => async (data, context) => {
       console.log('Hook 1');
-      console.log(data.treatmentSheet);
+      console.log(data);
+      if(data.treatmentSheet!==undefined){
+
+      }else{
+        
+      }
       data.treatmentSheet.investigations.map(x => {
         if (x.tracks !== undefined) {
           x.tracks.map(y => {

@@ -41,7 +41,7 @@ class Service {
         $select: ['_id', 'name']
       }
     });
-    
+
 
     let bills = [];
     let procedureBills = [];
@@ -134,6 +134,7 @@ class Service {
         investigations: investigationItems,
         billingId: billCreator
       };
+      console.log(laboratoryRequests, billCreator);
       await labrequestService.create(laboratoryRequests);
     }
     console.log(2);
@@ -215,7 +216,7 @@ class Service {
           isCosted: false,
           isDispensed: false,
           isAuthorised: true,
-          prescriptionItems:  data.treatmentSheet.medications
+          prescriptionItems: data.treatmentSheet.medications
         };
         await prescriptionService.create(prescribe);
       }
@@ -259,7 +260,7 @@ class Service {
         $select: ['_id', 'name']
       }
     });
-console.log(prescriptionPriority);
+    console.log(prescriptionPriority);
     let bills = [];
     let procedureBills = [];
     let medicationBills = [];
@@ -354,6 +355,7 @@ console.log(prescriptionPriority);
           investigations: investigationItems,
           billingId: billCreator
         };
+        console.log(laboratoryRequests, billCreator);
         await labrequestService.create(laboratoryRequests);
       }
     }
@@ -449,7 +451,7 @@ console.log(prescriptionPriority);
           isCosted: false,
           isDispensed: false,
           isAuthorised: true,
-          prescriptionItems:  data.treatmentSheet.medications
+          prescriptionItems: data.treatmentSheet.medications
         };
         console.log(prescribe);
 
