@@ -1,17 +1,33 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
+const jsend = require('jsend');
 class Service {
   constructor(options) {
     this.options = options || {};
   }
 
-  find(params) {
-    return Promise.resolve([]);
+  async find(params) {
+    console.log(params.query);
+    const familyCoverService = this.app.service('families');
+    const _families = await familyCoverService.find({
+      query: params.query
+    });
+    console.log(_families);
+    let families = [];
+    _families.data.map(x => {
+      x.familyCovers.map(y => {
+        const item = y;
+        y.familyId = x._id;
+        families.push(y);
+      });
+    });
+    return jsend.success(families);
   }
 
   get(id, params) {
     return Promise.resolve({
-      id, text: `A new message with ID: ${id}!`
+      id,
+      text: `A new message with ID: ${id}!`
     });
   }
 
@@ -249,8 +265,7 @@ class Service {
           });
         }
       });
-    }
-    );
+    });
 
   }
 
@@ -263,7 +278,9 @@ class Service {
   }
 
   remove(id, params) {
-    return Promise.resolve({ id });
+    return Promise.resolve({
+      id
+    });
   }
   setup(app) {
     this.app = app;
