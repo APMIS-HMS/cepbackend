@@ -233,8 +233,20 @@ class Service {
     return jsend.success(result);
   }
 
-  update(id, data, params) {
-    return Promise.resolve(data);
+  async update(id, data, params) {
+    const treatmentSheetsService = this.app.service('treatment-sheets');
+    const documentationService = this.app.service('documentations');
+    if (data.treatmentSheet.doc !== undefined) {
+      const doc = data.treatmentSheet.doc;
+      delete data.treatmentSheet.doc;
+      await documentationService.patch(doc._id, {
+        documentations: doc.documentations
+      }, {});
+    }
+    const treatmentSheet = await treatmentSheetsService.patch(id, {
+      treatmentSheet: data.treatmentSheet
+    });
+    return treatmentSheet;
   }
 
   async patch(id, data, params) {

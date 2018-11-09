@@ -8,53 +8,63 @@ const {
 const fastJoinServerDate = {
   joins: {
     addServerDate: () => async (data, context) => {
-      console.log('Hook 1');
-      console.log(data);
-      if(data.treatmentSheet!==undefined){
-
-      }else{
-        
+      if (data.treatmentSheet !== undefined) {
+        if (data.treatmentSheet.investigations !== undefined) {
+          data.treatmentSheet.investigations.map(x => {
+            if (x.tracks !== undefined) {
+              x.tracks.map(y => {
+                if (y.createdAt === undefined) {
+                  y.createdAt = new Date();
+                }
+              });
+            }
+          });
+        }
+        if (data.treatmentSheet.medications !== undefined) {
+          data.treatmentSheet.medications.map(x => {
+            if (x.tracks !== undefined) {
+              x.tracks.map(y => {
+                if (y.createdAt === undefined) {
+                  y.createdAt = new Date();
+                }
+              });
+            }
+          });
+        }
+        if (data.treatmentSheet.procedures !== undefined) {
+          data.treatmentSheet.procedures.map(x => {
+            if (x.tracks !== undefined) {
+              x.tracks.map(y => {
+                if (y.createdAt === undefined) {
+                  y.createdAt = new Date();
+                }
+              });
+            }
+          });
+        }
+        if (data.treatmentSheet.nursingCares !== undefined) {
+          data.treatmentSheet.nursingCares.map(x => {
+            if (x.tracks !== undefined) {
+              x.tracks.map(y => {
+                if (y.createdAt === undefined) {
+                  y.createdAt = new Date();
+                }
+              });
+            }
+          });
+        }
+        if (data.treatmentSheet.physicianOrders !== undefined) {
+          data.treatmentSheet.physicianOrders.map(x => {
+            if (x.tracks !== undefined) {
+              x.tracks.map(y => {
+                if (y.createdAt === undefined) {
+                  y.createdAt = new Date();
+                }
+              });
+            }
+          });
+        }
       }
-      data.treatmentSheet.investigations.map(x => {
-        if (x.tracks !== undefined) {
-          x.tracks.map(y => {
-            if (y.createdAt === undefined) {
-              y.createdAt = new Date();
-            }
-          });
-        }
-      });
-      console.log('Hook 1');
-      data.treatmentSheet.medications.map(x => {
-        if (x.tracks !== undefined) {
-          x.tracks.map(y => {
-            if (y.createdAt === undefined) {
-              y.createdAt = new Date();
-            }
-          });
-        }
-      });
-      console.log('Hook 1');
-      data.treatmentSheet.procedures.map(x => {
-        if (x.tracks !== undefined) {
-          x.tracks.map(y => {
-            if (y.createdAt === undefined) {
-              y.createdAt = new Date();
-            }
-          });
-        }
-      });
-      console.log('Hook 1');
-      data.treatmentSheet.nursingCares.map(x => {
-        if (x.tracks !== undefined) {
-          x.tracks.map(y => {
-            if (y.createdAt === undefined) {
-              y.createdAt = new Date();
-            }
-          });
-        }
-      });
-      console.log(data);
     }
   }
 }
