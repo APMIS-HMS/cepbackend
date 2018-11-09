@@ -152,6 +152,7 @@ const facilityRoles = require('./facility-roles/facility-roles.service.js');
 const saveEmployee = require('./save-employee/save-employee.service.js');
 const scheduleTypes = require('./schedule-types/schedule-types.service.js');
 const schedules = require('./schedules/schedules.service.js');
+const notification = require('./notification/notification.service.js');
 const getPrescription =
   require('./get-prescription/get-prescription.service.js');
 const timezones = require('./timezones/timezones.service.js');
@@ -385,6 +386,7 @@ module.exports = function (app) {
   app.configure(auditTray);
   app.configure(bedTypes);
   app.configure(clientTypes);
+  app.configure(notification);
   app.configure(companycovers);
   app.configure(companycovercategories);
   app.configure(companyHealthCover);
