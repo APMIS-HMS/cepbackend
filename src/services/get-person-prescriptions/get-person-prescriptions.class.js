@@ -23,10 +23,10 @@ class Service {
     });
     let strPatients = [];
     strPatients.push.apply(strPatients, patientIds.data);
+    delete params.query.personId;
+    params.query.patientId = strPatients;
     let prescriptions = await prescriptionsService.find({
-      query: {
-        patientId: strPatients
-      }
+      query: params.query
     });
     return prescriptions;
   }

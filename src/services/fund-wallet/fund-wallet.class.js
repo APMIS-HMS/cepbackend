@@ -32,8 +32,7 @@ class FundWalletService {
         const paymentService = this.app.service('payments');
         const cashPaymentService = this.app.service('cash-payment');
 
-        const accessToken = params.accessToken; /* Not required */
-
+        const accessToken = params.accessToken !== undefined ? params.accessToken : params.headers.authorization.split(' ')[1]; /* Not required */
         if (accessToken !== undefined && data.paymentMethod === undefined) {
             const ref = data.ref; /* Not required. This is for e-payment */
             const payment = data.payment;
@@ -41,9 +40,9 @@ class FundWalletService {
             const paymentRoute = payment.route; /* Not required. This is either "Flutterwave", "Paystack" */
             const amount = data.amount; /* Required */
             const facilityId =
-				data.facilityId; /* Not required. This is if someone is funding the wallet on behalf of the facility */
+        data.facilityId; /* Not required. This is if someone is funding the wallet on behalf of the facility */
             const entity =
-				data.entity; /* Required. This is the entity making the transaction. Could either be "Person" or "Facility" */
+        data.entity; /* Required. This is the entity making the transaction. Could either be "Person" or "Facility" */
             const loggedPersonId = params.user.personId;
             const destinationId = data.destinationId !== undefined ? data.destinationId : params.user.personId;
             if (payment !== undefined) {
@@ -101,7 +100,7 @@ class FundWalletService {
                             const facility = await facilityService.get(facilityId);
                             const facilityWallet = await facilityService.get(facilityId, {
                                 query: {
-                                    $select: [ 'wallet' ]
+                                    $select: ['wallet']
                                 }
                             });
                             const userWallet = facilityWallet.wallet; // facility.wallet;
@@ -135,7 +134,6 @@ class FundWalletService {
                             paymentRes.isActive = true;
                             paymentRes.paymentResponse = data2;
                             let updatedPayment = await paymentService.update(paymentRes._id, paymentRes);
-
                             if (updatedPayment !== undefined) {
                                 if (entity !== undefined && entity.toLowerCase() === 'person') {
                                     const person = await peopleService.get(destinationId);
@@ -168,7 +166,7 @@ class FundWalletService {
                                     const facility = await facilityService.get(facilityId);
                                     const facilityWallet = await facilityService.get(facilityId, {
                                         query: {
-                                            $select: [ 'wallet' ]
+                                            $select: ['wallet']
                                         }
                                     });
                                     const userWallet = facilityWallet.wallet; //facility.wallet;
@@ -189,7 +187,7 @@ class FundWalletService {
                                         const facilityUpdate = await facilityService.update(facility._id, facility);
                                         let selectedFacility = await facilityService.get(facility._id, {
                                             query: {
-                                                $select: [ 'wallet' ]
+                                                $select: ['wallet']
                                             }
                                         });
                                         facilityUpdate.wallet = selectedFacility.wallet;
@@ -209,10 +207,14 @@ class FundWalletService {
             }
         } else if (
             accessToken !== undefined &&
-			(data.paymentMethod !== undefined && data.paymentMethod.toLowerCase() === 'cash')
+      (data.paymentMethod !== undefined && data.paymentMethod.toLowerCase() === 'cash')
         ) {
             const person = await peopleService.get(data.destinationId);
-            const personWallet = await peopleService.get(data.destinationId, { query: { $select: [ 'wallet' ] } });
+            const personWallet = await peopleService.get(data.destinationId, {
+                query: {
+                    $select: ['wallet']
+                }
+            });
             const userWallet = personWallet.wallet; //person.wallet;
             const cParam = {
                 amount: data.amount,
@@ -231,7 +233,7 @@ class FundWalletService {
             const facility = await facilityService.get(data.sourceId);
             const facilityWallet2 = await facilityService.get(data.sourceId, {
                 query: {
-                    $select: [ 'wallet' ]
+                    $select: ['wallet']
                 }
             });
             const facilityWallet = facilityWallet2.wallet; // facility.wallet;
@@ -278,7 +280,11 @@ class FundWalletService {
                     facilityId: params.query.facilityId
                 }
             });
-            const personWallet2 = await peopleService.get(data.destinationId, { query: { $select: [ 'wallet' ] } });
+            const personWallet2 = await peopleService.get(data.destinationId, {
+                query: {
+                    $select: ['wallet']
+                }
+            });
             personUpdate.wallet = personWallet2.wallet;
             //const personUpdate = await peopleService.update(person._id, person);
             const facilityUpdate = await facilityService.patch(facility._id, {
@@ -286,7 +292,7 @@ class FundWalletService {
             });
             const facilityWallet3 = await facilityService.get(facility._id, {
                 query: {
-                    $select: [ 'wallet' ]
+                    $select: ['wallet']
                 }
             });
             facilityUpdate.wallet = facilityWallet3.wallet;
@@ -301,7 +307,7 @@ class FundWalletService {
             };
             return data;
         }
-        // });
+    // });
     }
 
     verifyPayStackPayment(url) {
@@ -408,7 +414,7 @@ function generateOtp() {
     return otp;
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
     return new FundWalletService(options);
 };
 

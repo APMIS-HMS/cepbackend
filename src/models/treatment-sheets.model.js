@@ -6,6 +6,7 @@ module.exports = function(app) {
     const mongooseClient = app.get('mongooseClient');
     const { Schema } = mongooseClient;
     const treatmentSheets = new Schema({
+        problem:{ type: Schema.Types.Mixed, required: false },
         personId: { type: Schema.Types.ObjectId, required: true },
         facilityId: { type: Schema.Types.ObjectId, required: true },
         treatmentSheet: { type: Schema.Types.Mixed, required: true },

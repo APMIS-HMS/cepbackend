@@ -314,6 +314,7 @@ const setTreatmentSheetBills = require('./set-treatment-sheet-bills/set-treatmen
 const extractFacilityData = require('./extract-facility-data/extract-facility-data.service.js');
 const dashboard = require('./dashboard/dashboard.service.js');
 const clinicAttendanceSummary = require('./clinic-attendance-summary/clinic-attendance-summary.service.js');
+const facilityInitializer = require('./facility-initializer/facility-initializer.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -543,4 +544,8 @@ module.exports = function (app) {
   app.configure(addHmoFacilities);
   app.configure(dashboard);
   app.configure(clinicAttendanceSummary);
+};
+  app.configure(setTreatmentSheetBills);
+  app.configure(extractFacilityData);
+  app.configure(facilityInitializer);
 };

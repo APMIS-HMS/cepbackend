@@ -1074,11 +1074,9 @@ function appointment(data) {
   let themeMessage = (data.providerDetails != undefined && data.providerDetails.personDetails != undefined) ? `This is to notify you of your appointment with ${data.providerDetails.personDetails.title} ${data.providerDetails.personDetails.lastName} ${data.providerDetails.personDetails.firstName} scheduled for: ${data.startDate} at ${data.clinicId} clinic of ${data.patientDetails.facilityObj.name}` : `This is to notify you of your appointment scheduled for: ${data.startDate} at ${data.clinicId} clinic of ${data.patientDetails.facilityObj.name}`;
   const title = 'Your Apmis Appoinment';
   if (data.zoom === undefined) {
-    //console.log('no zoom');
     let tem = emailApmisIdTemplate(themeMessage, title, data.patientDetails.personDetails);
     sendEmailViaApi('dev@apmis.ng', data.patientDetails.personDetails.email, title, tem);
   } else {
-    //console.log('have zoom');
     let tem = emailTelemedicineAppointmentTemplate(themeMessage, title, data.patientDetails.personDetails, data.zoom.join_url);
     sendEmailViaApi('dev@apmis.ng', data.patientDetails.personDetails.email, title, tem);
 
