@@ -69,9 +69,18 @@ const fastJoinServerDate = {
   }
 }
 
+const fastJoinCreatedBy = {
+  joins: {
+    addCreatedByObject: () => async (data, context) => {
+      const employee = await context.app.service('employees').get(data.createdBy, {});
+      data.createdByName = employee.personDetails.firstName + ' ' + employee.personDetails.lastName;
+    }
+  }
+}
+
 module.exports = {
   before: {
-    all: [], //authenticate('jwt')],
+    all: [authenticate('jwt')],
     find: [],
     get: [],
     create: [],
@@ -82,8 +91,8 @@ module.exports = {
 
   after: {
     all: [],
-    find: [],
-    get: [],
+    find: [fastJoin(fastJoinCreatedBy)],
+    get: [fastJoin(fastJoinCreatedBy)],
     create: [],
     update: [],
     patch: [],
