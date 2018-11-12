@@ -12,6 +12,7 @@ module.exports = function(app) {
         treatmentSheet: { type: Schema.Types.Mixed, required: true },
         createdBy: { type: Schema.Types.ObjectId, required: true },
         completed: { type: Schema.Types.Boolean, default: false },
+        completionDescription: { type: String, default: false }
     }, {
         timestamps: true
     });
