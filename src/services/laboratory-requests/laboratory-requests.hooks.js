@@ -26,7 +26,7 @@ module.exports = {
     },
 
     after: {
-        all: [],//fastJoin(resolvers)],
+        all: [fastJoin(resolvers)],
         find: [],
         get: [],
         create: [],
