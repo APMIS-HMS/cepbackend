@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const jsend = require('jsend');
+let jsend = require('jsend');
 class Service {
     constructor(options) {
         this.options = options || {};
@@ -16,19 +16,66 @@ class Service {
     }
 
     async create(data, params) {
-        const InvestigationService = this.app.service('investigations');
+        const LaboratoryReportsService = this.app.service('laboratory-reports');
         const LaboratoryRequestService = this.app.service('laboratory-requests');
+
+        let labSummary = {
+            apmisId : String,
+            patientName : String,
+            status : String,
+            clinic : String,
+            doctor :String,
+            request : String,
+            date  : new  Date()
+        };
+
+        let investigationReportByLocation={};
+        let investigationReportByBench = {};
+        let labWorkBenches = [];
+        let workBenches = [];
+        let workBench = {};
+        let labRequests = [];
+        let labReports;
+        let investigations;
+        let investigation;
 
         let facilityId = data.facilityId;
         try {
-            console.log('========Got here=========\n',facilityId);
             const getLabRequest = await LaboratoryRequestService.find({query:{facilityId:facilityId}});
-             console.log('========Got here1=========');
-            if(getLabRequest !== undefined){
-                console.log('==============data=============\n',getLabRequest);
+            
+            labRequests = getLabRequest.data;
+            
+            if(labRequests.length >0){
+                investigations = labRequests.map(x=>{
+                    return x.investigations;
+                });
+                //return jsend.success(investigations);
+                investigation = investigations.map(x=>{
+                    return x[0].investigation;});
+
+                labWorkBenches = investigation.map(x=>{
+                    return x.LaboratoryWorkbenches;
+                });
+
+                workBenches = labWorkBenches.map(x=>{
+                    return x[0].workbenches[0].workBench;
+                });
+                
+                const getLabReport = await LaboratoryReportsService.find({query:{facilityId:facilityId}});
+                labReports = getLabReport.data;
+                if(labReports.length >0){
+                    labReports.forEach(report =>{
+                        labRequests.forEach(request=>{
+                            if(report.patientId === request.patientId){
+                                labSummary.request = '';
+                            }
+                        });
+                    });
+                }
+                return jsend.success(getLabReport);
             }
         } catch (error) {
-            console.log('===error===\n',error);
+            //console.log('===error===\n',error);
             return jsend.error({message:'There was an errror while ',code:422, data:{error} });
         }
 
