@@ -5,8 +5,10 @@ module.exports = function (options = {}) { // eslint-disable-line no-unused-vars
   return context => {
     if (context.type === "before") {
       if (context.params.query !== undefined) {
-        context.params.isCoveredPage = context.params.query.isCoveredPage;
-        delete context.params.query.isCoveredPage;
+        if (context.params.query.isCoveredPage !== undefined) {
+          context.params.isCoveredPage = context.params.query.isCoveredPage;
+          delete context.params.query.isCoveredPage;
+        }
       }
     }
     return Promise.resolve(context);
