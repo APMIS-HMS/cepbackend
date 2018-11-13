@@ -3,7 +3,7 @@ const {
 } = require('@feathersjs/authentication').hooks;
 
 const {
-  fastJoin,softDelete2
+  fastJoin,softDelete
 } = require('feathers-hooks-common');
 
 const extractbill = require('../../hooks/extractbill');
@@ -102,7 +102,7 @@ const fixedEditPrice = {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt'),softDelete2()],
+    all: [authenticate('jwt'),softDelete()],
     find: [extractbill(), iscovered()],
     get: [iscovered()],
     create: [],
@@ -112,7 +112,7 @@ module.exports = {
   },
 
   after: {
-    all: [softDelete2(),fastJoin(resolvers)],
+    all: [softDelete(),fastJoin(resolvers)],
     find: [extractbill()],
     get: [],
     create: [],

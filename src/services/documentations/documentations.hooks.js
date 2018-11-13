@@ -1,11 +1,11 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const {
-  softDelete2
+  softDelete
 } = require('feathers-hooks-common');
 
 module.exports = {
   before: {
-    all: [authenticate('jwt'),softDelete2()],
+    all: [authenticate('jwt'),softDelete()],
     find: [],
     get: [],
     create: [],
@@ -15,7 +15,7 @@ module.exports = {
   },
 
   after: {
-    all: [softDelete2()],
+    all: [softDelete()],
     find: [],
     get: [],
     create: [],
