@@ -30,8 +30,18 @@ class Service {
                 startDate = new Date(new Date().setDate(new Date().getDate() - 1));
                 getAppointment = await AppointmentService.find({
                     query: {
-                        facilityId: facilityId//,
-                        //updatedAt: {$gte:startDate} 
+                        facilityId: facilityId,//,
+                        $and: [{
+                            updatedAt: {
+                                $gte: params.query.startDate
+                            }
+                        },
+                        {
+                            updatedAt: {
+                                $lte: Date.now()
+                            }
+                        }
+                        ] 
                     }
                 });
             } else if (params.query.startDate !== undefined && params.query.endDate === undefined) {

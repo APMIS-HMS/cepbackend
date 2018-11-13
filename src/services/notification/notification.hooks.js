@@ -3,15 +3,15 @@ const {
     fastJoin
 } = require('feathers-hooks-common');
 
-const resolvers = {
-    joins: {
-        loggedInUser: () => async (notification, context) => {
-            notification.senderId = context.user._id;
-            notification.isRead = false;
-        }
-    }
+// const resolvers = {
+//     joins: {
+//         loggedInUser: () => async (notification, context) => {
+//             notification.senderId = context.user._id;
+//             notification.isRead = false;
+//         }
+//     }
 
-};
+// };
 
 
 
@@ -20,7 +20,7 @@ module.exports = {
         all: [authenticate('jwt')],
         find: [],
         get: [],
-        create: [fastJoin(resolvers)],
+        create: [fastJoin()],
         update: [],
         patch: [],
         remove: []

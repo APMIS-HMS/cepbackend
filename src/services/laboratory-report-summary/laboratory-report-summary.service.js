@@ -4,17 +4,18 @@ const hooks = require('./laboratory-report-summary.hooks');
 
 module.exports = function (app) {
   
-  const paginate = app.get('paginate');
+    const paginate = app.get('paginate');
 
-  const options = {
-    paginate
-  };
+    const options = {
+        paginate,
+        app:app
+    };
 
-  // Initialize our service with any options it requires
-  app.use('/laboratory-report-summary', createService(options));
+    // Initialize our service with any options it requires
+    app.use('/laboratory-report-summary', createService(options));
 
-  // Get our initialized service so that we can register hooks
-  const service = app.service('laboratory-report-summary');
+    // Get our initialized service so that we can register hooks
+    const service = app.service('laboratory-report-summary');
 
-  service.hooks(hooks);
+    service.hooks(hooks);
 };
