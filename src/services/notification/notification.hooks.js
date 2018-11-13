@@ -6,10 +6,8 @@ const {
 const resolvers = {
     joins: {
         loggedInUser: () => async (notification, context) => {
-            console.log('========hook context=========\n',context);
-            notification.senderId = context.user._id ;
-            notification.isRead = false ;
-
+            notification.senderId = context.user._id;
+            notification.isRead = false;
         }
     }
 
