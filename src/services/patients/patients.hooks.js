@@ -3,7 +3,7 @@ const {
 } = require('@feathersjs/authentication').hooks;
 const alerts = require('../../hooks/alerts');
 const {
-  fastJoin
+  fastJoin,softDelete2
 } = require('feathers-hooks-common');
 var differenceInYears = require('date-fns/difference_in_years');
 var differenceInMonths = require('date-fns/difference_in_months');
@@ -73,7 +73,7 @@ const facilityObj = {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
+    all: [authenticate('jwt'),softDelete2()],
     find: [],
     get: [],
     create: [],
@@ -83,7 +83,7 @@ module.exports = {
   },
 
   after: {
-    all: [fastJoin(resolvers)],
+    all: [softDelete2(),fastJoin(resolvers)],
     find: [fastJoin(facilityObj)],
     get: [fastJoin(facilityObj)],
     create: [alerts()],

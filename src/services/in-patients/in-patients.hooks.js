@@ -3,7 +3,7 @@ const differenceInYears = require('date-fns/difference_in_years');
 const differenceInMonths = require('date-fns/difference_in_months');
 const differenceInWeeks = require('date-fns/difference_in_weeks');
 const differenceInDays = require('date-fns/difference_in_days');
-const { fastJoin } = require('feathers-hooks-common');
+const { fastJoin,softDelete2 } = require('feathers-hooks-common');
 const resolvers = {
     joins: {
         personDetails: () => async(inPatient, context) => {
@@ -68,7 +68,7 @@ function checkAge(dateOfBirth) {
 
 module.exports = {
     before: {
-        all: [authenticate('jwt')],
+        all: [authenticate('jwt'),softDelete2()],
         find: [],
         get: [],
         create: [],
@@ -78,7 +78,7 @@ module.exports = {
     },
 
     after: {
-        all: [fastJoin(resolvers)],
+        all: [softDelete2(),fastJoin(resolvers)],
         find: [],
         get: [],
         create: [],

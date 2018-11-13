@@ -15,6 +15,7 @@ module.exports = function(app) {
         isActive: { type: Boolean, 'default': false },
         paymentPlan: [paymentPlanSchema],
         orders: [{ type: String, required: false }],
+        isUnknown:{ type: Boolean, 'default': false },
         tags: [{ type: Schema.Types.Mixed, required: false }],
         clientsNo: [{ type: Schema.Types.Mixed }],
         timeLines: [{ type: Schema.Types.Mixed, required: false }],

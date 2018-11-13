@@ -1,5 +1,5 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
-const { fastJoin } = require('feathers-hooks-common');
+const { fastJoin,softDelete2 } = require('feathers-hooks-common');
 const resolvers = {
     joins: {
         patientDetails: () => async(prescription, context) => {
@@ -38,7 +38,7 @@ const billing = {
 
 module.exports = {
     before: {
-        all: [authenticate('jwt')],
+        all: [authenticate('jwt'),softDelete2()],
         find: [],
         get: [],
         create: [],
@@ -48,7 +48,7 @@ module.exports = {
     },
 
     after: {
-        all: [fastJoin(resolvers)],
+        all: [softDelete2(),fastJoin(resolvers)],
         find: [],
         get: [fastJoin(billing)],
         create: [],

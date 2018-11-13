@@ -2,7 +2,7 @@ const {
     authenticate
 } = require('@feathersjs/authentication').hooks;
 const {
-    fastJoin
+    fastJoin,softDelete2
 } = require('feathers-hooks-common');
 var startOfDay = require('date-fns/start_of_day');
 var endOfDay = require('date-fns/end_of_today');
@@ -133,7 +133,7 @@ const resolvers = {
 };
 module.exports = {
     before: {
-        all: [authenticate('jwt')],
+        all: [authenticate('jwt'),softDelete2()],
         find: [],
         get: [],
         create: [],
@@ -142,7 +142,7 @@ module.exports = {
         remove: []
     },
     after: {
-        all: [fastJoin(resolvers)],
+        all: [fastJoin(resolvers),softDelete2()],
         find: [],
         get: [],
         create: [],
