@@ -16,7 +16,7 @@ module.exports = function(app) {
         doctorId: { type: Schema.Types.ObjectId, required: false },
         orderStatusId: { type: Schema.Types.String, required: true },
         zoom: { type: Schema.Types.Mixed, required: false },
-        startDate: { type: Date, require: true },
+        startDate: { type: Date,'default':Date.now() },
         patientId: { type: Schema.Types.ObjectId, required: true },
         appointmentReason: { type: String, require: false },
         category: { type: Schema.Types.String, required: true },

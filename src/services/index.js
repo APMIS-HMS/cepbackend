@@ -152,6 +152,7 @@ const facilityRoles = require('./facility-roles/facility-roles.service.js');
 const saveEmployee = require('./save-employee/save-employee.service.js');
 const scheduleTypes = require('./schedule-types/schedule-types.service.js');
 const schedules = require('./schedules/schedules.service.js');
+const notification = require('./notification/notification.service.js');
 const getPrescription =
   require('./get-prescription/get-prescription.service.js');
 const timezones = require('./timezones/timezones.service.js');
@@ -312,7 +313,10 @@ const healthCoveredBillHistories = require('./health-covered-bill-histories/heal
 const addHmoFacilities = require('./add-hmo-facilities/add-hmo-facilities.service.js');
 const setTreatmentSheetBills = require('./set-treatment-sheet-bills/set-treatment-sheet-bills.service.js');
 const extractFacilityData = require('./extract-facility-data/extract-facility-data.service.js');
+const dashboard = require('./dashboard/dashboard.service.js');
+const clinicAttendanceSummary = require('./clinic-attendance-summary/clinic-attendance-summary.service.js');
 const facilityInitializer = require('./facility-initializer/facility-initializer.service.js');
+const unknownPatients = require('./unknown-patients/unknown-patients.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -383,6 +387,7 @@ module.exports = function (app) {
   app.configure(auditTray);
   app.configure(bedTypes);
   app.configure(clientTypes);
+  app.configure(notification);
   app.configure(companycovers);
   app.configure(companycovercategories);
   app.configure(companyHealthCover);
@@ -540,7 +545,10 @@ module.exports = function (app) {
   app.configure(outOfStockCountDetails);
   app.configure(healthCoveredBillHistories);
   app.configure(addHmoFacilities);
+  app.configure(dashboard);
+  app.configure(clinicAttendanceSummary);
   app.configure(setTreatmentSheetBills);
   app.configure(extractFacilityData);
   app.configure(facilityInitializer);
+  app.configure(unknownPatients);
 };
