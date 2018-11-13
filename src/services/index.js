@@ -36,7 +36,7 @@ const organisationServices =
   require('./organisation-services/organisation-services.service.js');
 const inPatients = require('./in-patients/in-patients.service.js');
 const inpatientTransferStatuses = require(
-    './inpatient-transfer-statuses/inpatient-transfer-statuses.service.js');
+  './inpatient-transfer-statuses/inpatient-transfer-statuses.service.js');
 const inpatientWaitingLists =
   require('./inpatient-waiting-lists/inpatient-waiting-lists.service.js');
 const inpatientWaitingTypes =
@@ -62,12 +62,12 @@ const stores = require('./stores/stores.service.js');
 const storeRequisitions =
   require('./store-requisitions/store-requisitions.service.js');
 const inventoryTransactionTypes = require(
-    './inventory-transaction-types/inventory-transaction-types.service.js');
+  './inventory-transaction-types/inventory-transaction-types.service.js');
 const inventoryTransfers =
   require('./inventory-transfers/inventory-transfers.service.js');
 const investigations = require('./investigations/investigations.service.js');
 const investigationReportTypes = require(
-    './investigation-report-types/investigation-report-types.service.js');
+  './investigation-report-types/investigation-report-types.service.js');
 const purchaseEntries =
   require('./purchase-entries/purchase-entries.service.js');
 const inventories = require('./inventories/inventories.service.js');
@@ -195,7 +195,7 @@ const inventoryInitialisers =
 const listOfInventories =
   require('./list-of-inventories/list-of-inventories.service.js');
 const inventoryTransferStatuses = require(
-    './inventory-transfer-statuses/inventory-transfer-statuses.service.js');
+  './inventory-transfer-statuses/inventory-transfer-statuses.service.js');
 const stockTransfers = require('./stock-transfers/stock-transfers.service.js');
 const listOfStockTransfers =
   require('./list-of-stock-transfers/list-of-stock-transfers.service.js');
@@ -266,7 +266,7 @@ const vitalBpLocations =
 const immunizationSchedule =
   require('./immunization-schedule/immunization-schedule.service.js');
 const crudImmunizationSchedule = require(
-    './crud-immunization-schedule/crud-immunization-schedule.service.js');
+  './crud-immunization-schedule/crud-immunization-schedule.service.js');
 const setMultipleAppointments =
   require('./set-multiple-appointments/set-multiple-appointments.service.js');
 const billPrescription =
@@ -279,9 +279,9 @@ const facilityPlans = require('./facility-plans/facility-plans.service.js');
 const apmisSubscriptions =
   require('./apmis-subscriptions/apmis-subscriptions.service.js');
 const walkinDispensePrescription = require(
-    './walkin-dispense-prescription/walkin-dispense-prescription.service.js');
+  './walkin-dispense-prescription/walkin-dispense-prescription.service.js');
 const documentationAuthorization = require(
-    './documentation-authorization/documentation-authorization.service.js');
+  './documentation-authorization/documentation-authorization.service.js');
 const nhisResports = require('./nhis-resports/nhis-resports.service.js');
 const crudLabInvestigationPrice = require('./crud-lab-investigation-price/crud-lab-investigation-price.service.js');
 const temporalChanelNames = require('./temporal-chanel-names/temporal-chanel-names.service.js');
@@ -318,6 +318,7 @@ const clinicAttendanceSummary = require('./clinic-attendance-summary/clinic-atte
 const facilityInitializer = require('./facility-initializer/facility-initializer.service.js');
 const laboratoryReportSummary = require('./laboratory-report-summary/laboratory-report-summary.service.js');
 const appointmentReportSummary = require('./appointment-report-summary/appointment-report-summary.service.js');
+const unknownPatients = require('./unknown-patients/unknown-patients.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -553,4 +554,5 @@ module.exports = function (app) {
   app.configure(facilityInitializer);
   app.configure(laboratoryReportSummary);
   app.configure(appointmentReportSummary);
+  app.configure(unknownPatients);
 };
