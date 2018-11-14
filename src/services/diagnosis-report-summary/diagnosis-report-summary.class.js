@@ -9,6 +9,7 @@ class Service {
     }
     find (params) {
         let DiagnosisService = this.app.service('diagnosises');
+        let LabRequestService = this.app.service('laboratory-requests');
         let diagnosisSummary = {
             hospitalNo:String, 
             gender:String,
