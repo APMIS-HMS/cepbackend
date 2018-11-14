@@ -1,53 +1,63 @@
 /* eslint-disable no-unused-vars */
 let jsend = require('jsend');
 class Service {
-    constructor (options) {
+    constructor(options) {
         this.options = options || {};
     }
 
-    setup(app){
+    setup(app) {
         this.app = app;
     }
 
-    async find (params) {
+    async find(params) {
         const AppointmentService = this.app.service('appointments');
+        const FacilityService = this.app.service('facilities');
         // date, clinic, total checked in appointments, number of new appointment 
         let visit = [];
         let getAppointment;
         let startDate = params.query.startDate;
         let endDate = params.query.endDate;
         let facilityId = params.query.facilityId;
-        let appointments = [];
         let newAppointmentTypeCount;
         let followUpAppointmentTypeCount;
-        let newMalePatientCount;
         let folloUpMalePatientCount;
-        let newFemalePatientCount;
         let followUpFemalePatientCount;
-        let summary = {};
         
-            
         try {
-            if(params.query.startDate === undefined){
-                startDate = new Date(new Date().setDate(new Date().getDate()-1));
+            let getFac = await FacilityService.get(facilityId);
+            //return jsend.success(getFac);
+            if (params.query.startDate === undefined) {
+                startDate = new Date(new Date().setDate(new Date().getDate() - 1));
                 getAppointment = await AppointmentService.find({
-                    query:{facilityId:facilityId//,
-                        //updatedAt: {$gte:startDate} 
-                    }});
-            }else if(params.query.startDate !== undefined && params.query.endDate === undefined){
-                getAppointment = await AppointmentService.find({query:{facilityId:params.query.facilityId}});
-            }else if(params.query.startDate === undefined && params.query.endDate !== undefined){
+                    query: {
+                        facilityId: facilityId,//,
+                        $and: [{
+                            updatedAt: {
+                                $gte: params.query.startDate
+                            }
+                        },
+                        {
+                            updatedAt: {
+                                $lte: Date.now()
+                            }
+                        }
+                        ] 
+                    }
+                });
+            } else if (params.query.startDate !== undefined && params.query.endDate === undefined) {
+                getAppointment = await AppointmentService.find({ query: { facilityId: params.query.facilityId } });
+            } else if (params.query.startDate === undefined && params.query.endDate !== undefined) {
                 getAppointment = await AppointmentService.find({
-                    query:{
-                        facilityId:data.facilityId,
-                        updatedAt: {$gte: params.query.startDate}
+                    query: {
+                        facilityId: data.facilityId,
+                        updatedAt: { $gte: params.query.startDate }
                     }
                 });
             }
-            else{
+            else {
                 getAppointment = await AppointmentService.find({
-                    query:{
-                        facilityId:params.query.facilityId,
+                    query: {
+                        facilityId: params.query.facilityId,
                         $and: [{
                             updatedAt: {
                                 $gte: params.query.startDate
@@ -63,42 +73,76 @@ class Service {
                 });
             }
             // Check if appointments
-            if(getAppointment.data.length>0){
+            if (getAppointment.data.length > 0) {
                 visit.date = Date.now();
-                let totalCheckedInPatients = getAppointment.data.filter(x => x.attendance).length;
-                console.log('OK o \n', totalCheckedInPatients);
-                let GroupedByClinic={};
-                let newFemaleCount={};
-                let newMaleCount={};
-
+                let newFemaleCount = {};
+                 let newMaleCount = {};
+               
                 
-                appointments = getAppointment.data.map(x=>{
-                    GroupedByClinic = getAppointment.data.filter(item => item.clinicId === x.clinicId);
-                }); console.log('OK \n', GroupedByClinic.length);
-                   
-                newFemaleCount = GroupedByClinic.filter(item => item.providerDetails.patientDetails.gender === 'female');
-                newMaleCount = GroupedByClinic.filter(item => item.providerDetails.patientDetails.gender === 'male');
-                followUpFemalePatientCount = GroupedByClinic.filter(item => item.providerDetails.patientDetails.gender === 'female');
-                folloUpMalePatientCount = GroupedByClinic.filter(item => item.providerDetails.patientDetails.gender === 'male');
-                newAppointmentTypeCount = GroupedByClinic.filter(item => item.appointmentTypeId === 'New');
-                followUpAppointmentTypeCount = GroupedByClinic.filter(item => item.appointmentTypeId.toLowerCase() === 'follow up');
 
-                let summary = {
-                    date: Date.now(),
-                    clinicName: '',
-                    totalCheckedInPatients:totalCheckedInPatients ,
-                    new: {
-                        total: newAppointmentTypeCount.length,
-                        totalFemale: newFemaleCount.length,
-                        totalMale: newMaleCount.length
-                    },
-                    followUp: {
-                        total: followUpAppointmentTypeCount.length,
-                        totalFemale: followUpFemalePatientCount.length,
-                        totalMale: folloUpMalePatientCount.length
-                    }
-                };
-                visit.push(summary);
+                let clinic = getAppointment.data.map(x => {
+                    return {
+                        facilityId: x.facilityId,
+                        clinic: x.clinicId,
+                        _id: x._id,
+                        personDetails: x.patientDetails.personDetails,
+                        appointmentTypeId: x.appointmentTypeId
+                    };
+                });
+                let clinicNames = [... new Set(clinic.map(x => x.clinic))];
+
+                let res = {};
+                clinicNames.forEach(element => {
+                    res[element] = [];
+                    let newMale = [], newFemale = [], followUpmale = [], followUpFemale = [];
+                    newAppointmentTypeCount=0;
+                    followUpAppointmentTypeCount=0;
+
+                    clinic.forEach(clinic => {
+                        if (clinic.clinic === element) {
+                            res[element].push(clinic);
+                            //return jsend.success(element);
+                            if (clinic.appointmentTypeId === 'New') {
+                                newAppointmentTypeCount++;
+                                if (clinic.personDetails.gender.toLowerCase() === 'male') {
+                                    newMale.push(clinic);
+                                } else {
+                                    newFemale.push(clinic);
+                                }
+                            } else {
+                                followUpAppointmentTypeCount++;
+                                if (clinic.personDetails.gender.toLowerCase() === 'male') {
+                                    followUpmale.push(clinic);
+                                } else {
+                                    followUpFemale.push(clinic);
+                                }
+                            }
+                        }
+                    });
+                    newMaleCount = newMale.length;
+                    newFemaleCount = newFemale.length;
+                    followUpFemalePatientCount = followUpFemale.length;
+                    folloUpMalePatientCount = followUpmale.length;
+                    
+                    let summary = {
+                        date: Date.now(),
+                        clinicName: element,
+                        total: res[element].length,
+                        new: {
+                            total: newAppointmentTypeCount,
+                            totalFemale: newFemaleCount,
+                            totalMale: newMaleCount
+                        },
+                        followUp: {
+                            total: followUpAppointmentTypeCount,
+                            totalFemale: followUpFemalePatientCount,
+                            totalMale: folloUpMalePatientCount
+                        }
+                    };
+                    visit.push(summary);
+
+                });
+                
                 return jsend.success(visit);
             }
             else {
@@ -106,18 +150,18 @@ class Service {
             }
 
         } catch (error) {
-            return jsend.error({message:'Something went wrong',code:508,data:{detail:error}});
+            return jsend.error({ message: 'Something went wrong', code: 508, data: { detail: error } });
         }
     }
 
-    get (id, params) {
+    get(id, params) {
         return Promise.resolve({
             id, text: `A new message with ID: ${id}!`
         });
     }
 
-    async create (data, params) {
-        
+    async create(data, params) {
+
         if (Array.isArray(data)) {
             return Promise.all(data.map(current => this.create(current, params)));
         }
@@ -125,21 +169,21 @@ class Service {
         return Promise.resolve(data);
     }
 
-    update (id, data, params) {
+    update(id, data, params) {
         return Promise.resolve(data);
     }
 
-    patch (id, data, params) {
+    patch(id, data, params) {
         return Promise.resolve(data);
     }
 
-    remove (id, params) {
+    remove(id, params) {
         return Promise.resolve({ id });
     }
 }
 
-Array.prototype.groupBy = function(prop) {
-    return this.reduce(function(groups, item) {
+Array.prototype.groupBy = function (prop) {
+    return this.reduce(function (groups, item) {
         console.log('Me \n', groups, item);
         const val = item[prop];
         groups[val] = groups[val] || [];
@@ -148,6 +192,12 @@ Array.prototype.groupBy = function(prop) {
     }, {});
 };
 
+Array.prototype.getUnique = function () {
+    var o = {}, a = [], i, e;
+    for (i = 0; e === this[i]; i++) { o[e] = 1; }
+    for (e in o) { a.push(e); }
+    return a;
+};
 module.exports = function (options) {
     return new Service(options);
 };
