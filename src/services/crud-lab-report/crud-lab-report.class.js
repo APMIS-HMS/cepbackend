@@ -63,10 +63,10 @@ class Service {
             const isUploaded = false;
             const isSaved = false;
 
-          let selectedInvestigation;
+            let selectedInvestigation;
             request.investigations.forEach((investigation) => {
               if (investigation.investigation._id === investigationId) {
-                 selectedInvestigation = investigation;
+                selectedInvestigation = investigation;
                 if (data.file !== undefined) {
                   investigation.file = {
                     name: uploadedDoc.fileName,
@@ -90,36 +90,61 @@ class Service {
                 }
               }
             });
-            console.log(2);
 
-          try {
-            if (
-              selectedInvestigation.investigation.LaboratoryWorkbenches.length > 0 &&
-              selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches.length > 0
-            ) {
+            try {
+              if (
+                selectedInvestigation.investigation.LaboratoryWorkbenches.length > 0 &&
+                selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches.length > 0
+              ) {
+                let existingReport = await reportService.find({
+                  query: {
+                    'requestId': request._id,
+                    'investigationId': selectedInvestigation.investigation
+                  }
+                });
+                if (existingReport.data.length > 0) {
+                  let report = existingReport.data[0];
+                  report.laboratoryId =
+                    selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
+                  report.requestId = request._id;
+                  report.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
+                  report.specimenReceived = selectedInvestigation.specimenReceived;
+                  report.sampleTaken = selectedInvestigation.sampleTaken;
+                  report.sampleTakenBy = selectedInvestigation.sampleTakenBy;
+                  report.specimenNumber = selectedInvestigation.specimenNumber;
+                  report.requestClinicalInformation = request.clinicalInformation;
+                  report.requestDiagnosis = request.diagnosis;
+                  report.result = data.result.map((res) => {
+                    return {
 
-              data.laboratoryId =
-                selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
-              data.requestId = request._id;
-              data.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
-              data.specimenReceived = selectedInvestigation.specimenReceived;
-              data.sampleTaken = selectedInvestigation.sampleTaken;
-              data.sampleTakenBy = selectedInvestigation.sampleTakenBy;
-              data.specimenNumber = selectedInvestigation.specimenNumber;
-              data.requestClinicalInformation = request.clinicalInformation;
-              data.requestDiagnosis = request.diagnosis;
-              data.result = data.result.map((res) => {
-                return {
+                      result: res.result
+                    }
+                  });
+                  report.isUploaded = false;
+                  const createdReport = await reportService.patch(report._id, report);
+                } else {
+                  data.laboratoryId =
+                    selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
+                  data.requestId = request._id;
+                  data.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
+                  data.specimenReceived = selectedInvestigation.specimenReceived;
+                  data.sampleTaken = selectedInvestigation.sampleTaken;
+                  data.sampleTakenBy = selectedInvestigation.sampleTakenBy;
+                  data.specimenNumber = selectedInvestigation.specimenNumber;
+                  data.requestClinicalInformation = request.clinicalInformation;
+                  data.requestDiagnosis = request.diagnosis;
+                  data.result = data.result.map((res) => {
+                    return {
 
-                  result: res.result
+                      result: res.result
+                    }
+                  });
+                  data.isUploaded = false;
+                  const createdReport = await reportService.create(data);
                 }
-              });
-              const createdReport = await reportService.create(data);
-              console.log('created 1:', createdReport);
+              }
+            } catch (error) {
             }
-          } catch (error) {
-            console.log(error);
-          }
 
 
 
@@ -134,7 +159,6 @@ class Service {
             return jsend.error('There was an error saving report. Please try again later!');
           }
         } else if (action === 'upload') {
-          console.log(4);
           const forms = await formService.find({
             query: {
               title: {
@@ -198,35 +222,49 @@ class Service {
                     'requestId': request._id,
                     'investigationId': selectedInvestigation.investigation
                   }
-                })
-
-                data.laboratoryId =
-                  selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
-                data.requestId = request._id;
-                data.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
-                data.specimenReceived = selectedInvestigation.specimenReceived;
-                data.sampleTaken = selectedInvestigation.sampleTaken;
-                data.sampleTakenBy = selectedInvestigation.sampleTakenBy;
-                data.specimenNumber = selectedInvestigation.specimenNumber;
-                data.requestClinicalInformation = request.clinicalInformation;
-                data.requestDiagnosis = request.diagnosis;
-                data.result = data.result.map((res) => {
-                  return {
-
-                    result: res.result
-                  }
                 });
-                // "sampleTaken": true,
-                // "sampleTakenBy": "5a725e25d0a7a03468a14e86",
-                // "specimenReceived": true,
-                // "specimenNumber": "83AQ",
-                // "isUploaded": true,
-                // "isSaved": true,
-                const createdReport = await reportService.create(data);
-                console.log('created 1:', createdReport);
+                if (existingReport.data.length > 0) {
+                  let report = existingReport.data[0];
+                  report.laboratoryId =
+                    selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
+                  report.requestId = request._id;
+                  report.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
+                  report.specimenReceived = selectedInvestigation.specimenReceived;
+                  report.sampleTaken = selectedInvestigation.sampleTaken;
+                  report.sampleTakenBy = selectedInvestigation.sampleTakenBy;
+                  report.specimenNumber = selectedInvestigation.specimenNumber;
+                  report.requestClinicalInformation = request.clinicalInformation;
+                  report.requestDiagnosis = request.diagnosis;
+                  report.result = data.result.map((res) => {
+                    return {
+
+                      result: res.result
+                    }
+                  });
+                  report.isUploaded = true;
+                  const createdReport = await reportService.patch(report._id, report);
+                } else {
+                  data.laboratoryId =
+                    selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench.laboratoryId;
+                  data.requestId = request._id;
+                  data.workBench = selectedInvestigation.investigation.LaboratoryWorkbenches[0].workbenches[0].workBench;
+                  data.specimenReceived = selectedInvestigation.specimenReceived;
+                  data.sampleTaken = selectedInvestigation.sampleTaken;
+                  data.sampleTakenBy = selectedInvestigation.sampleTakenBy;
+                  data.specimenNumber = selectedInvestigation.specimenNumber;
+                  data.requestClinicalInformation = request.clinicalInformation;
+                  data.requestDiagnosis = request.diagnosis;
+                  data.result = data.result.map((res) => {
+                    return {
+
+                      result: res.result
+                    }
+                  });
+                  data.isUploaded = true;
+                  const createdReport = await reportService.create(data);
+                }
               }
             } catch (error) {
-              console.log(error);
             }
 
             const updateRequest = await requestService.patch(request._id, request, {});
