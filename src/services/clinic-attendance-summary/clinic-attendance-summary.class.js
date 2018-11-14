@@ -76,9 +76,7 @@ class Service {
             if (getAppointment.data.length > 0) {
                 visit.date = Date.now();
                 let newFemaleCount = {};
-                 let newMaleCount = {};
-               
-                
+                let newMaleCount = {};
 
                 let clinic = getAppointment.data.map(x => {
                     return {
