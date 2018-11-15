@@ -19,7 +19,8 @@ module.exports = function(app) {
         tags: [{ type: Schema.Types.Mixed, required: false }],
         clientsNo: [{ type: Schema.Types.Mixed }],
         timeLines: [{ type: Schema.Types.Mixed, required: false }],
-        documentationAuthorizationCode: documentationAuthorizationSchema
+        documentationAuthorizationCode: documentationAuthorizationSchema,
+        deleted: { type: Boolean, 'default': false }
     }, { timestamps: true });
 
     return mongooseClient.model('patients', patients);

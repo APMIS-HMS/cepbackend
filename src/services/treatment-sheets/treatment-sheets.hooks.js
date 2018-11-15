@@ -90,7 +90,7 @@ module.exports = {
   },
 
   after: {
-    all: [softDelete()],
+    all: [],
     find: [fastJoin(fastJoinCreatedBy)],
     get: [fastJoin(fastJoinCreatedBy)],
     create: [],

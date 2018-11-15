@@ -48,7 +48,7 @@ module.exports = {
     },
 
     after: {
-        all: [softDelete(),fastJoin(resolvers)],
+        all: [fastJoin(resolvers)],
         find: [],
         get: [fastJoin(billing)],
         create: [],

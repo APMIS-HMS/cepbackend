@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+const jsend = require('jsend');
+
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -84,7 +86,15 @@ class Service {
     return savedPatient;
   }
 
-  async update(id, data, params) {
+  update(id, data, params) {
+    return Promise.resolve([]);
+  }
+
+  patch(id, data, params) {
+    return Promise.resolve(data);
+  }
+
+  async remove(id, params) {
     const personService = this.app.service('people');
     const patientService = this.app.service('patients');
     const billService = this.app.service('billings');
@@ -96,16 +106,34 @@ class Service {
     const inPatientsService = this.app.service('in-patients');
     const inPatientWatingService = this.app.service('inpatient-waiting-lists');
     const invoiceService = this.app.service('invoices')
-
     const unknownPerson = await personService.get(params.query.unknownPersonId, {});
+    const unknownPersonWallet = await personService.get(params.query.unknownPersonId, {
+      query: {
+        $select: ['wallet']
+      }
+    });
     const verifiedPerson = await personService.get(params.query.verifiedPersonId, {});
+    const verifiedPersonWallet = await personService.get(params.query.verifiedPersonId, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    verifiedPerson.wallet = (verifiedPersonWallet.wallet !== undefined) ? verifiedPersonWallet.wallet : {};
+    unknownPerson.wallet = (unknownPersonWallet.wallet !== undefined) ? unknownPersonWallet.wallet : {};
+    verifiedPerson.wallet.balance = (isNaN(verifiedPerson.wallet.balance)) ? 0 : verifiedPerson.wallet.balance;
+    unknownPerson.wallet.balance = (isNaN(unknownPerson.wallet.balance)) ? 0 : unknownPerson.wallet.balance;
     verifiedPerson.wallet.balance += unknownPerson.wallet.balance;
-
+    verifiedPerson.wallet.ledgerBalance += unknownPerson.wallet.ledgerBalance;
+    verifiedPerson.wallet.transactions = (verifiedPerson.wallet.transactions !== undefined) ? verifiedPerson.wallet.transactions : [];
+    verifiedPerson.wallet.transactions.push(...unknownPerson.wallet.transactions);
     //write code to soft delete unknown person here
-    await personService.remove(unknownPerson._id,{});
+
+    await personService.patch(verifiedPerson._id, {
+      wallet: verifiedPerson.wallet
+    }, {});
 
     const unknownPatient = await patientService.get(id, {});
-    const verifiedPatient = await personService.get(params.query.verifiedPatientId, {});
+    const verifiedPatient = await patientService.get(params.query.verifiedPatientId, {});
     verifiedPatient.tags = (verifiedPatient.tags !== undefined) ? verifiedPatient.tags : [];
     unknownPatient.tags = (unknownPatient.tags !== undefined) ? unknownPatient.tags : [];
     verifiedPatient.tags.push(...unknownPatient.tags);
@@ -116,20 +144,17 @@ class Service {
     unknownPatient.timeLines = (unknownPatient.timeLines !== undefined) ? unknownPatient.timeLines : [];
     verifiedPatient.timeLines = verifiedPatient.timeLines.push(...unknownPatient.timeLines);
     verifiedPerson.wallet.balance += unknownPerson.wallet.balance;
-
-
     //write code to soft delete unknown patient here
-    await patientService.remove(unknownPatient._id,{});
-
-
-
-    const unknownBills = await billingService.find({
+    const awaitedPaitent = await patientService.patch(verifiedPatient._id, verifiedPatient, {});
+    const unknownBills = await billService.find({
       query: {
         patientId: id
       }
     });
 
-    unknownBills.data.map(element => {
+    const _unknownBills = JSON.parse(JSON.stringify(unknownBills));
+    _unknownBills.data.map(element => {
+      delete element._id;
       if (element.coverFile === undefined) {
         element.patientId = params.query.verifiedPatientId;
       }
@@ -138,45 +163,39 @@ class Service {
       });
     });
 
-    await billService.create(unknownBills.data);
+    billService.create(_unknownBills.data).then(payload => {
+    }, err => {
+    });
 
-    for (let index = 0; index < unknownBills.data.length; index++) {
-      const element = unknownBills.data[index];
-      await billService.remove(element._id,{});
-    }
+    // console.log(createdBill);
 
     const unknownPrescriptions = await prescriptionService.find({
       query: {
         patientId: id
       }
     });
-
-    unknownPrescriptions.data.map(element => {
+    const _unknownPrescriptions = JSON.parse(JSON.stringify(unknownPrescriptions));
+    _unknownPrescriptions.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
     });
-
-    await prescriptionService.create(unknownPrescriptions.data);
-
-    for (let index = 0; index < unknownPrescriptions.data.length; index++) {
-      const element = unknownPrescriptions.data[index];
-      await prescriptionService.remove(element._id,{});
+    if (_unknownPrescriptions.data.length > 0) {
+      prescriptionService.create(_unknownPrescriptions.data).then(payload => {
+      }, err => {
+      })
     }
-
     const unknownLabRequest = await labReqService.find({
       query: {
         patientId: id
       }
     });
-
-    unknownLabRequest.data.map(element => {
+    const _unknownLabRequest = JSON.parse(JSON.stringify(unknownLabRequest));
+    _unknownLabRequest.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
     });
-
-    await labReqService.create(unknownLabRequest.data);
-
-    for (let index = 0; index < unknownLabRequest.data.length; index++) {
-      const element = unknownLabRequest.data[index];
-      await labReqService.remove(element._id,{});
+    if (_unknownLabRequest.data.length > 0) {
+      await labReqService.create(_unknownLabRequest.data);
     }
 
     const unknownTreatment = await treatmentService.find({
@@ -185,135 +204,166 @@ class Service {
         personId: params.query.unknownPersonId
       }
     });
-
-    unknownTreatment.data.map(element => {
+    const _unknownTreatment = JSON.parse(JSON.stringify(unknownTreatment));
+    _unknownTreatment.data.map(element => {
+      delete element._id;
       element.personId = params.query.verifiedPersonId;
     });
-    if (unknownTreatment.data.length > 0) {
-      await treatmentService.create(unknownTreatment.data);
+    if (_unknownTreatment.data.length > 0) {
+      await treatmentService.create(_unknownTreatment.data);
     }
-
-    for (let index = 0; index < unknownTreatment.data.length; index++) {
-      const element = unknownTreatment.data[index];
-      await treatmentService.remove(element._id,{});
-    }
-
 
     const unknownDoc = await docService.find({
       query: {
         personId: params.query.unknownPersonId
       }
     });
-
     const verifiedDoc = await docService.find({
       query: {
         personId: params.query.verifiedPersonId
       }
     });
-
     if (unknownDoc.data.length > 0) {
       unknownDoc.data[0].personId = params.query.verifiedPersonId;
       unknownDoc.data[0].documentations.map(element => {
         element.patientId = params.query.verifiedPatientId;
       });
+      verifiedDoc.data[0].documentations.push(...unknownDoc.data[0].documentations);
     }
-    verifiedDoc.data[0].documentations.push(...unknownDoc.data[0].documentations);
-
+    
     if (verifiedDoc.data.length > 0) {
-      await treatmentService.patch(verifiedDoc.data[0]._id, {
+      docService.patch(verifiedDoc.data[0]._id, {
         documentations: verifiedDoc.data[0].documentations
-      });
+      }).then(payload => {
+      }, err => {
+      })
     }
-
-    for (let index = 0; index < unknownTreatment.data.length; index++) {
-      const element = unknownTreatment.data[index];
-      await treatmentService.remove(element._id,{});
-    }
-
     const unknownAppointments = await appointmentService.find({
       query: {
         patientId: id
       }
     });
-
-    unknownAppointments.data.map(element => {
+    const _unknownAppointments = JSON.parse(JSON.stringify(unknownAppointments));
+    _unknownAppointments.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
     });
 
-    if (unknownAppointments.data.length > 0) {
-      await appointmentService.create(unknownAppointments.data);
-    }
-    for (let index = 0; index < unknownAppointments.data.length; index++) {
-      const element = unknownAppointments.data[index];
-      await appointmentService.remove(element._id,{});
+    if (_unknownAppointments.data.length > 0) {
+      await appointmentService.create(_unknownAppointments.data);
     }
 
-    const unknowInPatients = await inPatientsService.fin({
+    const unknowInPatients = await inPatientsService.find({
       query: {
         patientId: id
       }
     });
-
-    unknowInPatients.data.map(element => {
+    const _unknowInPatients = JSON.parse(JSON.stringify(unknowInPatients));
+    _unknowInPatients.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
     });
 
     if (unknowInPatients.data.length > 0) {
-      await inPatientsService.create(unknowInPatients.data);
-    }
-    for (let index = 0; index < unknowInPatients.data.length; index++) {
-      const element = unknowInPatients.data[index];
-      await inPatientsService.remove(element._id,{});
+      await inPatientsService.create(_unknowInPatients.data);
     }
 
-    const unknowInPatientWaiting = await inPatientWatingService.fin({
+    const unknowInPatientWaiting = await inPatientWatingService.find({
       query: {
         patientId: id
       }
     });
+    const _unknowInPatientWaiting = JSON.parse(JSON.stringify(unknowInPatientWaiting));
 
-    unknowInPatientWaiting.data.map(element => {
+    _unknowInPatientWaiting.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
     });
 
-    if (unknowInPatientWaiting.data.length > 0) {
-      await inPatientWatingService.create(unknowInPatientWaiting.data);
-    }
-    for (let index = 0; index < unknowInPatientWaiting.data.length; index++) {
-      const element = unknowInPatientWaiting.data[index];
-      await inPatientWatingService.remove(element._id,{});
+    if (_unknowInPatientWaiting.data.length > 0) {
+      await inPatientWatingService.create(_unknowInPatientWaiting.data);
     }
 
-    const unknowInvoice = await invoiceService.fin({
+    const unknowInvoice = await invoiceService.find({
       query: {
         patientId: id
       }
     });
-
-    unknowInvoice.data.map(element => {
+    const _unknowInvoice = JSON.parse(JSON.stringify(unknowInvoice));
+    _unknowInvoice.data.map(element => {
+      delete element._id;
       element.patientId = params.query.verifiedPatientId;
       element.billingIds.map(element_ => {
         element_.patientId = params.query.verifiedPatientId;
       });
     });
-
-    if (unknowInvoice.data.length > 0) {
-      await invoiceService.create(unknowInvoice.data);
+    if (_unknowInvoice.data.length > 0) {
+      await invoiceService.create(_unknowInvoice.data);
+    }
+    
+    //Deleting the existing data
+    for (let index = 0; index < unknownTreatment.data.length; index++) {
+      const element = unknownTreatment.data[index];
+       treatmentService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknownAppointments.data.length; index++) {
+      const element = unknownAppointments.data[index];
+       appointmentService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknowInPatients.data.length; index++) {
+      const element = unknowInPatients.data[index];
+       inPatientsService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknowInPatientWaiting.data.length; index++) {
+      const element = unknowInPatientWaiting.data[index];
+       inPatientWatingService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
     }
     for (let index = 0; index < unknowInvoice.data.length; index++) {
       const element = unknowInvoice.data[index];
-      await invoiceService.remove(element._id,{});
+       invoiceService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
     }
-  }
-
-  patch(id, data, params) {
-    return Promise.resolve(data);
-  }
-
-  remove(id, params) {
-    return Promise.resolve({
-      id
+    for (let index = 0; index < unknownPrescriptions.data.length; index++) {
+      const element = unknownPrescriptions.data[index];
+       prescriptionService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknownLabRequest.data.length; index++) {
+      const element = unknownLabRequest.data[index];
+       labReqService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknownDoc.data.length; index++) {
+      const element = unknownDoc.data[index];
+      docService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    for (let index = 0; index < unknownBills.data.length; index++) {
+      const element = unknownBills.data[index];
+      billService.remove(element._id, {}).then(pay => {
+      }, err => {
+      })
+    }
+    patientService.remove(unknownPatient._id, {}).then(pay => {
+    }, err => {
     });
+
+    personService.remove(unknownPerson._id, {}).then(pay => {
+    }, err => {
+    }); 
+    return jsend.success(verifiedPatient);
   }
 }
 

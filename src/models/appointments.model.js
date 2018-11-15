@@ -27,6 +27,7 @@ module.exports = function(app) {
         isActive: { type: Boolean, 'default': true },
         isCheckedOut: { type: Boolean, 'default': false },
         isEngaged: { type: Boolean, 'default': false },
+        deleted: { type: Boolean, 'default': false }
     }, {
         timestamps: true
     });

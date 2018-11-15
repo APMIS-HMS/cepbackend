@@ -15,7 +15,7 @@ module.exports = {
   },
 
   after: {
-    all: [softDelete()],
+    all: [],
     find: [],
     get: [],
     create: [alerts()],

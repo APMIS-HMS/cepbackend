@@ -18,7 +18,8 @@ module.exports = function (app) {
     balance: { type: Number, require: false },
     totalDiscount: { type: Number, require: false },
     totalPrice: { type: Number, require: false },
-    subTotal: { type: Number, require: false }
+    subTotal: { type: Number, require: false },
+    deleted: { type: Boolean, 'default': false }
   }, {
     timestamps: true
   });

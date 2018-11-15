@@ -142,7 +142,7 @@ module.exports = {
         remove: []
     },
     after: {
-        all: [fastJoin(resolvers),softDelete()],
+        all: [fastJoin(resolvers)],
         find: [],
         get: [],
         create: [],

@@ -83,7 +83,7 @@ module.exports = {
   },
 
   after: {
-    all: [softDelete(),fastJoin(resolvers)],
+    all: [fastJoin(resolvers)],
     find: [fastJoin(facilityObj)],
     get: [fastJoin(facilityObj)],
     create: [alerts()],
