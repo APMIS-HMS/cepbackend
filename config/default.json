@@ -27,5 +27,5 @@
       "passwordField": "password"
     }
   },
-  "mongodb": "mongodb://localhost/apmisapiv_2"
+  "mongodb": "mongodb://localhost:27017/apmisapiv_2"
 }
