@@ -21,7 +21,8 @@ module.exports = function(app) {
         discharge: dischargeTransfer,
         dischargedBy: { type: Schema.Types.ObjectId, required: false },
         proposedWard: { type: Schema.Types.ObjectId, required: false },
-        isDischarged: { type: Boolean, default: false }
+        isDischarged: { type: Boolean, default: false },
+        deleted: { type: Boolean, 'default': false }
     }, {
         timestamps: true
     });
