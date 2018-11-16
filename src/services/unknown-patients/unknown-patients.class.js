@@ -122,16 +122,18 @@ class Service {
     unknownPerson.wallet = (unknownPersonWallet.wallet !== undefined) ? unknownPersonWallet.wallet : {};
     verifiedPerson.wallet.balance = (isNaN(verifiedPerson.wallet.balance)) ? 0 : verifiedPerson.wallet.balance;
     unknownPerson.wallet.balance = (isNaN(unknownPerson.wallet.balance)) ? 0 : unknownPerson.wallet.balance;
+    verifiedPerson.wallet.ledgerBalance = (isNaN(verifiedPerson.wallet.ledgerBalance)) ? 0 : verifiedPerson.wallet.ledgerBalance;
+    unknownPerson.wallet.ledgerBalance = (isNaN(unknownPerson.wallet.ledgerBalance)) ? 0 : unknownPerson.wallet.ledgerBalance;
     verifiedPerson.wallet.balance += unknownPerson.wallet.balance;
     verifiedPerson.wallet.ledgerBalance += unknownPerson.wallet.ledgerBalance;
+    unknownPerson.wallet.transactions = (unknownPerson.wallet.transactions !== undefined) ? unknownPerson.wallet.transactions : [];
     verifiedPerson.wallet.transactions = (verifiedPerson.wallet.transactions !== undefined) ? verifiedPerson.wallet.transactions : [];
     verifiedPerson.wallet.transactions.push(...unknownPerson.wallet.transactions);
-    //write code to soft delete unknown person here
-
-    await personService.patch(verifiedPerson._id, {
+    personService.patch(verifiedPerson._id, {
       wallet: verifiedPerson.wallet
-    }, {});
-
+    }, {}).then(p=>{
+    },e=>{
+    });
     const unknownPatient = await patientService.get(id, {});
     const verifiedPatient = await patientService.get(params.query.verifiedPatientId, {});
     verifiedPatient.tags = (verifiedPatient.tags !== undefined) ? verifiedPatient.tags : [];
@@ -143,7 +145,6 @@ class Service {
     verifiedPatient.timeLines = (verifiedPatient.timeLines !== undefined) ? verifiedPatient.timeLines : [];
     unknownPatient.timeLines = (unknownPatient.timeLines !== undefined) ? unknownPatient.timeLines : [];
     verifiedPatient.timeLines = verifiedPatient.timeLines.push(...unknownPatient.timeLines);
-    verifiedPerson.wallet.balance += unknownPerson.wallet.balance;
     //write code to soft delete unknown patient here
     const awaitedPaitent = await patientService.patch(verifiedPatient._id, verifiedPatient, {});
     const unknownBills = await billService.find({
@@ -151,7 +152,6 @@ class Service {
         patientId: id
       }
     });
-
     const _unknownBills = JSON.parse(JSON.stringify(unknownBills));
     _unknownBills.data.map(element => {
       delete element._id;
@@ -162,12 +162,9 @@ class Service {
         element3.patientId = params.query.verifiedPatientId
       });
     });
-
     billService.create(_unknownBills.data).then(payload => {
     }, err => {
     });
-
-    // console.log(createdBill);
 
     const unknownPrescriptions = await prescriptionService.find({
       query: {
@@ -197,7 +194,6 @@ class Service {
     if (_unknownLabRequest.data.length > 0) {
       await labReqService.create(_unknownLabRequest.data);
     }
-
     const unknownTreatment = await treatmentService.find({
       query: {
         facilityId: params.query.facilityId,
