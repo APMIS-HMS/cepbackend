@@ -104,6 +104,7 @@ module.exports = function (app) {
             type: Schema.Types.Mixed,
             required: false
         }],
+        deleted: { type: Boolean, 'default': false },
         wallet: {
             type: walletSchema,
             select: false,

@@ -1,10 +1,11 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const peopleApmisId = require('../../hooks/people-apmis-id');
 const alerts = require('../../hooks/alerts');
+const { softDelete } = require('feathers-hooks-common');
 
 module.exports = {
   before: {
-    all: [],
+    all: [authenticate('jwt'),softDelete()],
     find: [authenticate('jwt')],
     get: [authenticate('jwt')],
     create: [peopleApmisId()],
