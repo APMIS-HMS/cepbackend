@@ -76,9 +76,7 @@ class Service {
             if (getAppointment.data.length > 0) {
                 visit.date = Date.now();
                 let newFemaleCount = {};
-                 let newMaleCount = {};
-               
-                
+                let newMaleCount = {};
 
                 let clinic = getAppointment.data.map(x => {
                     return {
@@ -146,7 +144,7 @@ class Service {
                 return jsend.success(visit);
             }
             else {
-                return jsend.success('No record found!');
+                return jsend.success();
             }
 
         } catch (error) {

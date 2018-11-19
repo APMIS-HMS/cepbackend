@@ -319,6 +319,8 @@ const facilityInitializer = require('./facility-initializer/facility-initializer
 const laboratoryReportSummary = require('./laboratory-report-summary/laboratory-report-summary.service.js');
 const appointmentReportSummary = require('./appointment-report-summary/appointment-report-summary.service.js');
 const unknownPatients = require('./unknown-patients/unknown-patients.service.js');
+const appointmentDiagnosisReport = require('./appointment-diagnosis-report/appointment-diagnosis-report.service.js');
+const appointmentsSummaryReport = require('./appointments-summary-report/appointments-summary-report.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -555,4 +557,6 @@ module.exports = function (app) {
   app.configure(laboratoryReportSummary);
   app.configure(appointmentReportSummary);
   app.configure(unknownPatients);
+  app.configure(appointmentDiagnosisReport);
+  app.configure(appointmentsSummaryReport);
 };
