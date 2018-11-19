@@ -36,10 +36,6 @@ class Service {
                 let returnData = services.filter(x => x.name.toLowerCase().includes(searchString.toLowerCase()));
                 for (let index = 0; index < returnData.length; index++) {
                   const element = returnData[index];
-                  console.log(facilityId,
-                    data._id,
-                    categories[0]._id,
-                    element._id);
                   const facilityPrice = await facilityPriceService.find({
                     query: {
                       facilityId: facilityId,
