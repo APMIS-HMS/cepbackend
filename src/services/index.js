@@ -321,6 +321,7 @@ const appointmentReportSummary = require('./appointment-report-summary/appointme
 const unknownPatients = require('./unknown-patients/unknown-patients.service.js');
 const appointmentDiagnosisReport = require('./appointment-diagnosis-report/appointment-diagnosis-report.service.js');
 const appointmentsSummaryReport = require('./appointments-summary-report/appointments-summary-report.service.js');
+const paymentReports = require('./payment-reports/payment-reports.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -559,4 +560,5 @@ module.exports = function (app) {
   app.configure(unknownPatients);
   app.configure(appointmentDiagnosisReport);
   app.configure(appointmentsSummaryReport);
+  app.configure(paymentReports);
 };
