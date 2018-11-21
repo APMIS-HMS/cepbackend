@@ -25,8 +25,10 @@ class Service {
             let getAppointments;
             if (params.query.startDate === undefined && params.query.endDate === undefined) {
                 getAppointments = await AppointmentService.find({ query: {
-                    facilityId:facilityId
-                   
+                    facilityId:facilityId,
+                    updatedAt: {
+                        $gte:startDate
+                    }
                 } });
             }else if(params.query.startDate !== undefined && params.query.endDate !== undefined) {
             //
