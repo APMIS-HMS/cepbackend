@@ -24,7 +24,7 @@ class Service {
         let followUpFemalePatientCount;
         
         try {
-            let getFac = await FacilityService.get(facilityId);
+            //let getFac = await FacilityService.get(facilityId);
             //return jsend.success(getFac);
             if (params.query.startDate === undefined) {
                 startDate = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -43,13 +43,13 @@ class Service {
                         }
                         ] 
                     }
-                });
+                });//return getAppointment;
             } else if (params.query.startDate !== undefined && params.query.endDate === undefined) {
                 getAppointment = await AppointmentService.find({ query: { facilityId: params.query.facilityId } });
             } else if (params.query.startDate === undefined && params.query.endDate !== undefined) {
                 getAppointment = await AppointmentService.find({
                     query: {
-                        facilityId: data.facilityId,
+                        facilityId:facilityId,
                         updatedAt: { $gte: params.query.startDate }
                     }
                 });
@@ -73,6 +73,7 @@ class Service {
                 });
             }
             // Check if appointments
+            // return getAppointment;
             if (getAppointment.data.length > 0) {
                 visit.date = Date.now();
                 let newFemaleCount = {};
@@ -121,11 +122,11 @@ class Service {
                     newFemaleCount = newFemale.length;
                     followUpFemalePatientCount = followUpFemale.length;
                     folloUpMalePatientCount = followUpmale.length;
-                    
+                    //return clinic;
                     let summary = {
                         date: Date.now(),
                         clinicName: element,
-                        total: res[element].length,
+                        grandTotal: res[element].length,
                         new: {
                             total: newAppointmentTypeCount,
                             totalFemale: newFemaleCount,
@@ -144,10 +145,11 @@ class Service {
                 return jsend.success(visit);
             }
             else {
-                return jsend.success();
+                return jsend.success([]);
             }
 
         } catch (error) {
+            console.log('============\n',error);
             return jsend.error({ message: 'Something went wrong', code: 508, data: { detail: error } });
         }
     }
