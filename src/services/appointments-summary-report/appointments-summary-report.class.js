@@ -25,10 +25,8 @@ class Service {
             let getAppointments;
             if (params.query.startDate === undefined && params.query.endDate === undefined) {
                 getAppointments = await AppointmentService.find({ query: {
-                    facilityId:facilityId,
-                    updatedAt: {
-                        $gte: startDate
-                    }
+                    facilityId:facilityId
+                   
                 } });
             }else if(params.query.startDate !== undefined && params.query.endDate !== undefined) {
             //
@@ -57,10 +55,12 @@ class Service {
                 let name=(x.providerDetails !== undefined)?x.providerDetails.personDetails.firstName
               +' '+x.providerDetails.personDetails.lastName:'No provider';
                 let fullName = x.patientDetails.personDetails.firstName +' '+x.patientDetails.personDetails.lastName;
+                let providerTitle = (x.providerDetails !== undefined)?x.providerDetails.personDetails.title+' ':'No title';
+                let patientTitle =x.patientDetails.personDetails.title+' ';
                 return {
-                    provider:name,
+                    provider:providerTitle+name,
                     apmisId:x.patientDetails.apmisId,
-                    patientName:fullName,
+                    patientName:patientTitle+fullName,
                     appointmentType:x.appointmentTypeId,
                     phone:x.patientDetails.personDetails.primaryContactPhoneNo,
                     time:x.startDate,
