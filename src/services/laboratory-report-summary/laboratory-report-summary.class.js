@@ -54,7 +54,9 @@ class Service {
                                 $lte: Date.now()
                             }
                         }
-                        ]
+                        ],
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $skip:(params.query.$kip)?params.query.$skip:0
                     }
                 });
             }
@@ -73,22 +75,34 @@ class Service {
                                 $lte: params.query.endDate
                             }
                         }
-                        ]
+                        ],
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $skip:(params.query.$kip)?params.query.$skip:0
                     }
                 });
             }// Search by querystring
             else if (params.query.queryString !== undefined) {
-                getLabReport = await LabReportService.find({ query: params.query });
+                getLabReport = await LabReportService.find({
+                    query: params.query,
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$kip)?params.query.$skip:0
+                });
             }
             // Search by all
             else if (params.query.searchBy !== undefined) {
-                getLabReport = await LabReportService.find({ query: { facilityId: facilityId } });
+                getLabReport = await LabReportService.find({ query: { 
+                    facilityId: facilityId,
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$kip)?params.query.$skip:0 
+                } });
             }
             else {
                 getLabReport = await LabReportService.find({
                     query: {
                         facilityId: facilityId,
-                        updatedAt: { $lte: Date.now() }
+                        updatedAt: { $lte: Date.now() },
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $skip:(params.query.$kip)?params.query.$skip:0
 
                     }
                 });
@@ -169,6 +183,7 @@ class Service {
                     patientId: x.patientId,
                     status: x.isUploaded,
                     date: x.createdAt,
+                    doctor:x.employeeDetails.firstName+' '+x.employeeDetails.lastName,
                     workBench: (x.investigations[i].investigation.LaboratoryWorkbenches[i] !== undefined) ?
                         x.investigations[i].investigation.LaboratoryWorkbenches[i].workbenches[i].workBench : 'No Workbench found'
 
@@ -178,10 +193,11 @@ class Service {
             let count = 0;
             if (labRequests.data.length > 0) {
                 newLabRequest.forEach((patient, i) => {
+                    let fullName = patient.patientDetails.firstName +' '+patient.patientDetails.lastName;
                     labReportSummary.apmisId = patient.patientDetails.apmisId;
-                    labReportSummary.patientName = patient.patientDetails.firstName;
+                    labReportSummary.patientName = fullName;
                     labReportSummary.patientId = patient.patientId;
-                    labReportSummary.doctor = patient.investigation[i].report.publishedById;
+                    labReportSummary.doctor = patient.doctor;
                     labReportSummary.status = patient.investigation[i].isUploaded;
                     labReportSummary.date = patient.date;
                     labReportSummary.request = patient.investigation[i].investigation.name;
@@ -190,21 +206,23 @@ class Service {
                     summary.push(labReportSummary);
                 });
                 //return locSum;
-                var counts = {};
+                var location = {};
                 //results.forEach(function (x) {
                 //counts[x.name]=[];
                 locSum.forEach(element=>{
                     summaryByLoc.request=element;
-                    counts[element]= (counts[element.resquest] || 0) + 1;
-                    summaryByLoc.total =counts;
+                    location[element]= (location[element.resquest] || 0) + 1;
+                    summaryByLoc.total =location;
                 });
                    
                 //});
 
                 laboratoryReport = summary;
-                laboratoryReport.location = counts;
-                laboratoryReport.bench = summaryByBench;
-                return jsend.success(laboratoryReport);
+                getLabReport.data = summary;
+                getLabReport.location = location;
+                //laboratoryReport.location = location;
+                // laboratoryReport.bench = summaryByBench;
+                return jsend.success(getLabReport);
             }
         } catch (error) {
             console.log('==========\n', error);
