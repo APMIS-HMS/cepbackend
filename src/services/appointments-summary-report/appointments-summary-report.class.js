@@ -56,10 +56,11 @@ class Service {
             let patientAppointmenstSummary = getAppointments.data.map(x=>{
                 let name=(x.providerDetails !== undefined)?x.providerDetails.personDetails.firstName
               +' '+x.providerDetails.personDetails.lastName:'No provider';
+                let fullName = x.patientDetails.personDetails.firstName +' '+x.patientDetails.personDetails.lastName;
                 return {
                     provider:name,
                     apmisId:x.patientDetails.apmisId,
-                    patientName:x.patientDetails.personDetails.firstName,
+                    patientName:fullName,
                     appointmentType:x.appointmentTypeId,
                     phone:x.patientDetails.personDetails.primaryContactPhoneNo,
                     time:x.startDate,
