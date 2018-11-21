@@ -79,7 +79,7 @@ class Service {
                 diagnosisSummary.summary = summary;
                 return jsend.success(diagnosisSummary);
             }else{
-              return jsend.success([]);  
+                return jsend.success([]);  
             }
             
         } catch (error) {
