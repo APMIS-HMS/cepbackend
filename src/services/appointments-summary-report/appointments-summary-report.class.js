@@ -59,7 +59,7 @@ class Service {
                 let patientTitle =x.patientDetails.personDetails.title+' ';
                 return {
                     provider:providerTitle+name,
-                    apmisId:x.patientDetails.apmisId,
+                    patientApmisId:x.patientDetails.personDetails.apmisId,
                     patientName:patientTitle+fullName,
                     appointmentType:x.appointmentTypeId,
                     phone:x.patientDetails.personDetails.primaryContactPhoneNo,
