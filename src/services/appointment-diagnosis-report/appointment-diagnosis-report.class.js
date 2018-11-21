@@ -11,7 +11,7 @@ class Service {
     async find(params) {
         const AppointmentService = this.app.service('appointments');
         const LabRequestService = this.app.service('laboratory-requests');
-        
+
         let summary = {};
         let facilityId = params.query.facilityId;
         let startDate = new Date(new Date().setDate(new Date().getDate()));

@@ -201,7 +201,7 @@ class Service {
                    
                 //});
 
-                laboratoryReport.summary = summary;
+                laboratoryReport = summary;
                 laboratoryReport.location = counts;
                 laboratoryReport.bench = summaryByBench;
                 return jsend.success(laboratoryReport);
