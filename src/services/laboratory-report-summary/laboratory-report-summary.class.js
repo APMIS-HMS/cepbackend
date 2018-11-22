@@ -222,7 +222,7 @@ class Service {
                 getLabReport.location = location;
                 //laboratoryReport.location = location;
                 // laboratoryReport.bench = summaryByBench;
-                return jsend.success(getLabReport);
+                return getLabReport;
             }
         } catch (error) {
             console.log('==========\n', error);
