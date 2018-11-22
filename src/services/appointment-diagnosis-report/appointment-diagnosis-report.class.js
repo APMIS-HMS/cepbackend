@@ -9,81 +9,43 @@ class Service {
     }
 
     async find(params) {
-        const AppointmentService = this.app.service('appointments');
-        const LabRequestService = this.app.service('laboratory-requests');
+        const DocumentationsService = this.app.service('documentations');
+        const PatientService = this.app.service('patients');
 
-        let summary = {};
-        let facilityId = params.query.facilityId;
-        let startDate = new Date(new Date().setDate(new Date().getDate()));
         try {
-            let getAppointments;
-            if (params.query.startDate === undefined && params.query.endDate === undefined) {
-                console.log(startDate);
-                getAppointments = await AppointmentService.find({ query: { 
-                    facilityId: facilityId,
-                    updatedAt: {
-                        $gte: startDate
-                    }
-                } });
-            }
-            //find by date range
-            else if (params.query.startDate !== undefined && params.query.endDate !== undefined) {
-                getAppointments = await AppointmentService.find({
-                    query: {
-                        facilityId: facilityId,
-                        $and: [{
-                            updatedAt: {
-                                $gte: params.query.startDate
+            let getDoc = await DocumentationsService.find({query:{personId:params.query.personId}});
+            //return getDoc;
+            if(getDoc.data.length>0){
+                let documentations = getDoc.data[0].documentations;
+                let patientIds = documentations.map(x=>x.patientId);
+                let getPatient;
+                getPatient = await PatientService.find({query:{'_id': { $in: patientIds }}});
+
+                let summary=[];
+                let diagnosesSum = {};
+                if (documentations.length>0){
+                    getPatient.data.map(x=>{
+                        documentations.map(y=>{
+                            if(y._id.toString() === x.patientId.toString()){
+                                diagnosesSum.age = y.age;
+                                diagnosesSum.apmisId = y.personDetails.apmisId;
+                                diagnosesSum.gender = y.personDetails.gender;
+                                diagnosesSum.patientId=x.patientId;
+                                diagnosesSum.patientName= x.patientName;
+                                //diagnosesSum.ICD10Code= (x.document.body.ICD10Diagnosis!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
+                                //diagnosesSum.diagnosis= (x.document.body.ICD10Diagnosis!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
+                                summary.push(diagnosesSum);
                             }
-                        },
-                        {
-                            updatedAt: {
-                                $lte: params.query.endDate
-                            }
-                        }
-                        ]
-                    }
-                });
-            }
-            else{
-                getAppointments = await AppointmentService.find({query:params.query});
-            }
-            let patientIds = getAppointments.data.map(x => {
-                return x.patientId;
-            });
-            let getLabRequests = await LabRequestService.find({ query: { 'patientId': { $in: patientIds } } });
-            let patientAppointmenstSummary = getAppointments.data.map(x => {
-                return {
-                    patientId: x.patientId,
-                    patientName: x.patientDetails.personDetails.firstName,
-                    apmisId: x.patientDetails.personDetails.apmisId,
-                    gender: x.patientDetails.personDetails.gender,
-                    age: x.patientDetails.personDetails.age,
-                    ICD10Code: '',
-                    diagnosis: ''
-                }
-            });
-            let diagnosisSummary;
-            patientAppointmenstSummary.forEach(e => {
-                diagnosisSummary = getLabRequests.data.map(x => {
-
-                    if (x.patientId === e.patientId) {
-                        e.diagnosis = x.diagnosis;
-                    }
-                    return e;
-                });
-
-            });
-
-            summary.totalAppointments = (diagnosisSummary !== undefined)?diagnosisSummary.length:0;
-            if(diagnosisSummary!==undefined){
-                diagnosisSummary.summary = summary;
-                return jsend.success(diagnosisSummary);
-            }else{
-                return jsend.success([]);  
+                        });
+                        
+                    });
+                    
+                }  return summary; 
             }
             
+            
         } catch (error) {
+            console.log('====================\n',error);
             return jsend.error(error);
         }
 
