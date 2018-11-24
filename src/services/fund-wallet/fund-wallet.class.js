@@ -130,7 +130,6 @@ class FundWalletService {
             let url = process.env.PAYSTACK_VERIFICATION_URL + data.ref.trxref;
             let data2 = await this.verifyPayStackPayment(url);
             let payload = JSON.parse(data2);
-            console.log(payload);
             if (payload.status && payload.data.status === 'success') {
               paymentRes.isActive = true;
               paymentRes.paymentResponse = data2;
@@ -169,13 +168,11 @@ class FundWalletService {
                     params.query.saveCard = false;
                   }
                   if (!params.query.isCardReused && params.query.saveCard) {
-                    console.log('Inside decision');
                     person.wallet.cards.push({
                       authorization: payload.data.authorization,
                       customer: payload.data.customer
                     })
                   }
-                  console.log(person, params.query);
                   try {
                     const personUpdate = await peopleService.update(person._id, person, {
                       query: {
