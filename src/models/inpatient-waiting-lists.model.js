@@ -14,7 +14,8 @@ module.exports = function(app) {
         unitId: { type: Schema.Types.ObjectId, required: false }, // Not important. Planning on removing it.
         isAdmitted: { type: Boolean, 'default': false },
         admittedDate: { type: Date, required: false },
-        description: { type: String, required: false }
+        description: { type: String, required: false },
+        deleted: { type: Boolean, 'default': false }
     }, {
         timestamps: true
     });

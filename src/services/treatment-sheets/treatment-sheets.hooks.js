@@ -2,7 +2,7 @@ const {
   authenticate
 } = require('@feathersjs/authentication').hooks;
 const {
-  fastJoin
+  fastJoin,softDelete
 } = require('feathers-hooks-common');
 
 const fastJoinServerDate = {
@@ -80,7 +80,7 @@ const fastJoinCreatedBy = {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
+    all: [authenticate('jwt'),softDelete()],
     find: [],
     get: [],
     create: [],
