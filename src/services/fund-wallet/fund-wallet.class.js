@@ -156,6 +156,23 @@ class FundWalletService {
                     transactionStatus: 'Completed'
                   };
                   person.wallet = transaction(userWallet, cParam);
+                  if (params.query.isCardReused === 'true'){
+                    params.query.isCardReused = true;
+                  }else if (params.query.isCardReused === 'false'){
+                    params.query.isCardReused = false;
+                  }
+
+                  if (params.query.saveCard === 'true'){
+                    params.query.saveCard = true;
+                  }else if (params.query.saveCard === 'false'){
+                    params.query.saveCard = false;
+                  }
+                  if (!params.query.isCardReused && params.query.saveCard) {
+                    person.wallet.cards.push({
+                      authorization: payload.data.authorization,
+                      customer: payload.data.customer
+                    })
+                  }
                   try {
                     const personUpdate = await peopleService.update(person._id, person, {
                       query: {
