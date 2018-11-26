@@ -18,7 +18,9 @@ class Service {
   async create(data, params) {
     const patientsService = this.app.service('patients');
     const billingsService = this.app.service('billings');
+    const facilityService = this.app.service('facilities');
     const familiesService = this.app.service('families');
+    const facilitySubscriptionStatus = await facilityService.get(params.query.facilityId);
     let billGroup = [];
     const insurance = data.filter(x => x.covered.coverType === 'insurance');
     const wallet = data.filter(x => x.covered.coverType === 'wallet');
