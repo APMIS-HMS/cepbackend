@@ -10,6 +10,7 @@ module.exports = function(app) {
     const documentations = new Schema({
         personId: { type: Schema.Types.ObjectId, required: true },
         documentations: [patientDocumentationSchema],
+        deleted: { type: Boolean, 'default': false }
     }, {
         timestamps: true
     });

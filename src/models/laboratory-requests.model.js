@@ -15,6 +15,7 @@ module.exports = function(app) {
         investigations: [{ type: Schema.Types.Mixed, required: true }],
         billingId: { type: Schema.Types.Mixed, required: false },
         source: { type: Schema.Types.Mixed, required: false },
+        deleted: { type: Boolean, 'default': false }
     }, {
         timestamps: true
     });

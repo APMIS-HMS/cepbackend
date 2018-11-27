@@ -22,10 +22,8 @@ class Service {
     const treatmentSheetsService = this.app.service('treatment-sheets');
     const billCreatorsService = this.app.service('bill-creators');
     const patientsService = this.app.service('patients');
-
     const prescriptionPriorityService = this.app.service('prescription-priorities');
     const prescriptionService = this.app.service('prescriptions');
-
     const patient = await patientsService.find({
       query: {
         facilityId: data.facilityId,
@@ -33,27 +31,56 @@ class Service {
         $select: ['_id', 'clientsNo', 'paymentPlan']
       }
     });
-
-
     const prescriptionPriority = await prescriptionPriorityService.find({
       query: {
         name: 'Normal',
         $select: ['_id', 'name']
       }
     });
-
-
     let bills = [];
     let procedureBills = [];
     let medicationBills = [];
     let investigationItems = [];
     let billCreator = {};
-    let labRequests = {};
+    let createdTreatment = {};
 
     let billCreatorPrecedure = {};
     let billCreatorMed = {};
 
-    const treatmentSheet = await treatmentSheetsService.create(data);
+    const orderSet = await treatmentSheetsService.find({
+      query: {
+        personId: params.query.personId,
+        facilityId: params.query.facilityId,
+        completed: false
+      }
+    });
+
+    orderSet.data = (orderSet.data.length === 0) ? [{
+      treatmentSheet: {}
+    }] : orderSet.data;
+    orderSet.data[0].treatmentSheet.medications = (orderSet.data[0].treatmentSheet.medications === undefined) ? [] : orderSet.data[0].treatmentSheet.medications;
+    data.treatmentSheet.medications = (data.treatmentSheet.medications === undefined) ? [] : data.treatmentSheet.medications;
+    orderSet.data[0].treatmentSheet.medications.push(...data.treatmentSheet.medications);
+    orderSet.data[0].treatmentSheet.investigations = (orderSet.data[0].treatmentSheet.investigations === undefined) ? [] : orderSet.data[0].treatmentSheet.investigations;
+    data.treatmentSheet.investigations = (data.treatmentSheet.investigations === undefined) ? [] : data.treatmentSheet.investigations;
+    orderSet.data[0].treatmentSheet.investigations.push(...data.treatmentSheet.investigations); //.filter(x => x.isBilled === false));
+    orderSet.data[0].treatmentSheet.procedures = (orderSet.data[0].treatmentSheet.procedures === undefined) ? [] : orderSet.data[0].treatmentSheet.procedures;
+    data.treatmentSheet.procedures = (data.treatmentSheet.procedures === undefined) ? [] : data.treatmentSheet.procedures;
+    orderSet.data[0].treatmentSheet.procedures.push(...data.treatmentSheet.procedures);
+    orderSet.data[0].treatmentSheet.nursingCares = (orderSet.data[0].treatmentSheet.nursingCares === undefined) ? [] : orderSet.data[0].treatmentSheet.nursingCares;
+    data.treatmentSheet.nursingCares = (data.treatmentSheet.nursingCares === undefined) ? [] : data.treatmentSheet.nursingCares;
+    orderSet.data[0].treatmentSheet.nursingCares.push(...data.treatmentSheet.nursingCares);
+    orderSet.data[0].treatmentSheet.physicianOrders = (orderSet.data[0].treatmentSheet.physicianOrders === undefined) ? [] : orderSet.data[0].treatmentSheet.physicianOrders;
+    data.treatmentSheet.physicianOrders = (data.treatmentSheet.physicianOrders === undefined) ? [] : data.treatmentSheet.physicianOrders;
+    orderSet.data[0].treatmentSheet.physicianOrders.push(...data.treatmentSheet.physicianOrders);
+    if (orderSet.data[0]._id !== undefined) {
+      createdTreatment = await treatmentSheetsService.patch(orderSet.data[0]._id, {
+        treatmentSheet: orderSet.data[0].treatmentSheet
+      }, {});
+    } else {
+      createdTreatment = await treatmentSheetsService.create(data);
+    }
+
     if (data.treatmentSheet.investigations !== undefined) {
       data.treatmentSheet.investigations.map(investigation => {
         let bill = {};
@@ -67,11 +94,10 @@ class Service {
             patientId: patient.data[0]._id,
             quantity: 1,
             active: true,
-            totalPrice: 0,
-            covered: {
-              coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-            },
+            totalPrice: 0
           };
+          bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           if (investigation.investigation !== undefined) {
             bill.unitPrice = (investigation.investigation.changedPrice !== null && investigation.investigation.changedPrice !== undefined) ? investigation.investigation.changedPrice : investigation.investigation.location.workbenches[0].price;
             bill.totalPrice = bill.unitPrice;
@@ -124,7 +150,7 @@ class Service {
     }
     if (data.treatmentSheet.procedures !== undefined) {
       data.treatmentSheet.procedures.map(procedure => {
-        const bill = {
+        let bill = {
           unitPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price,
           facilityId: data.facilityId,
           unitPriceChanges: [],
@@ -134,24 +160,24 @@ class Service {
           quantity: 1,
           active: true,
           totalPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price,
-          covered: {
-            coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-          },
         };
-
+        bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+        bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
         procedureBills.push(bill);
       });
-      billCreatorPrecedure = await billCreatorsService.create(procedureBills, {
-        query: {
-          facilityId: data.facilityId,
-          patientId: patient.data[0]._id
-        }
-      });
+      if (procedureBills.length > 0) {
+        billCreatorPrecedure = await billCreatorsService.create(procedureBills, {
+          query: {
+            facilityId: data.facilityId,
+            patientId: patient.data[0]._id
+          }
+        });
+      }
     }
     if (data.treatmentSheet.medications !== undefined) {
       data.treatmentSheet.medications.map(medication => {
         if (medication.isBilled) {
-          const bill = {
+          let bill = {
             unitPrice: (medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost,
             facilityId: data.facilityId,
             unitPriceChanges: [],
@@ -160,11 +186,10 @@ class Service {
             patientId: patient.data[0]._id,
             quantity: medication.quantity,
             active: true,
-            totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost),
-            covered: {
-              coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-            },
+            totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost)            
           };
+          bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           if (medication.changedPrice !== undefined && medication.changedPrice !== null) {
             bill.unitPriceChanges.push({
               currentPrice: medication.changedPrice,
@@ -182,11 +207,10 @@ class Service {
             patientId: patient.data[0]._id
           }
         });
-
         billCreatorMed.map(b => {
           b.billItems.map(x => {
             data.treatmentSheet.medications.map(y => {
-              if (x.serviceId !== undefined && x.facilityServiceId !== undefined && x.serviceId.toString() === y.serviceId.toString() && x.facilityServiceId.toString() === y.facilityServiceId.toString()) {
+              if (x.serviceId !== undefined && x.facilityServiceId !== undefined && y.isBilled && x.serviceId.toString() === y.serviceId.toString() && x.facilityServiceId.toString() === y.facilityServiceId.toString()) {
                 y.billItemId = x._id;
                 y.billId = billCreatorMed._id;
               }
@@ -203,14 +227,17 @@ class Service {
           isAuthorised: true,
           prescriptionItems: data.treatmentSheet.medications
         };
-        await prescriptionService.create(prescribe);
+        prescriptionService.create(prescribe).then(pre => {
+
+        }, err => {});
+
       }
     }
     const result = {
       investigations: billCreator,
       procedures: billCreatorPrecedure,
       medications: billCreatorMed,
-      treatmentSheet: treatmentSheet
+      treatmentSheet: createdTreatment
     }
     return jsend.success(result);
   }
@@ -246,14 +273,14 @@ class Service {
         $select: ['_id', 'clientsNo', 'paymentPlan']
       }
     });
-    
+
     const prescriptionPriority = await prescriptionPriorityService.find({
       query: {
         name: 'Normal',
         $select: ['_id', 'name']
       }
     });
-    
+
     let bills = [];
     let procedureBills = [];
     let medicationBills = [];
@@ -267,7 +294,7 @@ class Service {
     const treatmentSheet = await treatmentSheetsService.patch(id, {
       treatmentSheet: data.treatmentSheet
     });
-    
+
     if (data.treatmentSheet.investigations !== undefined) {
       data.treatmentSheet.investigations.map(investigation => {
         if (investigation.isExisting === undefined) {
@@ -282,11 +309,10 @@ class Service {
               patientId: patient.data[0]._id,
               quantity: 1,
               active: true,
-              totalPrice: 0,
-              covered: {
-                coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-              },
+              totalPrice: 0
             };
+            bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
             if (investigation.investigation !== undefined) {
               bill.unitPrice = (investigation.investigation.changedPrice !== null && investigation.investigation.changedPrice !== undefined) ? investigation.investigation.changedPrice : investigation.investigation.location.workbenches[0].price;
               bill.totalPrice = bill.unitPrice;
@@ -344,7 +370,7 @@ class Service {
     if (data.treatmentSheet.procedures !== undefined) {
       data.treatmentSheet.procedures.map(procedure => {
         if (procedure.isExisting === undefined) {
-          const bill = {
+          let bill = {
             unitPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price,
             facilityId: data.facilityId,
             unitPriceChanges: [],
@@ -353,11 +379,10 @@ class Service {
             patientId: patient.data[0]._id,
             quantity: 1,
             active: true,
-            totalPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price,
-            covered: {
-              coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-            },
+            totalPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price
           };
+          bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           procedureBills.push(bill);
         }
       });
@@ -374,7 +399,7 @@ class Service {
       data.treatmentSheet.medications.map(medication => {
         if (medication.isExisting === undefined) {
           if (medication.isBilled) {
-            const bill = {
+            let bill = {
               unitPrice: (medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost,
               facilityId: data.facilityId,
               unitPriceChanges: [],
@@ -384,10 +409,9 @@ class Service {
               quantity: medication.quantity,
               active: true,
               totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost),
-              covered: {
-                coverType: patient.data[0].paymentPlan.find(x => x.isDefault !== true).planType
-              },
             };
+            bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
+            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
             if (medication.changedPrice !== undefined && medication.changedPrice !== null) {
               bill.unitPriceChanges.push({
                 currentPrice: medication.changedPrice,
@@ -426,7 +450,7 @@ class Service {
           isAuthorised: true,
           prescriptionItems: data.treatmentSheet.medications
         };
-        const yu = await prescriptionService.create(prescribe);
+        await prescriptionService.create(prescribe);
       }
     }
     const result = {
