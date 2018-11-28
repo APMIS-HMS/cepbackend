@@ -323,6 +323,7 @@ const appointmentDiagnosisReport = require('./appointment-diagnosis-report/appoi
 const appointmentsSummaryReport = require('./appointments-summary-report/appointments-summary-report.service.js');
 const patientRegReport = require('./patient-reg-report/patient-reg-report.service.js');
 const facilityProductList = require('./facility-product-list/facility-product-list.service.js');
+const employeeAccessibilitiesQuery = require('./employee-accessibilities-query/employee-accessibilities-query.service.js');
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -563,4 +564,5 @@ module.exports = function (app) {
   app.configure(appointmentsSummaryReport);
   app.configure(patientRegReport);
   app.configure(facilityProductList);
+  app.configure(employeeAccessibilitiesQuery);
 };

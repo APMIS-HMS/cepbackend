@@ -11,7 +11,9 @@ class Service {
     const storeInventories = await inventoryService.find({
       query: {
         facilityId: params.query.facilityId,
-        storeId: params.query.storeId
+        storeId: params.query.storeId,
+        $limit: params.query.limit !== undefined ? params.query.limit : 10,
+        $skip: params.query.skip != undefined ? params.query.skip : 0
       }
     });
     const facilityServiceIds = storeInventories.data.map(inventory => inventory.facilityServiceId);
@@ -35,17 +37,8 @@ class Service {
         ]
       }
     });
-    const mapStoreInventories = storeInventories.data.map(inventory => {
-      return {
-        productName: inventory.productObject.name,
-        availableQuantity: inventory.availableQuantity,
-        transactions: inventory.transactions.filter(transaction => transaction.availableQuantity > 0),
-        price: this.getProductPrice(prices.data, inventory.serviceId.toString(), inventory.facilityServiceId.toString())
-      }
-    });
 
     // get product re-order-level
-    console.log(productIds);
     const productLevels = await reOrderLevelService.find({
       query: {
         facilityId: params.query.facilityId,
@@ -55,8 +48,24 @@ class Service {
         }
       }
     });
-    console.log(productLevels);
-    return Promise.resolve(mapStoreInventories);
+
+    const mapStoreInventories = storeInventories.data.map(inventory => {
+      return {
+        productName: inventory.productObject.name,
+        availableQuantity: inventory.availableQuantity,
+        transactions: inventory.transactions.filter(transaction => transaction.availableQuantity > 0),
+        price: this.getProductPrice(prices.data, inventory.serviceId.toString(), inventory.facilityServiceId.toString()),
+        reOrderLevel: this.getProductReOrderLevel(productLevels.data, inventory.storeId.toString(), inventory.productId.toString())
+      }
+    });
+
+
+    return Promise.resolve({
+      total: storeInventories.total,
+      limit: storeInventories.limit,
+      skip: storeInventories.skip,
+      data: mapStoreInventories
+    });
   }
 
   getProductPrice(prices, serviceId, facilityServiceId) {
@@ -64,8 +73,9 @@ class Service {
     return price.length > 0 ? price[0].price : 0
   }
 
-  getProductReOrderLevel() {
-
+  getProductReOrderLevel(reOrderLevels, storeId, productId) {
+    const order = reOrderLevels.filter(order => order.storeId.toString() == storeId && order.productId.toString() == productId);
+    return order.length > 0 ? order[0].reOrderLevel : 0
   }
 
   get(id, params) {
