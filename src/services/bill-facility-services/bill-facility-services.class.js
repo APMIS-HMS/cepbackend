@@ -190,7 +190,6 @@ function fixedGroupExisting(results) {
   let discount = 0;
   let len5 = results.length - 1;
   let masterBillGroups = [];
-console.log(results);
   for (let i = len5; i >= 0; i--) {
     masterBillGroups.push(results[i]);
     let len6 = results[i].billItems.length - 1;

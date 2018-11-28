@@ -110,13 +110,7 @@ class Service {
         let pds = [];
         for (let _indx = 0; _indx < len4; _indx++) {
           try {
-            const pd = await billingsService.patch(filterCheckedBills[_indx]._id, {
-              billItems: filterCheckedBills[_indx].billItems
-            }, {
-              query: {
-                hasPriceChanged: false
-              }
-            });
+            const pd = await billingsService.update(filterCheckedBills[_indx]._id, filterCheckedBills[_indx], {});
             pds.push(pd);
           } catch (error) {}
 
