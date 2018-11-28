@@ -30,6 +30,10 @@ const billingSchema = new Schema({
     type: Number,
     required: true
   },
+  apmisSurCharge: {
+    type: Number,
+    required: false
+  },
   unitPrice: {
     type: Number,
     required: true
