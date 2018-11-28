@@ -30,7 +30,7 @@ const billingSchema = new Schema({
     type: Number,
     required: true
   },
-  subCharge: {
+  apmisSurCharge: {
     type: Number,
     required: false
   },

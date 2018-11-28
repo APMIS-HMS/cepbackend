@@ -17,6 +17,7 @@ module.exports = function(app) {
         userId: { type: Schema.Types.ObjectId, required: false },
         billItems: [billingItemScheme],
         subTotal: { type: Number, required: true },
+        totalCost: { type: Number, required: false, 'default': 0 },
         grandTotal: { type: Number, required: true },
         discount: { type: Number, required: false },
         deleted: { type: Boolean, 'default': false }
