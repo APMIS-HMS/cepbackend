@@ -23,6 +23,7 @@ class Service {
             $in: params.query.patientIds
           },
           'billItems.isBearerConfirmed': true,
+          'billItems.isInvoiceGenerated': false,
           $or: [{
               'billItems.covered.coverType': 'wallet'
             },
@@ -30,6 +31,7 @@ class Service {
               'billItems.covered.coverType': 'family'
             }
           ],
+          $limit:false,
           $sort: {
             updatedAt: -1
           }
@@ -51,13 +53,18 @@ class Service {
         query: {
           patientId: patientIds[i].id,
           'billItems.isBearerConfirmed': true,
+          'billItems.isInvoiceGenerated': false,
           $or: [{
               'billItems.covered.coverType': 'wallet'
             },
             {
               'billItems.covered.coverType': 'family'
             }
-          ]
+          ],
+          $limit:false,
+          $sort: {
+            updatedAt: -1
+          }
         }
       });
       patientBills.push.apply(patientBills, awaitedBillItems.data);
