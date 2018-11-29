@@ -322,6 +322,7 @@ const unknownPatients = require('./unknown-patients/unknown-patients.service.js'
 const appointmentDiagnosisReport = require('./appointment-diagnosis-report/appointment-diagnosis-report.service.js');
 const appointmentsSummaryReport = require('./appointments-summary-report/appointments-summary-report.service.js');
 const patientRegReport = require('./patient-reg-report/patient-reg-report.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);

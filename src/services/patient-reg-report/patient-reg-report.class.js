@@ -118,7 +118,7 @@ class Service {
                             patientName:x.personDetails.firstName,
                             gender:x.personDetails.gender, 
                             age:x.age,
-                            Address:x.personDetails.homeAddress, 
+                            address:x.personDetails.homeAddress, 
                             phone:x.personDetails.primaryContactPhoneNo,
                             dateCreated:x.createdAt
                         };
@@ -154,7 +154,7 @@ class Service {
                     if(params.query.plan !== undefined){
                         if(params.query.plan.toLowerCase() === 'hmo'){
                             paymentPlan.plan ={
-                                'HMO':hmo
+                                'hmo':hmo
                             };
                         }
                         if(params.query.plan.toLowerCase() === 'familycover'){
@@ -172,10 +172,10 @@ class Service {
                                 'privatePatient':privatePatient
                             };
                         }
-                        else if(params.query.plan.toLowerCase()==='true'){
+                        else if(params.query.plan ===true){
                             console.log('here');
                             paymentPlan.plan ={
-                                'HMO':hmo,
+                                'hmo':hmo,
                                 'familyCover':familyCover,
                                 'companyCover':companyCover,
                                 'privatePatient':privatePatient
