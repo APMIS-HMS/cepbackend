@@ -31,7 +31,7 @@ class Service {
               'billItems.covered.coverType': 'family'
             }
           ],
-          $limit:false,
+          $limit: false,
           $sort: {
             updatedAt: -1
           }
@@ -61,7 +61,7 @@ class Service {
               'billItems.covered.coverType': 'family'
             }
           ],
-          $limit:false,
+          $limit: false,
           $sort: {
             updatedAt: -1
           }
@@ -132,6 +132,8 @@ class Service {
         query: {
           facilityId: id,
           'billItems.isBearerConfirmed': true,
+          'billItems.isInvoiceGenerated': false,
+          $limit: false,
           $sort: {
             updatedAt: -1
           }
@@ -160,6 +162,8 @@ class Service {
                     'billItems.covered.coverType': 'family'
                   }
                 ],
+                'billItems.isInvoiceGenerated': false,
+                $limit: false,
                 $sort: {
                   updatedAt: -1
                 }
@@ -218,7 +222,9 @@ class Service {
               {
                 'billItems.covered.coverType': 'family'
               }
-            ]
+            ],
+            'billItems.isInvoiceGenerated': false,
+            $limit: false,
           }
         });
         patientBills.push.apply(patientBills, awaitedBillItems.data);
