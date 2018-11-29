@@ -3,6 +3,7 @@ var isAfter = require('date-fns/is_after');
 var isBefore = require('date-fns/is_before');
 const jsend = require('jsend');
 var addDays = require('date-fns/add_days');
+var Paginator = require('../../../src/helpers/paginate');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -50,19 +51,26 @@ class Service {
     //     }
 
     // }
+
     retVal = expiredProduct.data.map(x => {
       return {
-        transactions: x.transactions.filter(y => isAfter(y.expiryDate, addDays(Date.now(), params.query.numberOfDays))).map(u => {
+        transactions: x.transactions.filter(y => isBefore(y.expiryDate, addDays(Date.now(), params.query.numberOfDays))).map(u => {
           return {
             quantity: u.quantity,
             batchNumber: u.batchNumber,
             expiryDate: u.expiryDate
           };
         }),
-        productName: x.productObject.name
+        productName: x.productObject.name,
+        reOrderLevel: x.reorder,
+        price: x.price.price,
+        availableQuantity: x.totalQuantity
       };
     });
-    return jsend.success(retVal.filter(x => x.transactions.length > 0));
+    const skip = params.query.skip;
+    const limit = params.query.limit;
+    const page = skip / limit + 1;
+    return jsend.success(Paginator(retVal.filter(x => x.transactions.length > 0), page, limit));
   }
 
   get(id, params) {
