@@ -18,7 +18,13 @@ class Service {
   async create(data, params) {
     const patientsService = this.app.service('patients');
     const billingsService = this.app.service('billings');
+    const facilityService = this.app.service('facilities');
     const familiesService = this.app.service('families');
+    const facilitySubscriptionStatus = await facilityService.get(params.query.facilityId, {
+      query: {
+        $select: ['paymentDistribution']
+      }
+    });
     let billGroup = [];
     const insurance = data.filter(x => x.covered.coverType === 'insurance');
     const wallet = data.filter(x => x.covered.coverType === 'wallet');
@@ -36,14 +42,16 @@ class Service {
           });
           const patient = await patientsService.get(params.query.patientId);
           const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.hmoId !== undefined && x.planDetails.hmoId.toString() === insurance[index].covered.hmoId.toString());
+          const _total = sumCost(indx, {});
           const billModel = {
             'facilityId': params.query.facilityId,
-            'grandTotal': sumCost(indx),
+            'grandTotal': _total.totalCost,
             'coverFile': {
               'id': patientPaymentType[0].planDetails.principalId,
               'name': patientPaymentType[0].planDetails.hmoName
             },
-            'subTotal': sumCost(indx),
+            'subTotal': _total.totalCost,
+            'totalCost': _total.totalCostValue,
             'discount': 0,
             'billItems': indx
           };
@@ -62,14 +70,16 @@ class Service {
           });
           const patient = await patientsService.get(params.query.patientId);
           const patientPaymentType = patient.paymentPlan.filter(x => x.planDetails.companyId.toString() === company[index].covered.companyId.toString());
+          const _total = sumCost(indx, facilitySubscriptionStatus.paymentDistribution);
           const billModel = {
             'facilityId': params.query.facilityId,
-            'grandTotal': sumCost(indx),
+            'grandTotal': _total.totalCost,
             'coverFile': {
               'id': patientPaymentType[0].planDetails.principalId,
               'name': patientPaymentType[0].planDetails.hmoName
             },
-            'subTotal': sumCost(indx),
+            'subTotal': _total.totalCost,
+            'totalCost': _total.totalCostValue,
             'discount': 0,
             'billItems': indx
           };
@@ -93,15 +103,17 @@ class Service {
           if (familyCoveredDetails !== null) {
             familyPrincipal = familyCoveredDetails.familyCovers.find(x => x.serial === 0);
           }
+          const _total = sumCost(indx, facilitySubscriptionStatus.paymentDistribution);
           const billModel = {
             'facilityId': params.query.facilityId,
             'patientId': familyPrincipal.patientId,
-            'grandTotal': sumCost(indx),
+            'grandTotal': _total.totalCost,
             'coverFile': {
               'id': patientPaymentType[0].planDetails.principalId,
               'name': patientPaymentType[0].planDetails.principalName
             },
-            'subTotal': sumCost(indx),
+            'subTotal': _total.totalCost,
+            'totalCost': _total.totalCostValue,
             'discount': 0,
             'billItems': indx
           };
@@ -115,11 +127,13 @@ class Service {
       wallet.forEach(x => {
         x.isBearerConfirmed = true;
       });
+      const _total = sumCost(wallet, facilitySubscriptionStatus.paymentDistribution);
       const billModel = {
         'facilityId': params.query.facilityId,
-        'grandTotal': sumCost(wallet),
+        'grandTotal': _total.totalCost,
         'patientId': params.query.patientId,
-        'subTotal': sumCost(wallet),
+        'subTotal': _total.totalCost,
+        'totalCost': _total.totalCostValue,
         'billItems': wallet
       };
       billGroup.push(billModel);
@@ -143,13 +157,52 @@ module.exports = function (options) {
   return new Service(options);
 };
 
-function sumCost(billItems) {
+function sumCost(billItems, facilityDeductionPlan) {
   let totalCost = 0;
-  billItems.forEach(element => {
+  let totalCostValue = 0;
+  billItems.map(element => {
+    let sumCharge = element.quantity * element.unitPrice;
+    let subCharge = (facilityDeductionPlan.deductionValue / 100) * element.unitPrice;
     if (element.active == true || element.active === undefined) {
-      totalCost += element.totalPrice;
+      if (facilityDeductionPlan.deductionType === '%') {
+        if (subCharge <= facilityDeductionPlan.deductionCap) {
+          element.apmisSurCharge = subCharge * element.quantity;
+          totalCostValue += sumCharge;
+          element.unitPrice = element.unitPrice + (element.apmisSurCharge / element.quantity);
+          element.totalPrice = sumCharge + element.apmisSurCharge;
+          totalCost += element.totalPrice;
+        } else {
+          element.apmisSurCharge = facilityDeductionPlan.deductionCap;
+          totalCostValue += sumCharge;
+          element.unitPrice = element.unitPrice + element.apmisSurCharge;
+          element.totalPrice = sumCharge + element.apmisSurCharge;
+          totalCost += element.totalPrice;
+        }
+      } else if (facilityDeductionPlan.deductionType === 'v') {
+        if (facilityDeductionPlan.deductionValue <= facilityDeductionPlan.deductionCap) {
+          element.apmisSurCharge = facilityDeductionPlan.deductionValue;
+          totalCostValue += sumCharge;
+          element.unitPrice = element.unitPrice + element.apmisSurCharge;
+          element.totalPrice = sumCharge + element.apmisSurCharge;
+          totalCost += element.totalPrice;
+        } else {
+          element.apmisSurCharge = facilityDeductionPlan.deductionCap;
+          totalCostValue += sumCharge;
+          element.unitPrice = element.unitPrice + element.apmisSurCharge;
+          element.totalPrice = sumCharge + element.apmisSurCharge;
+          totalCost += element.totalPrice;
+        }
+      } else {
+        element.totalPrice = element.quantity * element.unitPrice;
+        totalCostValue += element.totalPrice;
+        totalCost += element.totalPrice;
+      }
     }
   });
-  return totalCost;
+  const result = {
+    totalCost: totalCost,
+    totalCostValue: totalCostValue
+  };
+  return result;
 }
 module.exports.Service = Service;

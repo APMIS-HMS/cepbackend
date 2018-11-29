@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+var Paginator = require('../../../src/helpers/paginate');
+const jsend = require('jsend');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -8,8 +10,46 @@ class Service {
     this.app = app;
   }
 
-  find(params) {
-    return Promise.resolve([]);
+  async find(params) {
+    const facilityService = this.app.service('facilities');
+    const storesService = this.app.service('stores');
+    const locationService = this.app.service('locations');
+
+    let getFacility = await facilityService.get(params.query.facilityId);
+    const minorLocations = getFacility.minorLocations;
+
+    const locations = await locationService.find({});
+
+    let getFacilityStore = await storesService.find({
+      query: {
+        facilityId: params.query.facilityId
+      }
+    });
+    // console.log(minorLocations);
+    const retVal = getFacilityStore.data.map(store => {
+      return {
+        name: store.name,
+        location: this.getMinorLocation(minorLocations, store.minorLocationId, locations.data),
+      }
+    });
+    const skip = params.query.skip;
+    const limit = params.query.limit;
+    const page = skip / limit + 1;
+    console.log(retVal);
+    return jsend.success(Paginator(retVal, page, limit));
+  }
+
+  getMinorLocation(minorLocations, minorLocationId, locations) {
+    const result = minorLocations.find(minor => minor._id.toString() === minorLocationId.toString());
+    const majorLocation = this.getMajorLocations(locations, result.locationId);
+    return {
+      minorLocation: result,
+      majorLocation: majorLocation
+    };
+  }
+
+  getMajorLocations(locations, locationId) {
+    return locations.find(major => major._id.toString() === locationId.toString());
   }
 
   async get(id, params) {
@@ -17,7 +57,7 @@ class Service {
     const storesService = this.app.service('stores');
     let getFacility = await facilityService.get(id);
     let getFacilityStore = {};
-    if(params.query.name != undefined){
+    if (params.query.name != undefined) {
       getFacilityStore = await storesService.find({
         query: {
           facilityId: id,
@@ -27,7 +67,7 @@ class Service {
           }
         }
       });
-    }else if(params.query.minorLocationId != undefined){
+    } else if (params.query.minorLocationId != undefined) {
 
       getFacilityStore = await storesService.find({
         query: {
@@ -35,15 +75,15 @@ class Service {
           minorLocationId: params.query.minorLocationId
         }
       });
-    }else if(params.query.productTypeId != undefined){
+    } else if (params.query.productTypeId != undefined) {
       getFacilityStore = await storesService.find({
         query: {
           facilityId: id,
-          'productTypeId.productTypeId':params.query.productTypeId
+          'productTypeId.productTypeId': params.query.productTypeId
         }
       });
     }
-    
+
     if (getFacilityStore.data.length > 0) {
       let len = getFacilityStore.data.length - 1;
       for (let j = len; j >= 0; j--) {
