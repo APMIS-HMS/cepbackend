@@ -56,7 +56,7 @@ class Service {
                         }
                         ],
                         $limit: (params.query.$limit) ? params.query.$limit : 10,
-                        $skip:(params.query.$kip)?params.query.$skip:0
+                        $skip:(params.query.$skip)?params.query.$skip:0
                     }
                 });
             }
