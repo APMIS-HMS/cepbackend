@@ -172,8 +172,8 @@ class Service {
                                 'privatePatient':privatePatient
                             };
                         }
-                        else if(params.query.plan ===true){
-                            console.log('here');
+                        else if(params.query.plan ==='all'){
+                            
                             paymentPlan.plan ={
                                 'hmo':hmo,
                                 'familyCover':familyCover,
