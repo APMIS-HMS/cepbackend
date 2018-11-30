@@ -9,7 +9,6 @@ class Service {
   }
 
   async find(params) {
-    console.log(params.query);
     if (params.query.storeId !== undefined) {
       const inventoriesService = this.app.service('inventories');
       let expiredProduct = await inventoriesService.find({
