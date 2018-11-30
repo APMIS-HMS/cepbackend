@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const jsend = require('jsend');
+var Paginator = require('../../../src/helpers/paginate');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -56,7 +57,11 @@ class Service {
         }
       }
     });
-    return jsend.success(reorders);
+    const skip = params.query.skip;
+    const limit = params.query.limit;
+    const page = skip / limit + 1;
+    return jsend.success(Paginator(reorders.filter(x => x.transactions.length > 0), page, limit));
+    // return jsend.success(reorders);
   }
 
   create(data, params) {

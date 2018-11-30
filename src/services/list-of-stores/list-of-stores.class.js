@@ -35,7 +35,6 @@ class Service {
     const skip = params.query.skip;
     const limit = params.query.limit;
     const page = skip / limit + 1;
-    console.log(retVal);
     return jsend.success(Paginator(retVal, page, limit));
   }
 
