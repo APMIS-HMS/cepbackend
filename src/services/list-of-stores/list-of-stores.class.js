@@ -19,16 +19,24 @@ class Service {
     const minorLocations = getFacility.minorLocations;
 
     const locations = await locationService.find({});
-
     let getFacilityStore = await storesService.find({
       query: {
-        facilityId: params.query.facilityId
+        facilityId: params.query.facilityId,
+        minorLocationId: params.query.minorLocationId
       }
     });
-    // console.log(minorLocations);
+    console.log(getFacilityStore)
+    if (params.query.minorLocationId === undefined) {
+      getFacilityStore = await storesService.find({
+        query: {
+          facilityId: params.query.facilityId
+        }
+      });
+    }
     const retVal = getFacilityStore.data.map(store => {
       return {
         name: store.name,
+        productTypes: store.productTypeId,
         location: this.getMinorLocation(minorLocations, store.minorLocationId, locations.data),
       }
     });
