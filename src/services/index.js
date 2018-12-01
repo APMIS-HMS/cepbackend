@@ -326,6 +326,7 @@ const facilityProductList = require('./facility-product-list/facility-product-li
 const employeeAccessibilitiesQuery = require('./employee-accessibilities-query/employee-accessibilities-query.service.js');
 const apmisSurcharges = require('./apmis-surcharges/apmis-surcharges.service.js');
 const paymentReports = require('./payment-reports/payment-reports.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
