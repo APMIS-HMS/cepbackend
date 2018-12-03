@@ -15,10 +15,16 @@ const resolvers = {
             .service('inventory-transfer-statuses')
             .get(inv.inventoryTransferTransactions[i].transferStatusId, {});
           inv.inventoryTransferTransactions[i].transferStatusObject = inve;
-          const fpService = await context.app.service('formulary-products').get(inv.inventoryTransferTransactions[i].productId,{});
-          if (fpService.data.id !== undefined) {
-            inv.inventoryTransferTransactions[i].productObject = fpService;
-          }
+        }
+        const fpService = await context.app.service('inventories').get(inv.inventoryTransferTransactions[i].inventoryId, {});
+        console.log(fpService);
+        if (fpService._id !== undefined) {
+          inv.inventoryTransferTransactions[i].productObject = fpService.productObject;
+          const baseItem = fpService.productObject.productConfigObject.find(x => x.isBase === true);
+          inv.inventoryTransferTransactions[i].productObject.baseItem = baseItem;
+          inv.inventoryTransferTransactions[i].productObject.availableQties = baseItem;
+          inv.inventoryTransferTransactions[i].availableQuantity = fpService.availableQuantity;
+          inv.inventoryTransferTransactions[i].availableOnHold = fpService.totalQuantity - fpService.availableQuantity;
         }
       }
     },
