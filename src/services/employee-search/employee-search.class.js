@@ -8,6 +8,7 @@ class Service {
   async find(params) {
     const employeeService = this.app.service('employees');
     const peopleService = this.app.service('people');
+    const employeeAccessiblityQueryService = this.app.service('employee-accessibilities-query');
     const accessToken = params.accessToken;
     const facilityId = params.query.facilityId;
     const searchText = params.query.searchText;
@@ -25,6 +26,16 @@ class Service {
           delete params.query.searchText;
           delete params.query.employeeTable;
           delete params.query.apmisLookup;
+
+          let filterByRole = params.query.filterByRole;
+          let moduleName = params.query.moduleName;
+          let roleName = params.query.roleName;
+
+          delete params.query.filterByRole;
+          delete params.query.moduleName;
+          delete params.query.roleName;
+
+
           params.query.$select = ['personId'];
           params.query.$limit = (params.query.$limit) ? params.query.$limit : 50
           let employees = await employeeService.find({
@@ -107,6 +118,28 @@ class Service {
                 if (employeeTable !== true) {
                   return jsend.success(people);
                 } else {
+
+
+                  if (filterByRole) {
+                    const employeeInRoles = await employeeAccessiblityQueryService.find({
+                      query: {
+                        facilityId: facilityId,
+                        roleName: roleName,
+                        moduleName: moduleName,
+                        employeesWithRoleInFacility: true
+                      }
+                    });
+                    employeez = [].concat.apply(...([...employeez, employeeInRoles.data] || []));
+                    try {
+                      employeez = employeez.reduce((unique, o) => {
+                        if (!unique.some(obj => obj._id.toString() === o._id.toString())) {
+                          unique.push(o);
+                        }
+                        return unique;
+                      }, []);
+                    } catch (error) {}
+
+                  }
                   return jsend.success(employeez);
                 }
               }

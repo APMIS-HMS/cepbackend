@@ -1,14 +1,12 @@
 // Initializes the `dashboard` service on path `/dashboard`
-const createService = require('feathers-mongoose');
-const createModel = require('../../models/dashboard.model');
+const createService = require('./dashboard.class.js');
 const hooks = require('./dashboard.hooks');
 
 module.exports = function (app) {
-  const Model = createModel(app);
+  
   const paginate = app.get('paginate');
 
   const options = {
-    Model,
     paginate
   };
 
