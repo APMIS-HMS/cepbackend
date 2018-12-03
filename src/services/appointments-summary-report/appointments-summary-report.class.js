@@ -56,6 +56,24 @@ class Service {
                     $limit: (params.query.$limit) ? params.query.$limit : 10,
                     $skip:(params.query.$skip)?params.query.$skip:0
                 }});
+            }else if(params.query.providerName !== undefined || params.query.patientName !== undefined) {
+                //
+                getAppointments = await AppointmentService.find({ query: {
+                    facilityId:facilityId,
+                    $and: [{
+                        updatedAt: {
+                            $gte: params.query.startDate
+                        }
+                    },
+                    {
+                        updatedAt: {
+                            $lte: params.query.endDate
+                        }
+                    }
+                    ],
+                    $limit: (params.query.$limit) ? params.query.$limit : false,
+                    $skip:(params.query.$skip)?params.query.$skip:0
+                }});
             }
             
             let patientAppointmenstSummary = getAppointments.data.map(x=>{
