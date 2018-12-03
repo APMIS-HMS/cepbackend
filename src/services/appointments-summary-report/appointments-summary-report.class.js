@@ -27,18 +27,17 @@ class Service {
             if (params.query.startDate === undefined && params.query.endDate === undefined) {
                 getAppointments = await AppointmentService.find({ query: {
                     facilityId:facilityId,
-                    // $and: [{
-                    //     updatedAt: {
-                    //         $gte:startDate
-                    //     }
-                    // },
-                    // {
-                    //     updatedAt: {
-                    //         $lte:Date.now()
-                    //     }
-                    // }
-                    // ],
-                    //orderStatusId:(params.query.status)?params.query.status:'',
+                    $and: [{
+                        updatedAt: {
+                            $gte:startDate
+                        }
+                    },
+                    {
+                        updatedAt: {
+                            $lte:Date.now()
+                        }
+                    }
+                    ],
                     $limit: (params.query.$limit) ? params.query.$limit : 10,
                     $skip:(params.query.$skip)?params.query.$skip:0
                 } });
@@ -61,10 +60,7 @@ class Service {
                     $skip:(params.query.$skip)?params.query.$skip:0
                 }});
             }
-            // let patientIds = getAppointments.data.map(x=>{
-            //   return x.patientId;
-            // });
-            //return jsend.success(getAppointments);
+            
             let patientAppointmenstSummary = getAppointments.data.map(x=>{
                 let name=(x.providerDetails !== undefined)?x.providerDetails.personDetails.firstName
               +' '+x.providerDetails.personDetails.lastName:'No provider';
@@ -82,15 +78,11 @@ class Service {
                 };
             });
 
-            console.log('Got here===0===');
             //Filter by provider
             let provider = params.query.providerName;
             if(provider !== undefined){
-                console.log('Got here======');
-                let doctor = patientAppointmenstSummary.filter(x=>x.provider.match(/provider/g));
-                console.log('Got here===1===');
+                let doctor = patientAppointmenstSummary.filter(x=>x.provider.indexOf(provider)>-1);
                 if(doctor.length>0){
-                    console.log('Got here==2====');
                     return jsend.success(doctor);
                 }else{
                     return jsend.success([]);
@@ -100,7 +92,7 @@ class Service {
             //Filter by patientName
             let patient = params.query.patientName;
             if(patient !== undefined){
-                let patientName = patientAppointmenstSummary.filter(x=>x.patientName===patient);
+                let patientName = patientAppointmenstSummary.filter(x=>x.patientName.indexOf(patient)>-1);
                 if(patientName.length>0){
                     return jsend.success(patientName);
                 }else{
