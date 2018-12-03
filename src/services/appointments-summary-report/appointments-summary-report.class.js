@@ -10,16 +10,13 @@ class Service {
 
     async find (params) {
         const AppointmentService = this.app.service('appointments');
-        const FacilityService = this.app.service('facilities');
-        const LabRequestService = this.app.service('laboratory-requests');
+        
         let summary = {
-            //patientHospitalNo: String,
             pastAppointmets: {},
             currentAppointmets: {},
             futureAppointmets: {},
-            
         };
-        let status = params.query.status;
+
         let startDate = new Date(new Date().setHours(0,0,0,0));
         let facilityId = params.query.facilityId;
         try {
@@ -114,7 +111,6 @@ class Service {
             }
             return jsend.success(patientAppointmenstSummary);
         } catch (error) {
-            console.log('=======Error=======\n',error);
             return jsend.error(error);
         }
 
