@@ -19,16 +19,28 @@ class Service {
             futureAppointmets: {},
             
         };
-        let startDate = new Date(new Date().setDate(new Date().getDate()));
+        let status = params.query.status;
+        let startDate = new Date(new Date().setHours(0,0,0,0));
         let facilityId = params.query.facilityId;
         try {
             let getAppointments;
             if (params.query.startDate === undefined && params.query.endDate === undefined) {
                 getAppointments = await AppointmentService.find({ query: {
                     facilityId:facilityId,
-                    updatedAt: {
-                        $gte:startDate
-                    }
+                    // $and: [{
+                    //     updatedAt: {
+                    //         $gte:startDate
+                    //     }
+                    // },
+                    // {
+                    //     updatedAt: {
+                    //         $lte:Date.now()
+                    //     }
+                    // }
+                    // ],
+                    //orderStatusId:(params.query.status)?params.query.status:'',
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$skip)?params.query.$skip:0
                 } });
             }else if(params.query.startDate !== undefined && params.query.endDate !== undefined) {
             //
@@ -44,10 +56,10 @@ class Service {
                             $lte: params.query.endDate
                         }
                     }
-                    ]
+                    ],
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$skip)?params.query.$skip:0
                 }});
-            }else{
-                getAppointments = await AppointmentService.find({ query:params.query});
             }
             // let patientIds = getAppointments.data.map(x=>{
             //   return x.patientId;
@@ -67,9 +79,47 @@ class Service {
                     phone:x.patientDetails.personDetails.primaryContactPhoneNo,
                     time:x.startDate,
                     status:x.orderStatusId
-                }
+                };
             });
-           
+
+            console.log('Got here===0===');
+            //Filter by provider
+            let provider = params.query.providerName;
+            if(provider !== undefined){
+                console.log('Got here======');
+                let doctor = patientAppointmenstSummary.filter(x=>x.provider.match(/provider/g));
+                console.log('Got here===1===');
+                if(doctor.length>0){
+                    console.log('Got here==2====');
+                    return jsend.success(doctor);
+                }else{
+                    return jsend.success([]);
+                }
+               
+            }
+            //Filter by patientName
+            let patient = params.query.patientName;
+            if(patient !== undefined){
+                let patientName = patientAppointmenstSummary.filter(x=>x.patientName===patient);
+                if(patientName.length>0){
+                    return jsend.success(patientName);
+                }else{
+                    return jsend.success([]);
+                }
+            }
+            //Filter by status
+            let status = params.query.status;
+            if(status !== undefined && status !== 'All'){
+                let getAllByStatus = patientAppointmenstSummary.filter(x=>x.status===status);
+                if(getAllByStatus.length>0){
+                    return jsend.success(getAllByStatus);
+                }else{
+                    return jsend.success([]);
+                }
+                
+            }else if(status !== undefined && status === 'All'){
+                return jsend.success(patientAppointmenstSummary);
+            }
             return jsend.success(patientAppointmenstSummary);
         } catch (error) {
             console.log('=======Error=======\n',error);
