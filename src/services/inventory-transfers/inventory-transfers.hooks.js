@@ -17,7 +17,6 @@ const resolvers = {
           inv.inventoryTransferTransactions[i].transferStatusObject = inve;
         }
         const fpService = await context.app.service('inventories').get(inv.inventoryTransferTransactions[i].inventoryId, {});
-        console.log(fpService);
         if (fpService._id !== undefined) {
           inv.inventoryTransferTransactions[i].productObject = fpService.productObject;
           const baseItem = fpService.productObject.productConfigObject.find(x => x.isBase === true);
