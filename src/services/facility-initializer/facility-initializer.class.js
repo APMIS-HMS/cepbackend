@@ -139,6 +139,8 @@ class Service {
     }]
     // end minor location initialiser
 
+    const updatedFacility = await facilityService.update(selectedFacility._id, selectedFacility);
+
     return categoryResult;
   }
 

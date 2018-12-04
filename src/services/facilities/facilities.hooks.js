@@ -12,7 +12,6 @@ const alerts = require('../../hooks/alerts');
 const resolvers = {
   joins: {
     facilityInitializer: () => async (facility, context) => {
-      console.log(facility);
       try {
         if (facility._id !== undefined) {
           const facilityObj = await context.app
@@ -22,11 +21,8 @@ const resolvers = {
                 facilityId: facility._id
               }
             });
-          console.log(facilityObj);
         }
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
 
 
     }

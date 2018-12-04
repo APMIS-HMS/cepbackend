@@ -8,6 +8,7 @@ class Service {
     const inventoryService = this.app.service('inventories');
     const facilityPriceService = this.app.service('facility-prices');
     const reOrderLevelService = this.app.service('product-reorders');
+    const productConfigurationService = this.app.service('product-configs');
     let storeInventories;
     if (params.query.searchText === undefined) {
       storeInventories = await inventoryService.find({
@@ -24,8 +25,8 @@ class Service {
           facilityId: params.query.facilityId,
           storeId: params.query.storeId,
           'productObject.name': {
-            $regex: searchText,
-            '$options': 'i'
+            $regex: params.query.searchText,
+            $options: 'i'
           },
           $limit: params.query.limit !== undefined ? params.query.limit : 10,
           $skip: params.query.skip != undefined ? params.query.skip : 0
@@ -33,18 +34,18 @@ class Service {
       });
     }
 
-    const facilityServiceIds = storeInventories.data.map(inventory => inventory.facilityServiceId);
-    const serviceIds = storeInventories.data.map(inventory => inventory.serviceId);
-    const productIds = storeInventories.data.map(inventory => inventory.productId);
+    const facilityServiceIds = storeInventories.data.map((inventory) => inventory.facilityServiceId);
+    const serviceIds = storeInventories.data.map((inventory) => inventory.serviceId);
+    const productIds = storeInventories.data.map((inventory) => inventory.productId);
 
     //get prices for all inventory products
     const prices = await facilityPriceService.find({
       query: {
         facilityId: params.query.facilityId,
         $and: [{
-            'facilityServiceId': {
+            facilityServiceId: {
               $in: facilityServiceIds
-            },
+            }
           },
           {
             serviceId: {
@@ -60,22 +61,46 @@ class Service {
       query: {
         facilityId: params.query.facilityId,
         storeId: params.query.storeId,
-        'productId': {
+        productId: {
           $in: productIds
         }
       }
     });
 
-    const mapStoreInventories = storeInventories.data.map(inventory => {
-      return {
-        productName: inventory.productObject.name,
-        availableQuantity: inventory.availableQuantity,
-        transactions: inventory.transactions.filter(transaction => transaction.availableQuantity > 0),
-        price: this.getProductPrice(prices.data, inventory.serviceId.toString(), inventory.facilityServiceId.toString()),
-        reOrderLevel: this.getProductReOrderLevel(productLevels.data, inventory.storeId.toString(), inventory.productId.toString())
+    // get product configuration
+    const productConfigurations = await productConfigurationService.find({
+      query: {
+        facilityId: params.query.facilityId,
+        storeId: params.query.storeId,
+        productId: {
+          $in: productIds
+        }
       }
     });
 
+    const mapStoreInventories = storeInventories.data.map((inventory) => {
+      return {
+        productName: inventory.productObject.name,
+        productId: inventory.productObject.id,
+        availableQuantity: inventory.availableQuantity,
+        transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
+        price: this.getProductPrice(
+          prices.data,
+          inventory.serviceId.toString(),
+          inventory.facilityServiceId.toString()
+        ),
+        reOrderLevel: this.getProductReOrderLevel(
+          productLevels.data,
+          inventory.storeId.toString(),
+          inventory.productId.toString()
+        ),
+        productConfiguration: this.getProductConfiguration(
+          productConfigurations.data,
+          inventory.facilityId.toString(),
+          inventory.productId.toString()
+        )
+      };
+    });
 
     return Promise.resolve({
       total: storeInventories.total,
@@ -86,13 +111,26 @@ class Service {
   }
 
   getProductPrice(prices, serviceId, facilityServiceId) {
-    const price = prices.filter(price => price.facilityServiceId.toString() == facilityServiceId && price.serviceId.toString() == serviceId);
-    return price.length > 0 ? price[0].price : 0
+    const price = prices.filter(
+      (price) =>
+      price.facilityServiceId.toString() == facilityServiceId && price.serviceId.toString() == serviceId
+    );
+    return price.length > 0 ? price[0].price : 0;
   }
 
   getProductReOrderLevel(reOrderLevels, storeId, productId) {
-    const order = reOrderLevels.filter(order => order.storeId.toString() == storeId && order.productId.toString() == productId);
-    return order.length > 0 ? order[0].reOrderLevel : 0
+    const order = reOrderLevels.filter(
+      (order) => order.storeId.toString() == storeId && order.productId.toString() == productId
+    );
+    return order.length > 0 ? order[0].reOrderLevel : 0;
+  }
+
+  getProductConfiguration(configurations, facilityId, productId) {
+    console.log(configurations);
+    const configuration = configurations.filter(
+      (config) => config.facilityId.toString() == facilityId && config.productId.toString() == productId
+    );
+    return configuration.length > 0 ? configuration[0] : undefined;
   }
 
   get(id, params) {
@@ -104,7 +142,7 @@ class Service {
 
   create(data, params) {
     if (Array.isArray(data)) {
-      return Promise.all(data.map(current => this.create(current, params)));
+      return Promise.all(data.map((current) => this.create(current, params)));
     }
 
     return Promise.resolve(data);
