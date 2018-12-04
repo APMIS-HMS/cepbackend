@@ -126,7 +126,6 @@ class Service {
   }
 
   getProductConfiguration(configurations, facilityId, productId) {
-    console.log(configurations);
     const configuration = configurations.filter(
       (config) => config.facilityId.toString() == facilityId && config.productId.toString() == productId
     );
