@@ -9,31 +9,31 @@ class Service {
     }
 
     async find(params) {
+       
         const DocumentationsService = this.app.service('documentations');
         const PatientService = this.app.service('patients');
 
         try {
             let getDoc = await DocumentationsService.find({query:{personId:params.query.personId}});
-            //return getDoc;
             if(getDoc.data.length>0){
                 let documentations = getDoc.data[0].documentations;
                 let patientIds = documentations.map(x=>x.patientId);
                 let getPatient;
                 getPatient = await PatientService.find({query:{'_id': { $in: patientIds }}});
-
+                
                 let summary=[];
                 let diagnosesSum = {};
                 if (documentations.length>0){
                     getPatient.data.map(x=>{
                         documentations.map(y=>{
-                            if(y._id.toString() === x.patientId.toString()){
-                                diagnosesSum.age = y.age;
-                                diagnosesSum.apmisId = y.personDetails.apmisId;
-                                diagnosesSum.gender = y.personDetails.gender;
-                                diagnosesSum.patientId=x.patientId;
-                                diagnosesSum.patientName= x.patientName;
-                                //diagnosesSum.ICD10Code= (x.document.body.ICD10Diagnosis!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
-                                //diagnosesSum.diagnosis= (x.document.body.ICD10Diagnosis!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
+                            if(y.patientId.toString() === x._id.toString()){
+                                diagnosesSum.age = x.age;
+                                diagnosesSum.apmisId = x.personDetails.apmisId;
+                                diagnosesSum.gender = x.personDetails.gender;
+                                diagnosesSum.patientId=y.patientId;
+                                diagnosesSum.patientName= y.patientName;
+                                diagnosesSum.ICD10Code= (x.document!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
+                                diagnosesSum.diagnosis= (x.document!==undefined)?x.document.body.ICD10Diagnosis:'No ICD10 Diagnoses found!';
                                 summary.push(diagnosesSum);
                             }
                         });

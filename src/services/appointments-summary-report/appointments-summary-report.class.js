@@ -10,25 +10,33 @@ class Service {
 
     async find (params) {
         const AppointmentService = this.app.service('appointments');
-        const FacilityService = this.app.service('facilities');
-        const LabRequestService = this.app.service('laboratory-requests');
+        
         let summary = {
-            //patientHospitalNo: String,
             pastAppointmets: {},
             currentAppointmets: {},
             futureAppointmets: {},
-            
         };
-        let startDate = new Date(new Date().setDate(new Date().getDate()));
+
+        let startDate = new Date(new Date().setHours(0,0,0,0));
         let facilityId = params.query.facilityId;
         try {
             let getAppointments;
             if (params.query.startDate === undefined && params.query.endDate === undefined) {
                 getAppointments = await AppointmentService.find({ query: {
                     facilityId:facilityId,
-                    updatedAt: {
-                        $gte:startDate
+                    $and: [{
+                        updatedAt: {
+                            $gte:startDate
+                        }
+                    },
+                    {
+                        updatedAt: {
+                            $lte:Date.now()
+                        }
                     }
+                    ],
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$skip)?params.query.$skip:0
                 } });
             }else if(params.query.startDate !== undefined && params.query.endDate !== undefined) {
             //
@@ -44,15 +52,30 @@ class Service {
                             $lte: params.query.endDate
                         }
                     }
-                    ]
+                    ],
+                    $limit: (params.query.$limit) ? params.query.$limit : 10,
+                    $skip:(params.query.$skip)?params.query.$skip:0
                 }});
-            }else{
-                getAppointments = await AppointmentService.find({ query:params.query});
+            }else if(params.query.providerName !== undefined || params.query.patientName !== undefined) {
+                //
+                getAppointments = await AppointmentService.find({ query: {
+                    facilityId:facilityId,
+                    $and: [{
+                        updatedAt: {
+                            $gte: params.query.startDate
+                        }
+                    },
+                    {
+                        updatedAt: {
+                            $lte: params.query.endDate
+                        }
+                    }
+                    ],
+                    $limit: (params.query.$limit) ? params.query.$limit : false,
+                    $skip:(params.query.$skip)?params.query.$skip:0
+                }});
             }
-            // let patientIds = getAppointments.data.map(x=>{
-            //   return x.patientId;
-            // });
-            //return jsend.success(getAppointments);
+            
             let patientAppointmenstSummary = getAppointments.data.map(x=>{
                 let name=(x.providerDetails !== undefined)?x.providerDetails.personDetails.firstName
               +' '+x.providerDetails.personDetails.lastName:'No provider';
@@ -67,12 +90,45 @@ class Service {
                     phone:x.patientDetails.personDetails.primaryContactPhoneNo,
                     time:x.startDate,
                     status:x.orderStatusId
-                }
+                };
             });
-           
+
+            //Filter by provider
+            let provider = params.query.providerName;
+            if(provider !== undefined){
+                let doctor = patientAppointmenstSummary.filter(x=>x.provider.indexOf(provider)>-1);
+                if(doctor.length>0){
+                    return jsend.success(doctor);
+                }else{
+                    return jsend.success([]);
+                }
+               
+            }
+            //Filter by patientName
+            let patient = params.query.patientName;
+            if(patient !== undefined){
+                let patientName = patientAppointmenstSummary.filter(x=>x.patientName.indexOf(patient)>-1);
+                if(patientName.length>0){
+                    return jsend.success(patientName);
+                }else{
+                    return jsend.success([]);
+                }
+            }
+            //Filter by status
+            let status = params.query.status;
+            if(status !== undefined && status !== 'All'){
+                let getAllByStatus = patientAppointmenstSummary.filter(x=>x.status===status);
+                if(getAllByStatus.length>0){
+                    return jsend.success(getAllByStatus);
+                }else{
+                    return jsend.success([]);
+                }
+                
+            }else if(status !== undefined && status === 'All'){
+                return jsend.success(patientAppointmenstSummary);
+            }
             return jsend.success(patientAppointmenstSummary);
         } catch (error) {
-            console.log('=======Error=======\n',error);
             return jsend.error(error);
         }
 
