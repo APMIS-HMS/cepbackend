@@ -1,10 +1,38 @@
 const {
   authenticate
 } = require('@feathersjs/authentication').hooks;
-
+const {
+  fastJoin
+} = require('feathers-hooks-common');
 const facilityToken = require('../../hooks/facility-token');
 
 const alerts = require('../../hooks/alerts');
+
+
+const resolvers = {
+  joins: {
+    facilityInitializer: () => async (facility, context) => {
+      console.log(facility);
+      try {
+        if (facility._id !== undefined) {
+          const facilityObj = await context.app
+            .service('facility-initializer')
+            .find({
+              query: {
+                facilityId: facility._id
+              }
+            });
+          console.log(facilityObj);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
+
+    }
+  }
+};
+
 
 
 module.exports = {
@@ -22,7 +50,7 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [alerts()],
+    create: [alerts(), fastJoin(resolvers)],
     update: [],
     patch: [],
     remove: []
