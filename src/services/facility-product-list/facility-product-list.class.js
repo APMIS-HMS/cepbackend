@@ -8,14 +8,31 @@ class Service {
     const inventoryService = this.app.service('inventories');
     const facilityPriceService = this.app.service('facility-prices');
     const reOrderLevelService = this.app.service('product-reorders');
-    const storeInventories = await inventoryService.find({
-      query: {
-        facilityId: params.query.facilityId,
-        storeId: params.query.storeId,
-        $limit: params.query.limit !== undefined ? params.query.limit : 10,
-        $skip: params.query.skip != undefined ? params.query.skip : 0
-      }
-    });
+    let storeInventories;
+    if (params.query.searchText === undefined) {
+      storeInventories = await inventoryService.find({
+        query: {
+          facilityId: params.query.facilityId,
+          storeId: params.query.storeId,
+          $limit: params.query.limit !== undefined ? params.query.limit : 10,
+          $skip: params.query.skip != undefined ? params.query.skip : 0
+        }
+      });
+    } else {
+      storeInventories = await inventoryService.find({
+        query: {
+          facilityId: params.query.facilityId,
+          storeId: params.query.storeId,
+          'productObject.name': {
+            $regex: searchText,
+            '$options': 'i'
+          },
+          $limit: params.query.limit !== undefined ? params.query.limit : 10,
+          $skip: params.query.skip != undefined ? params.query.skip : 0
+        }
+      });
+    }
+
     const facilityServiceIds = storeInventories.data.map(inventory => inventory.facilityServiceId);
     const serviceIds = storeInventories.data.map(inventory => inventory.serviceId);
     const productIds = storeInventories.data.map(inventory => inventory.productId);
