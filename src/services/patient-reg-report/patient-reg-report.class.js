@@ -98,7 +98,16 @@ class Service {
                     let malePrivatePatient = 0;
                     let personDetails = getPatients.data.map(x=>{
                         ageStr = x.age.substr(0,2);
-                        let age = parseInt(ageStr);
+                        let age;
+                        let checkMonth = x.age.split(' ');
+
+                        if(checkMonth[1].charAt(0).toLowerCase()==='y'){
+                            age = parseInt(ageStr);
+                        }
+                        else if(checkMonth[1].charAt(0).toLowerCase()==='m'){
+                            age = parseInt(ageStr)/100;
+                        }
+                        
                         // Total male patient count in  facility
                         if(x.personDetails.gender.toLowerCase()==='male'){
                             totalMaleCount +=1;
@@ -135,15 +144,20 @@ class Service {
                             
                         }
                         // Total male patient count grouped by age
-                        if(age <= endAge && x.personDetails.gender.toLowerCase()==='male'){
+                       
+                        if(age <= 10 && x.personDetails.gender.toLowerCase()==='male'){
                             ageCount += 1;
-
-                            maleCount += 1;
+                            
+                            if(x.personDetails.gender.toLowerCase()==='male'){
+                                maleCount += 1;
+                            }else if(x.personDetails.gender.toLowerCase()==='female'){
+                                femaleCount += 1;
+                            }
                         }
                         // Total female patient count grouped by age 
                         if(age <= endAge && x.personDetails.gender.toLowerCase()==='female'){
                             ageCount += 1;
-                            femaleCount += 1;
+                            
                         }
                         //Get all patient payment plan
                         payment.push(...x.paymentPlan);
@@ -152,7 +166,7 @@ class Service {
                             apmisId:x.personDetails.apmisId,
                             patientName:x.personDetails.firstName,
                             gender:x.personDetails.gender, 
-                            age:x.age,
+                            age:age,
                             address:x.personDetails.homeAddress, 
                             phone:x.personDetails.primaryContactPhoneNo,
                             dateCreated:x.createdAt
@@ -186,34 +200,35 @@ class Service {
                     }
 
                     //Patient summary by plan
-                    if(params.query.planType !== undefined){
-                        if(params.query.planType.toLowerCase() === 'hmo'){
+                    if(params.query.searchBy === 'plantype'){
+
+                        if(params.query.searchBy.toLowerCase() === 'hmo'){
                             paymentPlan ={
                                 'hmo':hmoCount
                             };
                         }
-                        if(params.query.planType.toLowerCase() === 'familycover'){
+                        if(params.query.searchBy.toLowerCase() === 'familycover'){
                             paymentPlan.plan ={
                                 'familyCover':familyCovercount
                             };
                         }
-                        if(params.query.planType.toLowerCase() === 'companycover'){
+                        if(params.query.searchBy.toLowerCase() === 'companycover'){
                             paymentPlan.plan ={
                                 'companyCover':companyCovercount
                             };
                         }
-                        if(params.query.planType.toLowerCase() === 'privatepatient'){
+                        if(params.query.searchBy.toLowerCase() === 'privatepatient'){
                             paymentPlan.plan ={
                                 'privatePatient':privatePatientCount
                             };
                         }
-                        else if(params.query.planType.toLowerCase() ==='plantype'){
+                        else if(params.query.searchBy.toLowerCase() ==='plantype'){
                             let data = []; // Will take this out later
                             let hmo={},familyCover={},companyCover={},privatePatient={};
                             //HMO
                             hmo.type ='hmo';
-                            hmo.totalPatient=hmoCount;
-                            hmo.male=maleHmo;
+                            hmo.totalPatient = hmoCount;
+                            hmo.male = maleHmo;
                             hmo.female=femaleHmo;
                             data.push(hmo);
                             //Family cover
@@ -239,25 +254,49 @@ class Service {
                         return jsend.success(paymentPlan);
                     }
                     // Patient summary filtered by  gender
-                    if(params.query.gender !== undefined){
-                        if(params.query.gender.toLowerCase() === 'male'){
-                            summary.totalMaleCount = totalMaleCount;
-                            return jsend.success(summary);
-                        }else{
-                            summary.totalFemaleCount = totalFemaleCount;
-                            return jsend.success(summary);
-                        }
+                    if(params.query.searchBy === 'gender'){
+                        summary.totalMaleCount = totalMaleCount;
+                        summary.totalFemaleCount = totalFemaleCount;
+
+                        return jsend.success(summary);
                     }
 
-                    // Patient summary filtered by  age range
-                    if(params.query.startAge !== undefined && params.query.endAge !== undefined){
+                    //Age ranges
 
-                        summary.female = femaleCount;
-                        summary.male = maleCount;
+                    if(params.query.searchBy === 'age'){
+                        let ageGroup = {};
+                        let ageRanges ={};
+                        ageGroup['0-10']=0,ageGroup['11-20']=0,ageGroup['21-30']=0,ageGroup['31-40']=0,ageGroup['41-50']=0,ageGroup['51-above']=0;
+                        var result = personDetails.map(x=>{
+                            
+                            if(x.age <= 1 && x.age < 11){
+                                ageGroup['0-10']+=1;
+                            }
+                            if(x.age >= 11 && x.age < 21 ){
+                                ageGroup['11-20']+=1;
+                            }
+                            if(x.age >= 21 && x.age < 31){
+                                ageGroup['21-30']+=1;
+                                //ageGroup['21-30'].push(x.gender);
+                            }
+                            if(x.age >= 31 && x.age < 41){
+                                ageGroup['31-40']+=1;
+                            }
+                            if(x.age >= 41 && x.age < 51){
+                                ageGroup['41-50']+=1;
+                            }
+                            if(x.age >= 51 && x.age > 51){
+                                ageGroup['51-above']+=1;
+                            }
+                            ageRanges.ageRanges = ageGroup;
+                            return {
+                                ageRanges
+                            };
+                        });
 
-                        ageRange.ageRange = summary;
-                        return jsend.success(ageRange);
-                    }
+                        return jsend.success([... new Set(result.map(x => x.ageRanges))]);
+                    } 
+                    
                     
                     return jsend.success(personDetails);
                 }else{
@@ -269,7 +308,6 @@ class Service {
             }
             
         }catch (error) {
-            console.log('================\n',error);
             return jsend.error(error);
         }
     }
