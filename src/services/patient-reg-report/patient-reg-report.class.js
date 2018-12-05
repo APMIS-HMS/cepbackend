@@ -208,30 +208,33 @@ class Service {
                             };
                         }
                         else if(params.query.planType.toLowerCase() ==='plantype'){
+                            let data = []; // Will take this out later
                             let hmo={},familyCover={},companyCover={},privatePatient={};
                             //HMO
+                            hmo.type ='hmo';
                             hmo.total=hmoCount;
                             hmo.male=maleHmo;
                             hmo.female=femaleHmo;
+                            data.push(hmo);
                             //Family cover
+                            familyCover.type = 'familyCover';
                             familyCover.total = familyCovercount;
                             familyCover.male = maleFamilyCover;
                             familyCover.female = femaleFamilyCover;
+                            data.push(familyCover);
                             //Company cover
+                            companyCover.type='companyCover';
                             companyCover.total=companyCovercount;
                             companyCover.male = maleCompanyCover;
                             companyCover.female = femaleCompanyCover;
+                            data.push(companyCover);
                             //privat Patient
+                            privatePatient.type ='privatePatient';
                             privatePatient.total = privatePatientCount;
                             privatePatient.male = malePrivatePatient;
                             privatePatient.female = femalePrivatePatient;
-
-                            paymentPlan={
-                                hmo,
-                                familyCover,
-                                companyCover,
-                                privatePatient
-                            };
+                            data.push(privatePatient);
+                            paymentPlan=data;
                         }
                         return jsend.success(paymentPlan);
                     }
