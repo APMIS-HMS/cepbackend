@@ -212,25 +212,25 @@ class Service {
                             let hmo={},familyCover={},companyCover={},privatePatient={};
                             //HMO
                             hmo.type ='hmo';
-                            hmo.total=hmoCount;
+                            hmo.totalPatient=hmoCount;
                             hmo.male=maleHmo;
                             hmo.female=femaleHmo;
                             data.push(hmo);
                             //Family cover
                             familyCover.type = 'familyCover';
-                            familyCover.total = familyCovercount;
+                            familyCover.totalPatient = familyCovercount;
                             familyCover.male = maleFamilyCover;
                             familyCover.female = femaleFamilyCover;
                             data.push(familyCover);
                             //Company cover
                             companyCover.type='companyCover';
-                            companyCover.total=companyCovercount;
+                            companyCover.totalPatient=companyCovercount;
                             companyCover.male = maleCompanyCover;
                             companyCover.female = femaleCompanyCover;
                             data.push(companyCover);
                             //privat Patient
                             privatePatient.type ='privatePatient';
-                            privatePatient.total = privatePatientCount;
+                            privatePatient.totalPatient = privatePatientCount;
                             privatePatient.male = malePrivatePatient;
                             privatePatient.female = femalePrivatePatient;
                             data.push(privatePatient);
