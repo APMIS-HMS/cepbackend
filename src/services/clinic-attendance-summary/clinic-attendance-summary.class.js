@@ -16,7 +16,7 @@ class Service {
         let date = new Date(new Date().setHours(0,0,0,0));
         let getAppointment;
         let startDate = (params.query.startDate)?params.query.startDate:date;
-        let endDate = (params.query.endDate)?params.query.endDate:date;
+        let endDate = (params.query.endDate)?params.query.endDate:Date.now();
         let facilityId = params.query.facilityId;
         let newAppointmentTypeCount;
         let followUpAppointmentTypeCount;
