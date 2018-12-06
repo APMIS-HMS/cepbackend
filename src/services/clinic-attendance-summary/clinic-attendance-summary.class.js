@@ -13,9 +13,10 @@ class Service {
         const AppointmentService = this.app.service('appointments');
         
         let visit = [];
+        let date = new Date(new Date().setHours(0,0,0,0));
         let getAppointment;
-        let startDate = params.query.startDate;
-        let endDate = params.query.endDate;
+        let startDate = (params.query.startDate)?params.query.startDate:date;
+        let endDate = (params.query.endDate)?params.query.endDate:Date.now();
         let facilityId = params.query.facilityId;
         let newAppointmentTypeCount;
         let followUpAppointmentTypeCount;
@@ -25,7 +26,6 @@ class Service {
         try {
             
             if (params.query.startDate === undefined) {
-                startDate = new Date(new Date().setHours(0,0,0,0));
                 getAppointment = await AppointmentService.find({
                     query: {
                         facilityId: facilityId,
@@ -136,9 +136,6 @@ class Service {
 
                 });
 
-                //Filter by PatientName
-                
-                //Filter by ProviderName
                 
                 return jsend.success(visit);
             }

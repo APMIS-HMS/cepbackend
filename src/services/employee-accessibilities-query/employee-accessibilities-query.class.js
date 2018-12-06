@@ -115,10 +115,12 @@ class Service {
       } catch (error) {}
 
       let roleFeatures = features.data.map((record) => record.actions.map((action) => action._id.toString()));
-      roleFeatures = [].concat.apply(...(roleFeatures || []));
+      if (roleFeatures !== null && roleFeatures !== undefined) {
+        roleFeatures = [].concat.apply(...(roleFeatures || []));
+      }
 
       // check for roleName in facilityaccesscontrols
-      if (roleFeatures.length > 0) {
+      if (roleFeatures.length > 0 && roleFeatures !== null && roleFeatures !== undefined) {
         try {
           access = await facilityAccessibilityService.find({
             query: {

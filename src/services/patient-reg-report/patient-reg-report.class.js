@@ -88,27 +88,76 @@ class Service {
                 }
                 if (getPatients.data.length>0){
                     let ageStr;
+                    let femaleFamilyCover = 0;
+                    let femaleCompanyCover = 0;
+                    let femaleHmo = 0;
+                    let femalePrivatePatient = 0;
+                    let maleFamilyCover = 0;
+                    let maleCompanyCover = 0;
+                    let maleHmo = 0;
+                    let malePrivatePatient = 0;
                     let personDetails = getPatients.data.map(x=>{
                         ageStr = x.age.substr(0,2);
-                        let age = parseInt(ageStr);
+                        let age;
+                        let checkMonth = x.age.split(' ');
+
+                        if(checkMonth[1].charAt(0).toLowerCase()==='y'){
+                            age = parseInt(ageStr);
+                        }
+                        else if(checkMonth[1].charAt(0).toLowerCase()==='m'){
+                            age = parseInt(ageStr)/100;
+                        }
+                        
                         // Total male patient count in  facility
                         if(x.personDetails.gender.toLowerCase()==='male'){
                             totalMaleCount +=1;
+
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'wallet' && x.paymentPlan[0].isDefault===true){
+                                malePrivatePatient +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'hmo' && x.paymentPlan[0].isDefault===true){
+                                maleHmo +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'companycover' && x.paymentPlan[0].isDefault===true){
+                                maleCompanyCover +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'familycover' && x.paymentPlan[0].isDefault===true){
+                                maleFamilyCover +=1;
+                            }
                         }
                         // Total female patient count in  facility
                         if(x.personDetails.gender.toLowerCase()==='female'){
                             totalFemaleCount +=1;
+
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'wallet' && x.paymentPlan[0].isDefault===true){
+                                femalePrivatePatient +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'hmo' && x.paymentPlan[0].isDefault===true){
+                                femaleHmo +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'companycover' && x.paymentPlan[0].isDefault===true){
+                                femaleCompanyCover +=1;
+                            }
+                            if(x.paymentPlan[0].planType.toLowerCase() === 'familycover' && x.paymentPlan[0].isDefault===true){
+                                femaleFamilyCover +=1;
+                            }
+                            
                         }
                         // Total male patient count grouped by age
-                        if(age <= endAge && x.personDetails.gender.toLowerCase()==='male'){
+                       
+                        if(age <= 10 && x.personDetails.gender.toLowerCase()==='male'){
                             ageCount += 1;
-
-                            maleCount += 1;
+                            
+                            if(x.personDetails.gender.toLowerCase()==='male'){
+                                maleCount += 1;
+                            }else if(x.personDetails.gender.toLowerCase()==='female'){
+                                femaleCount += 1;
+                            }
                         }
                         // Total female patient count grouped by age 
                         if(age <= endAge && x.personDetails.gender.toLowerCase()==='female'){
                             ageCount += 1;
-                            femaleCount += 1;
+                            
                         }
                         //Get all patient payment plan
                         payment.push(...x.paymentPlan);
@@ -117,7 +166,7 @@ class Service {
                             apmisId:x.personDetails.apmisId,
                             patientName:x.personDetails.firstName,
                             gender:x.personDetails.gender, 
-                            age:x.age,
+                            age:age,
                             address:x.personDetails.homeAddress, 
                             phone:x.personDetails.primaryContactPhoneNo,
                             dateCreated:x.createdAt
@@ -125,25 +174,25 @@ class Service {
                     });
 
                     //Get count of all patient payment plan
-                    let familyCover = 0;
-                    let companyCover = 0;
-                    let hmo = 0;
-                    let privatePatient = 0;
+                    let familyCovercount = 0;
+                    let companyCovercount = 0;
+                    let hmoCount = 0;
+                    let privatePatientCount = 0;
 
                     if(payment.length >0){
 
                         payment.map(x=>{
                             if(x.planType.toLowerCase() === 'wallet' && x.isDefault===true){
-                                privatePatient +=1;
+                                privatePatientCount +=1;
                             }
                             if(x.planType.toLowerCase() === 'hmo' && x.isDefault===true){
-                                hmo +=1;
+                                hmoCount +=1;
                             }
                             if(x.planType.toLowerCase() === 'companycover' && x.isDefault===true){
-                                companyCover +=1;
+                                companyCovercount +=1;
                             }
                             if(x.planType.toLowerCase() === 'familycover' && x.isDefault===true){
-                                familyCover +=1;
+                                familyCovercount +=1;
                             }
                         });
 
@@ -151,58 +200,103 @@ class Service {
                     }
 
                     //Patient summary by plan
-                    if(params.query.plan !== undefined){
-                        if(params.query.plan.toLowerCase() === 'hmo'){
-                            paymentPlan.plan ={
-                                'hmo':hmo
+                    if(params.query.searchBy === 'plantype'){
+
+                        if(params.query.searchBy.toLowerCase() === 'hmo'){
+                            paymentPlan ={
+                                'hmo':hmoCount
                             };
                         }
-                        if(params.query.plan.toLowerCase() === 'familycover'){
+                        if(params.query.searchBy.toLowerCase() === 'familycover'){
                             paymentPlan.plan ={
-                                'familyCover':familyCover
+                                'familyCover':familyCovercount
                             };
                         }
-                        if(params.query.plan.toLowerCase() === 'companycover'){
+                        if(params.query.searchBy.toLowerCase() === 'companycover'){
                             paymentPlan.plan ={
-                                'companyCover':companyCover
+                                'companyCover':companyCovercount
                             };
                         }
-                        if(params.query.plan.toLowerCase() === 'privatepatient'){
+                        if(params.query.searchBy.toLowerCase() === 'privatepatient'){
                             paymentPlan.plan ={
-                                'privatePatient':privatePatient
+                                'privatePatient':privatePatientCount
                             };
                         }
-                        else if(params.query.plan ==='all'){
-                            
-                            paymentPlan.plan ={
-                                'hmo':hmo,
-                                'familyCover':familyCover,
-                                'companyCover':companyCover,
-                                'privatePatient':privatePatient
-                            };
+                        else if(params.query.searchBy.toLowerCase() ==='plantype'){
+                            let data = []; // Will take this out later
+                            let hmo={},familyCover={},companyCover={},privatePatient={};
+                            //HMO
+                            hmo.type ='hmo';
+                            hmo.totalPatient = hmoCount;
+                            hmo.male = maleHmo;
+                            hmo.female=femaleHmo;
+                            data.push(hmo);
+                            //Family cover
+                            familyCover.type = 'familyCover';
+                            familyCover.totalPatient = familyCovercount;
+                            familyCover.male = maleFamilyCover;
+                            familyCover.female = femaleFamilyCover;
+                            data.push(familyCover);
+                            //Company cover
+                            companyCover.type='companyCover';
+                            companyCover.totalPatient=companyCovercount;
+                            companyCover.male = maleCompanyCover;
+                            companyCover.female = femaleCompanyCover;
+                            data.push(companyCover);
+                            //privat Patient
+                            privatePatient.type ='privatePatient';
+                            privatePatient.totalPatient = privatePatientCount;
+                            privatePatient.male = malePrivatePatient;
+                            privatePatient.female = femalePrivatePatient;
+                            data.push(privatePatient);
+                            paymentPlan=data;
                         }
                         return jsend.success(paymentPlan);
                     }
                     // Patient summary filtered by  gender
-                    if(params.query.gender !== undefined){
-                        if(params.query.gender.toLowerCase() === 'male'){
-                            summary.totalMaleCount = totalMaleCount;
-                            return jsend.success(summary);
-                        }else{
-                            summary.totalFemaleCount = totalFemaleCount;
-                            return jsend.success(summary);
-                        }
+                    if(params.query.searchBy === 'gender'){
+                        summary.totalMaleCount = totalMaleCount;
+                        summary.totalFemaleCount = totalFemaleCount;
+
+                        return jsend.success(summary);
                     }
 
-                    // Patient summary filtered by  age range
-                    if(params.query.startAge !== undefined && params.query.endAge !== undefined){
+                    //Age ranges
 
-                        summary.female = femaleCount;
-                        summary.male = maleCount;
+                    if(params.query.searchBy === 'age'){
+                        let ageGroup = {};
+                        let ageRanges ={};
+                        ageGroup['0-10']=0,ageGroup['11-20']=0,ageGroup['21-30']=0,ageGroup['31-40']=0,ageGroup['41-50']=0,ageGroup['51-above']=0;
+                        var result = personDetails.map(x=>{
+                            
+                            if(x.age <= 1 && x.age < 11){
+                                ageGroup['0-10']+=1;
+                            }
+                            if(x.age >= 11 && x.age < 21 ){
+                                ageGroup['11-20']+=1;
+                            }
+                            if(x.age >= 21 && x.age < 31){
+                                ageGroup['21-30']+=1;
+                                //ageGroup['21-30'].push(x.gender);
+                            }
+                            if(x.age >= 31 && x.age < 41){
+                                ageGroup['31-40']+=1;
+                            }
+                            if(x.age >= 41 && x.age < 51){
+                                ageGroup['41-50']+=1;
+                            }
+                            if(x.age >= 51 && x.age > 51){
+                                ageGroup['51-above']+=1;
+                            }
+                            ageRanges.ageRanges = ageGroup;
+                            return {
+                                ageRanges
+                            };
+                        });
 
-                        ageRange.ageRange = summary;
-                        return jsend.success(ageRange);
-                    }
+                        return jsend.success([... new Set(result.map(x => x.ageRanges))]);
+                    } 
+                    
                     
                     return jsend.success(personDetails);
                 }else{
@@ -214,7 +308,6 @@ class Service {
             }
             
         }catch (error) {
-            console.log('================\n',error);
             return jsend.error(error);
         }
     }
