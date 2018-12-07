@@ -82,8 +82,11 @@ class Service {
 		const mapStoreInventories = storeInventories.data.map((inventory) => {
 			return {
 				productName: inventory.productObject.name,
+				productCode:inventory.productObject.code,
 				productId: inventory.productObject.id,
 				availableQuantity: inventory.availableQuantity,
+				totalQuantity:inventory.totalQuantity,
+				_id:inventory._id,
 				transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
 				price: this.getProductPrice(
 					prices.data,
