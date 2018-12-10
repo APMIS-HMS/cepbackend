@@ -24,7 +24,7 @@ function ListId() {
   if (number.length < 7) {
     number = String('0000000' + number).slice(-7);
   }
-  var retVal = 'LO' + number + '' + randamApha();
+  var retVal = 'PL' + number + '' + randamApha();
   return retVal;
 }
 
