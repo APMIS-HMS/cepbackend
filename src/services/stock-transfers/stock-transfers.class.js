@@ -49,7 +49,7 @@ class Service {
             availableQuantity: inventory.availableQuantity,
             transactions: inventory.transactions
           });
-          if (data.requistionId !== null) {
+          if (data.requistionId !== null || data.requistionId !== undefined) {
             const requis = await reqProductService.patch(data.requistionId, {
               isSupplied: true
             });
@@ -114,6 +114,7 @@ class Service {
                           storeId: inventoryTransfers.destinationStoreId
                         }
                       });
+                      console.log(inventory2);
                       if (inventory2.data.length > 0) {
                         let batchTxn = inventory2.data[0].transactions.filter(x => x._id.toString() === inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString());
                         if (batchTxn.length > 0) {

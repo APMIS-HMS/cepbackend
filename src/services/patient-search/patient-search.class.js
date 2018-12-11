@@ -141,35 +141,35 @@ class Service {
                             $in: getUniqueKeys(keys)
                         },
                         $or: [{
-                                firstName: {
-                                    $regex: searchText,
-                                    '$options': 'i'
-                                }
-                            },
-                            {
-                                lastName: {
-                                    $regex: searchText,
-                                    '$options': 'i'
-                                }
-                            },
-                            {
-                                apmisId: {
-                                    $regex: searchText,
-                                    '$options': 'i'
-                                }
-                            },
-                            {
-                                email: {
-                                    $regex: searchText,
-                                    '$options': 'i'
-                                }
-                            },
-                            {
-                                otherNames: {
-                                    $regex: searchText,
-                                    '$options': 'i'
-                                }
+                            firstName: {
+                                $regex: searchText,
+                                '$options': 'i'
                             }
+                        },
+                        {
+                            lastName: {
+                                $regex: searchText,
+                                '$options': 'i'
+                            }
+                        },
+                        {
+                            apmisId: {
+                                $regex: searchText,
+                                '$options': 'i'
+                            }
+                        },
+                        {
+                            email: {
+                                $regex: searchText,
+                                '$options': 'i'
+                            }
+                        },
+                        {
+                            otherNames: {
+                                $regex: searchText,
+                                '$options': 'i'
+                            }
+                        }
                         ],
                         $limit: (params.query.$limit) ? params.query.$limit : 10,
                         $sort: {

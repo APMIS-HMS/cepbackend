@@ -11,12 +11,12 @@ class Service {
 
     async find(params) {
         const AppointmentService = this.app.service('appointments');
-        const FacilityService = this.app.service('facilities');
-        // date, clinic, total checked in appointments, number of new appointment 
+        
         let visit = [];
+        let date = new Date(new Date().setHours(0,0,0,0));
         let getAppointment;
-        let startDate = params.query.startDate;
-        let endDate = params.query.endDate;
+        let startDate = (params.query.startDate)?params.query.startDate:date;
+        let endDate = (params.query.endDate)?params.query.endDate:Date.now();
         let facilityId = params.query.facilityId;
         let newAppointmentTypeCount;
         let followUpAppointmentTypeCount;
@@ -24,61 +24,54 @@ class Service {
         let followUpFemalePatientCount;
         
         try {
-            //let getFac = await FacilityService.get(facilityId);
-            //return jsend.success(getFac);
+            
             if (params.query.startDate === undefined) {
-                startDate = new Date(new Date().setDate(new Date().getDate() - 1));
                 getAppointment = await AppointmentService.find({
                     query: {
-                        facilityId: facilityId,//,
+                        facilityId: facilityId,
                         $and: [{
                             updatedAt: {
-                                $gte: params.query.startDate
+                                $gte:startDate
                             }
                         },
                         {
                             updatedAt: {
-                                $lte: Date.now()
+                                $lte:Date.now()
                             }
                         }
-                        ] 
+                        ],
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $skip:(params.query.$skip)?params.query.$skip:0 
                     }
                 });//return getAppointment;
-            } else if (params.query.startDate !== undefined && params.query.endDate === undefined) {
-                getAppointment = await AppointmentService.find({ query: { facilityId: params.query.facilityId } });
-            } else if (params.query.startDate === undefined && params.query.endDate !== undefined) {
-                getAppointment = await AppointmentService.find({
-                    query: {
-                        facilityId:facilityId,
-                        updatedAt: { $gte: params.query.startDate }
-                    }
-                });
-            }
-            else {
+            }else {
                 getAppointment = await AppointmentService.find({
                     query: {
                         facilityId: params.query.facilityId,
                         $and: [{
                             updatedAt: {
-                                $gte: params.query.startDate
+                                $gte:startDate
                             }
                         },
                         {
                             updatedAt: {
-                                $lte: params.query.endDate
+                                $lte:endDate
                             }
                         }
-                        ]
+                        ],
+                        $limit: (params.query.$limit) ? params.query.$limit : 10,
+                        $skip:(params.query.$skip)?params.query.$skip:0
                     }
                 });
             }
-            // Check if appointments
-            // return getAppointment;
+            // Check if appointment array is not empty
+            
             if (getAppointment.data.length > 0) {
                 visit.date = Date.now();
                 let newFemaleCount = {};
                 let newMaleCount = {};
 
+                //Filter clinic 
                 let clinic = getAppointment.data.map(x => {
                     return {
                         facilityId: x.facilityId,
@@ -88,6 +81,7 @@ class Service {
                         appointmentTypeId: x.appointmentTypeId
                     };
                 });
+                // Filter clinics to take out redundancy
                 let clinicNames = [... new Set(clinic.map(x => x.clinic))];
 
                 let res = {};
@@ -124,7 +118,7 @@ class Service {
                     folloUpMalePatientCount = followUpmale.length;
                     //return clinic;
                     let summary = {
-                        date: Date.now(),
+                        date: new Date(new Date()),
                         clinicName: element,
                         grandTotal: res[element].length,
                         new: {
@@ -141,6 +135,7 @@ class Service {
                     visit.push(summary);
 
                 });
+
                 
                 return jsend.success(visit);
             }
@@ -198,6 +193,33 @@ Array.prototype.getUnique = function () {
     for (e in o) { a.push(e); }
     return a;
 };
+
+function filterList(q, list) {
+    function escapeRegExp(s) {
+        return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
+    const words = q
+        .split(/\s+/g)
+        .map(s => s.trim())
+        .filter(s => !!s);
+    const hasTrailingSpace = q.endsWith(' ');
+    const searchRegex = new RegExp(
+        words
+            .map((word, i) => {
+                if (i + 1 === words.length && !hasTrailingSpace) {
+                    // The last word - ok with the word being "startswith"-like
+                    return `(?=.*\\b${escapeRegExp(word)})`;
+                } else {
+                    // Not the last word - expect the whole word exactly
+                    return `(?=.*\\b${escapeRegExp(word)}\\b)`;
+                }
+            })
+            .join('') + '.+','gi'
+    );
+    return list.filter(item => {
+        return searchRegex.test(item.title);
+    });
+}
 module.exports = function (options) {
     return new Service(options);
 };
