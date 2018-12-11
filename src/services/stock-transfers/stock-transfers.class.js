@@ -25,6 +25,7 @@ class Service {
     const inventoryTransfersService = this.app.service('inventory-transfers');
     let inventoryTransfers = await inventoryTransfersService.create(data);
     let inventory = {};
+    let updatedInv = {};
     if (inventoryTransfers._id !== undefined) {
       if (inventoryTransfers.inventoryTransferTransactions !== undefined) {
         if (inventoryTransfers.inventoryTransferTransactions.length > 0) {
@@ -37,20 +38,20 @@ class Service {
                   let len2 = inventory.transactions.length - 1;
                   for (let index2 = len2; index2 >= 0; index2--) {
                     if (inventory.transactions[index2]._id.toString() === inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString()) {
-                      inventory.transactions[index2].availableQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
-                      inventory.availableQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                      inventory.transactions[index2].availableQuantity = inventory.transactions[index2].availableQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                      inventory.availableQuantity = inventory.availableQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity;
                     }
                   }
                 }
               }
             }
+            updatedInv = await inventoriesService.patch(inventory._id, {
+              availableQuantity: inventory.availableQuantity,
+              transactions: inventory.transactions
+            });
           }
-          let updatedInv = await inventoriesService.patch(inventory._id, {
-            availableQuantity: inventory.availableQuantity,
-            transactions: inventory.transactions
-          });
-          if (data.requistionId !== null || data.requistionId !== undefined) {
-            const requis = await reqProductService.patch(data.requistionId, {
+          if (data.requistionId !== null && data.requistionId !== undefined) {
+            await reqProductService.patch(data.requistionId, {
               isSupplied: true
             });
           }
@@ -106,15 +107,13 @@ class Service {
                       inventory.totalQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
 
                       let updatedInv = await inventoriesService.patch(inventory._id, inventory);
-
                       let inventory2 = await inventoriesService.find({
                         query: {
                           facilityId: updatedInv.facilityId,
                           productId: inventoryTransfers.inventoryTransferTransactions[index].productId,
-                          storeId: inventoryTransfers.destinationStoreId
+                          storeId: inventoryTransfers.storeId
                         }
                       });
-                      console.log(inventory2);
                       if (inventory2.data.length > 0) {
                         let batchTxn = inventory2.data[0].transactions.filter(x => x._id.toString() === inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString());
                         if (batchTxn.length > 0) {
@@ -131,13 +130,12 @@ class Service {
                           batchTxn[0].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                           inventory2.data[0].totalQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                           inventory2.data[0].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
-                          if (inventory2.data[0].batchTransactions == undefined) {
+                          if (inventory2.data[0].batchTransactions === undefined) {
                             inventory2.data[0].batchTransactions = [];
                           }
                           batchTxn[0].batchTransactions.push(transaction);
                         }
-                        await inventoriesService.patch(inventory2.data[0]._id, inventory2.data[0]);
-
+                        const ser = await inventoriesService.patch(inventory2.data[0]._id, inventory2.data[0]);
                       } else {
                         const inventoryModel = {
                           facilityId: updatedInv.facilityId,
@@ -156,7 +154,7 @@ class Service {
                         batchDetail.availableQuantity = inventoryTransfers.inventoryTransferTransactions[index].quantity;
                         batchDetail.batchTransactions = [];
                         inventoryModel.transactions.push(batchDetail);
-                        await inventoriesService.create(inventoryModel);
+                        const newT = await inventoriesService.create(inventoryModel);
                       }
                     }
                   }
