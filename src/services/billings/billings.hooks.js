@@ -15,7 +15,11 @@ const resolvers = {
     principalObject: () => async (bill, context) => {
       try {
         if (bill.patientId !== undefined) {
-          const patient = await context.app.service('patients').get(bill.patientId, {});
+          const patient = await context.app.service('patients').get(bill.patientId, {
+            query: {
+              $select:['personId']
+            }
+          });
           bill.principalObject = patient;
         }
       } catch (error) {
@@ -145,14 +149,14 @@ function sumBillItems(bill, facilityDeductionPlan) {
           element.totalPrice = sumCharge + element.apmisSurCharge;
           totalCost += element.totalPrice;
         }
-      }else {
+      } else {
         element.totalPrice = element.quantity * element.unitPrice;
         totalCostValue += element.totalPrice;
         totalCost += element.totalPrice;
       }
     }
   });
-  
+
   bill.grandTotal = totalCost;
   bill.subTotal = totalCost;
   bill.totalCost = totalCostValue;
