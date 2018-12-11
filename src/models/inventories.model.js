@@ -63,6 +63,10 @@ module.exports = function (app) {
       type: Number,
       required: false
     },
+    costPrice: {
+      type: Number,
+      required: false
+    },
     transactions: [inventoryTransactionSchema]
   }, {
     timestamps: true
