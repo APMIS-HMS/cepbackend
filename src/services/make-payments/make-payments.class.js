@@ -349,7 +349,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
     let surchargeValue = {};
     if (facilityWallet.paymentDistribution === undefined) {
       facilityWallet.paymentDistribution = {
-        deductionValue: 10,
+        deductionValue: 0,
         deductionType: '%',
         deductionCap: 1000,
         transactions: []

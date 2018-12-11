@@ -28,7 +28,7 @@ class Service {
     });
     if (facilitySubscriptionStatus._id !== undefined && facilitySubscriptionStatus.paymentDistribution === undefined) {
       facilitySubscriptionStatus.paymentDistribution = {
-        deductionValue: 10,
+        deductionValue: 0,
         deductionType: '%',
         deductionCap: 1000,
         transactions: []
