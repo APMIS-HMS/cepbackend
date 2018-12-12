@@ -329,6 +329,10 @@ const paymentReports = require('./payment-reports/payment-reports.service.js');
 
 const patientDiagnosis = require('./patient-diagnosis/patient-diagnosis.service.js');
 
+const dispenseReport = require('./dispense-report/dispense-report.service.js');
+
+const prescriptionReport = require('./prescription-report/prescription-report.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -573,4 +577,6 @@ module.exports = function (app) {
   app.configure(apmisSurcharges);
   app.configure(paymentReports);
   app.configure(patientDiagnosis);
+  app.configure(dispenseReport);
+  app.configure(prescriptionReport);
 };

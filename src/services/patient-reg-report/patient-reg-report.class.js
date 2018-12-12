@@ -266,33 +266,73 @@ class Service {
                     if(params.query.searchBy === 'age'){
                         let ageGroup = {};
                         let ageRanges ={};
+                        let femaleGenderCount={};
+                        let maleGenderCount={};
+                        let data = [];
+                        let summary = {};
                         ageGroup['0-10']=0,ageGroup['11-20']=0,ageGroup['21-30']=0,ageGroup['31-40']=0,ageGroup['41-50']=0,ageGroup['51-above']=0;
+                        femaleGenderCount['0-10']=0,femaleGenderCount['11-20']=0,femaleGenderCount['21-30']=0,
+                        femaleGenderCount['31-40']=0,femaleGenderCount['41-50']=0,femaleGenderCount['51-above']=0;
+                        maleGenderCount['0-10']=0,maleGenderCount['11-20']=0,maleGenderCount['21-30']=0,
+                        maleGenderCount['31-40']=0,maleGenderCount['41-50']=0,maleGenderCount['51-above']=0;
                         var result = personDetails.map(x=>{
                             
                             if(x.age <= 1 && x.age < 11){
                                 ageGroup['0-10']+=1;
+                                summary['']='';
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['0-10']+=1;
+                                }else{
+                                    femaleGenderCount['0-10']+=1;
+                                }
                             }
                             if(x.age >= 11 && x.age < 21 ){
                                 ageGroup['11-20']+=1;
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['11-20']+=1;
+                                }else{
+                                    femaleGenderCount['11-20']+=1;
+                                }
                             }
                             if(x.age >= 21 && x.age < 31){
                                 ageGroup['21-30']+=1;
-                                //ageGroup['21-30'].push(x.gender);
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['21-30']+=1;
+                                }else{
+                                    femaleGenderCount['21-30']+=1;
+                                }
                             }
                             if(x.age >= 31 && x.age < 41){
                                 ageGroup['31-40']+=1;
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['31-40']+=1;
+                                }else{
+                                    femaleGenderCount['31-40']+=1;
+                                }
                             }
                             if(x.age >= 41 && x.age < 51){
                                 ageGroup['41-50']+=1;
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['41-50']+=1;
+                                }else{
+                                    femaleGenderCount['41-50']+=1;
+                                }
                             }
                             if(x.age >= 51 && x.age > 51){
                                 ageGroup['51-above']+=1;
+                                if(x.gender.toLowerCase()==='male'){
+                                    maleGenderCount['51-above']+=1;
+                                }else{
+                                    femaleGenderCount['51-above']+=1;
+                                }
                             }
-                            ageRanges.ageRanges = ageGroup;
+                            ageRanges.tag = ageGroup;
+                            ageRanges.male = maleGenderCount;
+                            ageRanges.female = femaleGenderCount;
                             return {
                                 ageRanges
                             };
-                        });
+                        });//
 
                         return jsend.success([... new Set(result.map(x => x.ageRanges))]);
                     } 
