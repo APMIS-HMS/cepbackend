@@ -29,11 +29,13 @@ class Service {
         _id: {
           $in: getUniqueKeys(userRoles)
         },
-        $limit: 200
+        $limit: 200,
+        $select: ['features']
       }
     }).catch(err => {
-      // console.log(err.params.query);
+      console.log(err);
     });
+    console.log(features);
     let outArray = [];
     outArray = outArray.concat(features.data.map(x => x.features));
     var merged = [].concat.apply([], outArray);

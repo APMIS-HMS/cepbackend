@@ -25,11 +25,12 @@ class Service {
         minorLocationId: params.query.minorLocationId
       }
     });
-    console.log(getFacilityStore)
     if (params.query.minorLocationId === undefined) {
       getFacilityStore = await storesService.find({
         query: {
-          facilityId: params.query.facilityId
+          facilityId: params.query.facilityId,
+          $limit: params.query.$limit,
+          $skip: params.query.$skip
         }
       });
     }
@@ -43,7 +44,9 @@ class Service {
     const skip = params.query.skip;
     const limit = params.query.limit;
     const page = skip / limit + 1;
-    return jsend.success(Paginator(retVal, page, limit));
+    // return jsend.success(Paginator(retVal, page, limit));
+    getFacilityStore.data = retVal;
+    return jsend.success(getFacilityStore);
   }
 
   getMinorLocation(minorLocations, minorLocationId, locations) {
