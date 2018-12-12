@@ -118,26 +118,27 @@ class Service {
                 if (employeeTable !== true) {
                   return jsend.success(people);
                 } else {
-
-
                   if (filterByRole) {
-                    const employeeInRoles = await employeeAccessiblityQueryService.find({
-                      query: {
-                        facilityId: facilityId,
-                        roleName: roleName,
-                        moduleName: moduleName,
-                        employeesWithRoleInFacility: true
-                      }
-                    });
-                    employeez = [].concat.apply(...([...employeez, employeeInRoles.data] || []));
                     try {
-                      employeez = employeez.reduce((unique, o) => {
-                        if (!unique.some(obj => obj._id.toString() === o._id.toString())) {
-                          unique.push(o);
+                      const employeeInRoles = await employeeAccessiblityQueryService.find({
+                        query: {
+                          facilityId: facilityId,
+                          roleName: roleName,
+                          moduleName: moduleName,
+                          employeesWithRoleInFacility: true
                         }
-                        return unique;
-                      }, []);
+                      });
+                      employeez = [].concat.apply(...([...employeez, employeeInRoles.data] || []));
+                      try {
+                        employeez = employeez.reduce((unique, o) => {
+                          if (!unique.some(obj => obj._id.toString() === o._id.toString())) {
+                            unique.push(o);
+                          }
+                          return unique;
+                        }, []);
+                      } catch (error) {}
                     } catch (error) {}
+
 
                   }
                   return jsend.success(employeez);

@@ -11,9 +11,9 @@ class Service {
     let selectedFacility = await facilityService.get(params.query.facilityId, {});
 
     // begins category initializer
-    const newCategory = {};
+    let newCategory = {};
     newCategory.facilityId = params.query.facilityId;
-    const categories = [];
+    let categories = [];
     categories = [{
         services: [],
         canRemove: false,
@@ -139,6 +139,8 @@ class Service {
     }]
     // end minor location initialiser
 
+    const updatedFacility = await facilityService.update(selectedFacility._id, selectedFacility);
+
     return categoryResult;
   }
 
@@ -169,6 +171,10 @@ class Service {
     return Promise.resolve({
       id
     });
+  }
+
+  setup(app) {
+    this.app = app;
   }
 }
 
