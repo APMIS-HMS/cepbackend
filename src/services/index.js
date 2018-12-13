@@ -322,6 +322,14 @@ const unknownPatients = require('./unknown-patients/unknown-patients.service.js'
 const appointmentDiagnosisReport = require('./appointment-diagnosis-report/appointment-diagnosis-report.service.js');
 const appointmentsSummaryReport = require('./appointments-summary-report/appointments-summary-report.service.js');
 const patientRegReport = require('./patient-reg-report/patient-reg-report.service.js');
+const facilityProductList = require('./facility-product-list/facility-product-list.service.js');
+const employeeAccessibilitiesQuery = require('./employee-accessibilities-query/employee-accessibilities-query.service.js');
+const apmisSurcharges = require('./apmis-surcharges/apmis-surcharges.service.js');
+const paymentReports = require('./payment-reports/payment-reports.service.js');
+
+const purchaseList = require('./purchase-list/purchase-list.service.js');
+const patientDiagnosis = require('./patient-diagnosis/patient-diagnosis.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -561,4 +569,10 @@ module.exports = function (app) {
   app.configure(appointmentDiagnosisReport);
   app.configure(appointmentsSummaryReport);
   app.configure(patientRegReport);
+  app.configure(facilityProductList);
+  app.configure(employeeAccessibilitiesQuery);
+  app.configure(apmisSurcharges);
+  app.configure(paymentReports);
+  app.configure(purchaseList);
+  app.configure(patientDiagnosis);
 };

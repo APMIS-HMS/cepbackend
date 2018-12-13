@@ -55,29 +55,34 @@ function africas_sender(message, data, isScheduler) {
     }
   };
 
-  var post_req = https.request(post_options, function (res) {
-    res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      var jsObject = JSON.parse(chunk);
-      var recipients = jsObject.SMSMessageData.Recipients;
-      if (recipients.length > 0) {
-        // for (var i = 0; i < recipients.length; ++i) {
-        //     var logStr = 'number=' + recipients[i].number;
-        //     logStr += ';cost=' + recipients[i].cost;
-        //     logStr += ';status=' + recipients[i].status; // status is either
-        //     "Success" or "error message" console.log(logStr);
-        // }
-      } else {
-        // console.log('Error while sending: ' +
-        // jsObject.SMSMessageData.Message);
-      }
+  try {
+    var post_req = https.request(post_options, function (res) {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var jsObject = JSON.parse(chunk);
+        var recipients = jsObject.SMSMessageData.Recipients;
+        if (recipients.length > 0) {
+          // for (var i = 0; i < recipients.length; ++i) {
+          //     var logStr = 'number=' + recipients[i].number;
+          //     logStr += ';cost=' + recipients[i].cost;
+          //     logStr += ';status=' + recipients[i].status; // status is either
+          //     "Success" or "error message" console.log(logStr);
+          // }
+        } else {
+          // console.log('Error while sending: ' +
+          // jsObject.SMSMessageData.Message);
+        }
+      });
     });
-  });
 
-  // Add post parameters to the http request
-  post_req.write(post_data);
+    // Add post parameters to the http request
+    post_req.write(post_data);
 
-  post_req.end();
+    post_req.end();
+  } catch (error) {
+
+  }
+
 }
 
 function sendToken(data) {
@@ -101,14 +106,14 @@ function sendApmisId(data) {
 }
 
 function sendApmisId(data, password) {
-  const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
-    ' Password: ' + password + ' ,kindly change your password';
+  const message = 'Welcome to Apmis.\nBelow is your login credential.\n APMIS-ID: ' + data.apmisId +
+    ' Password: ' + password + ',\nkindly change your password\n(app.apmis.ng)';
   sender(message, data, false);
 }
 
 function sendAutoGeneratorPassword(data, password) {
-  const message = 'Welcome to Apmis CEP. Below is your login credential(app.apmis.ng). ApmisId: ' + data.apmisId +
-    ' Password: ' + password + ' ,kindly change your password';
+  const message = 'Welcome to Apmis.\n \n Below is your login credential. \n APMIS-ID: ' + data.apmisId +
+    '\n Password: ' + password + '\n kindly change your password\n(app.apmis.ng)';
   sender(message, data, false);
   // const message = 'APMIS Auto-generated password: ' + password +
   //     ' kindly change your password';
@@ -138,8 +143,8 @@ function sendScheduleAppointment(date, data) {
   }
   data.primaryContactPhoneNo =
     data.patientDetails.personDetails.primaryContactPhoneNo;
-  africas_sender(message, data, true);
-  sender(message, data, true);
+  africas_sender(message, data, false);
+  sender(message, data, false);
 }
 
 function sendNotification(data) {

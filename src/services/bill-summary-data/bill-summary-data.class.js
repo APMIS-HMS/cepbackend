@@ -20,11 +20,21 @@ class Service {
     let totalAmountPaidInvoice = 0;
     const bills = await billingsService.find({
       query: {
-        facilityId: id
+        facilityId: id,
+        $or: [{
+          'billItems.covered.coverType': 'wallet'
+        },
+        {
+          'billItems.covered.coverType': 'family'
+        }
+      ],
+      'billItems.isInvoiceGenerated':false,
+      $select:['billItems.isInvoiceGenerated','billItems.covered','billItems.totalPrice']
       }
     });
+    console.log(bills.data[0].billItems);
     for (let i = bills.data.length - 1; i >= 0; i--) {
-      bills.data[i].billItems.filter(x => x.isInvoiceGenerated === false).forEach(element => {
+      bills.data[i].billItems.filter(x => x.isInvoiceGenerated === false).map(element => {
         if (element.covered !== undefined) {
           if (element.covered.coverType !== 'insurance' && element.covered.coverType !== 'company') {
             totalAmountUnpaidBills += element.totalPrice;
@@ -35,20 +45,24 @@ class Service {
     const invoicesAmountUnpaidInvoice = await invoicesService.find({
       query: {
         facilityId: id,
-        paymentCompleted: false
+        $or: [{
+          paymentCompleted: false
+        },
+        {
+          paymentCompleted: true
+        }
+      ],
+      $select:['balance','paymentCompleted','totalPrice']
       }
     });
     for (let i = invoicesAmountUnpaidInvoice.data.length - 1; i >= 0; i--) {
-      totalAmountUnpaidInvoice += invoicesAmountUnpaidInvoice.data[i].balance;
-    }
-    const invoicesAmountPaidInvoice = await invoicesService.find({
-      query: {
-        facilityId: id
+      if(!invoicesAmountUnpaidInvoice.data[i].paymentCompleted){
+        totalAmountUnpaidInvoice += invoicesAmountUnpaidInvoice.data[i].balance;
+      }else{
+        totalAmountPaidInvoice += (invoicesAmountUnpaidInvoice.data[i].totalPrice - invoicesAmountUnpaidInvoice.data[i].balance);
       }
-    });
-    for (let i = invoicesAmountPaidInvoice.data.length - 1; i >= 0; i--) {
-      totalAmountPaidInvoice += (invoicesAmountPaidInvoice.data[i].totalPrice - invoicesAmountPaidInvoice.data[i].balance);
     }
+    
     let returnValue = {
       PaidIvoices: totalAmountPaidInvoice,
       UnpaidInvoices: totalAmountUnpaidInvoice,
