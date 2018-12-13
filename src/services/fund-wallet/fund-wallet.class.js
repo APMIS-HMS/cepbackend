@@ -131,6 +131,7 @@ class FundWalletService {
             let url = (data.authorization_code === undefined) ? process.env.PAYSTACK_VERIFICATION_URL + data.ref.trxref : process.env.PAYSTACK_CARD_REUSE_URL;
             let payload = await this.verifyPayStackPayment(url, data);
             if (payload.status && payload.data.status === 'success') {
+              const paystackConfirmedAmountInNaira = payload.data.amount / 100;
               paymentRes.isActive = true;
               paymentRes.paymentResponse = payload;
               let updatedPayment = await paymentService.update(paymentRes._id, paymentRes);
@@ -144,7 +145,7 @@ class FundWalletService {
                   });
                   const userWallet = personWallet.wallet;
                   const cParam = {
-                    amount: amount,
+                    amount: paystackConfirmedAmountInNaira,
                     paidBy: loggedPersonId,
                     sourceId: loggedPersonId,
                     sourceType: entity,
@@ -184,13 +185,11 @@ class FundWalletService {
                         facilityId: params.query.facilityId
                       }
                     });
-
-                    if (payload.data.authorization === undefined) {
-                      const card_save_status = (payload.data.status === 'success' && payload.data.authorization.reusable) ? true : false;
+                    if (data.authorization_code === undefined) {
+                      const card_save_status = (payload.data.authorization.reusable) ? true : false;
                       personUpdate.card_save_status = card_save_status;
-                    }else if (data.authorization_code !== undefined) {
-                      const card_auth_status = (payload.data.status === 'failed') ? false : true;
-                      personUpdate.card_auth_status = card_auth_status;
+                    } else if (data.authorization_code !== undefined) {
+                      personUpdate.card_auth_status = true;
                     }
 
                     return jsend.success(personUpdate);
@@ -206,7 +205,7 @@ class FundWalletService {
                   });
                   const userWallet = facilityWallet.wallet; //facility.wallet;
                   const cParam = {
-                    amount: amount,
+                    amount: paystackConfirmedAmountInNaira,
                     paidBy: loggedPersonId,
                     sourceId: facilityId,
                     sourceType: entity,
@@ -230,6 +229,19 @@ class FundWalletService {
                   } catch (error) {}
                 }
               }
+            } else if (payload.status && payload.data.status === 'failed') {
+              const _result = {
+                status: payload.status,
+                card_auth_status: false
+              };
+              return jsend.success(_result);
+            } else {
+              const _result = {
+                status: false,
+                card_auth_status: false,
+                card_save_status: false
+              };
+              return jsend.success(_result);
             }
           }
         }
@@ -363,7 +375,7 @@ class FundWalletService {
         },
         json: true
       };
-     return requestPromise(options);
+      return requestPromise(options);
     } else if (data.authorization_code === undefined) {
       const options = {
         method: 'GET',
@@ -406,10 +418,26 @@ class FundWalletService {
     return Promise.resolve(data);
   }
 
-  remove(id, params) {
-    return Promise.resolve({
-      id
+  //Delete User's Card
+  async remove(id, params) {
+    const peopleService = this.app.service('people');
+    const personWallet = await peopleService.get(id, {
+      query: {
+        $select: ['wallet']
+      }
     });
+    const cards = personWallet.wallet.cards.filter(x => x._id.toString() !== params.query.cardId.toString());
+
+    personWallet.wallet.cards = JSON.parse(JSON.stringify(cards));
+    const patchedWallet = await peopleService.patch(id, {
+      wallet: personWallet.wallet
+    }, {});
+    const _result = await peopleService.get(patchedWallet._id, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    return jsend.success(_result);
   }
 }
 
