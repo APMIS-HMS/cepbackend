@@ -110,4 +110,8 @@ $RECYCLE.BIN/
 # Others
 lib/
 data/
-keep.env
+
+# Environment Variables
+# local .env* files
+.env.local
+.env.*.local

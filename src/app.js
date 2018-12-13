@@ -16,6 +16,7 @@ const channels = require('./channels');
 const authentication = require('./authentication');
 const mongoose = require('./mongoose');
 require('dotenv').config();
+require('dotenv-flow').config();
 
 const app = express(feathers());
 
@@ -26,7 +27,9 @@ app.use(cors());
 app.use(helmet());
 app.use(compress());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 app.use(favicon(path.join(app.get('public'), 'favicon.ico')));
 // Host the public folder
 app.use('/', express.static(app.get('public')));
@@ -47,7 +50,9 @@ app.configure(channels);
 
 // Configure a middleware for 404s and the error handler
 app.use(express.notFound());
-app.use(express.errorHandler({ logger }));
+app.use(express.errorHandler({
+  logger
+}));
 
 app.hooks(appHooks);
 

@@ -46,6 +46,7 @@
     "crypto-js": "^3.1.9-1",
     "date-fns": "^1.29.0",
     "dotenv": "^4.0.0",
+    "dotenv-flow": "^0.1.0",
     "feathers-hooks-common": "^4.3.0",
     "feathers-mongodb": "^3.0.0",
     "feathers-mongoose": "^6.1.0",
