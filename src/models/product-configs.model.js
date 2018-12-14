@@ -12,6 +12,7 @@ module.exports = function (app) {
     productObject: { type: Schema.Types.Mixed, require: false },
     rxCode:{ type: String, require: false },
     productType:{type: Number, require: true },
+    
     packSizes:[packageItem]
   }, {
     timestamps: true
