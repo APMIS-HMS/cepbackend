@@ -32,10 +32,7 @@ class Service {
         $limit: 200,
         $select: ['features']
       }
-    }).catch(err => {
-      console.log(err);
-    });
-    console.log(features);
+    }).catch(err => {});
     let outArray = [];
     outArray = outArray.concat(features.data.map(x => x.features));
     var merged = [].concat.apply([], outArray);
