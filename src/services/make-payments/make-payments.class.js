@@ -333,7 +333,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
         $select: ['paymentCompleted', 'billingIds.billObject', 'payments']
       }
     });
-    
+
     let totalSurCharge = 0;
     invoiceObject.billingIds.map(x => {
       totalSurCharge += x.billObject.apmisSurCharge;
@@ -347,6 +347,14 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
 
     let deductionValue = {};
     let surchargeValue = {};
+    if (facilityWallet.paymentDistribution === undefined) {
+      facilityWallet.paymentDistribution = {
+        deductionValue: 0,
+        deductionType: '%',
+        deductionCap: 1000,
+        transactions: []
+      }
+    }
     if (facilityWallet.paymentDistribution.deductionType === '%') {
       deductionValue = {
         type: '%',
@@ -375,12 +383,12 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           deductedValue: _deductedValue,
           invoiceId: invoiceObject._id
         };
-        await apmisSurchargesService.update(apmisSurchargesObject.data[0]._id, surchargeValue);
+        apmisSurchargesService.update(apmisSurchargesObject.data[0]._id, surchargeValue).then(payload => {}, err => {});
       } else if (apmisSurchargesObject.data[0].isSurchargeCompleted) {
         apmisSurchargesObject.data[0].value = apmisSurchargesObject.data[0].value + data.inputedValue.amountPaid;
-        await apmisSurchargesService.patch(apmisSurchargesObject.data[0]._id, {
+        apmisSurchargesService.patch(apmisSurchargesObject.data[0]._id, {
           value: apmisSurchargesObject.data[0].value
-        }, {});
+        }, {}).then(payload => {}, err => {});
       }
     } else {
       if (invoiceObject.paymentCompleted) {
@@ -407,7 +415,7 @@ async function onDebitWallet(data, description, ref, facilitiesService, peopleSe
           invoiceId: invoiceObject._id
         };
       }
-      await apmisSurchargesService.create(surchargeValue);
+      apmisSurchargesService.create(surchargeValue).then(payload => {}, err => {});
     }
     let returnObj = {
       person: patchedPerson,

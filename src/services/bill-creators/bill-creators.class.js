@@ -16,6 +16,7 @@ class Service {
     });
   }
   async create(data, params) {
+
     const patientsService = this.app.service('patients');
     const billingsService = this.app.service('billings');
     const facilityService = this.app.service('facilities');
@@ -25,6 +26,15 @@ class Service {
         $select: ['paymentDistribution']
       }
     });
+    if (facilitySubscriptionStatus._id !== undefined && facilitySubscriptionStatus.paymentDistribution === undefined) {
+      facilitySubscriptionStatus.paymentDistribution = {
+        deductionValue: 0,
+        deductionType: '%',
+        deductionCap: 1000,
+        transactions: []
+      }
+    }
+    console.log(facilitySubscriptionStatus);
     let billGroup = [];
     const insurance = data.filter(x => x.covered.coverType === 'insurance');
     const wallet = data.filter(x => x.covered.coverType === 'wallet');
