@@ -334,6 +334,8 @@ const apmisConsumables = require('./apmis-consumables/apmis-consumables.service.
 
 const consumableCategories = require('./consumable-categories/consumable-categories.service.js');
 
+const createPatient = require('./create-patient/create-patient.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -581,4 +583,5 @@ module.exports = function (app) {
   app.configure(patientDiagnosis);
   app.configure(apmisConsumables);
   app.configure(consumableCategories);
+  app.configure(createPatient);
 };
