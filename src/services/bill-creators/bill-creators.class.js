@@ -34,7 +34,6 @@ class Service {
         transactions: []
       }
     }
-    console.log(facilitySubscriptionStatus);
     let billGroup = [];
     const insurance = data.filter(x => x.covered.coverType === 'insurance');
     const wallet = data.filter(x => x.covered.coverType === 'wallet');
