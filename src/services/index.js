@@ -330,6 +330,7 @@ const paymentReports = require('./payment-reports/payment-reports.service.js');
 const purchaseList = require('./purchase-list/purchase-list.service.js');
 const patientDiagnosis = require('./patient-diagnosis/patient-diagnosis.service.js');
 
+const findFacilities = require('./find-facilities/find-facilities.service.js');
 const apmisConsumables = require('./apmis-consumables/apmis-consumables.service.js');
 
 const consumableCategories = require('./consumable-categories/consumable-categories.service.js');
@@ -581,6 +582,7 @@ module.exports = function (app) {
   app.configure(paymentReports);
   app.configure(purchaseList);
   app.configure(patientDiagnosis);
+  app.configure(findFacilities);
   app.configure(apmisConsumables);
   app.configure(consumableCategories);
   app.configure(createPatient);

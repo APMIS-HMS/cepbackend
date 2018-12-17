@@ -94,17 +94,23 @@ class Service {
                     if (inventory.transactions[index2]._id.toString() == inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString()) {
                       batchDetail = inventory.transactions[index2];
                       const qty = inventory.transactions[index2].quantity;
-                      let transaction = {
-                        batchNumber: batchDetail.batchNumber,
-                        employeeId: inventoryTransfers.transferBy,
-                        preQuantity: qty, // Before Operation.
-                        postQuantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
-                        quantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
-                        inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
-                      };
-                      inventory.transactions[index2].batchTransactions.push(transaction);
-                      inventory.transactions[index2].quantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
-                      inventory.totalQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                      if(inventoryTransfers.inventoryTransferTransactions[index].transferStatusObject.name ==='Completed'){
+                        let transaction = {
+                          batchNumber: batchDetail.batchNumber,
+                          employeeId: inventoryTransfers.transferBy,
+                          preQuantity: qty, // Before Operation.
+                          postQuantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
+                          quantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
+                          inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
+                        };
+                        inventory.transactions[index2].batchTransactions.push(transaction);
+                        inventory.transactions[index2].quantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                        inventory.totalQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                      }else{
+                        inventory.transactions[index2].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                        inventory.availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
+                      }
+                      
 
                       let updatedInv = await inventoriesService.patch(inventory._id, inventory);
                       let inventory2 = await inventoriesService.find({
