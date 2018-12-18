@@ -133,7 +133,7 @@ class Service {
             if (queryDico.data.length > 0) {
                 let exactWord = queryDico.data.filter(
                     x =>
-                    x.word.toString().toLowerCase() ===
+                        x.word.toString().toLowerCase() ===
                     params.query.name.toString().toLowerCase()
                 );
                 if (exactWord.length == 0) {

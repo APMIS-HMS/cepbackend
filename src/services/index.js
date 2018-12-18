@@ -334,6 +334,8 @@ const dispenseReport = require('./dispense-report/dispense-report.service.js');
 
 const prescriptionReport = require('./prescription-report/prescription-report.service.js');
 
+const paymentReport = require('./payment-report/payment-report.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -581,4 +583,5 @@ module.exports = function (app) {
   app.configure(patientDiagnosis);
   app.configure(dispenseReport);
   app.configure(prescriptionReport);
+  app.configure(paymentReport);
 };

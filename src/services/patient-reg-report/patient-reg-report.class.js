@@ -36,7 +36,7 @@ class Service {
                 let maleCount = 0;
                 let femaleCount = 0;
                 let ageCount = 0;
-                if(params.query.startDate !== undefined){
+                if(params.query.startDate !== undefined && params.query.endDate === undefined){
                 //startDate = date;
                 // return jsend.success(format(startDate));
                     getPatients = await PatientService.find({
@@ -49,7 +49,7 @@ class Service {
                             },
                             {
                                 createdAt: {
-                                    $lte: endDate // endDate = startDate minus 7 days
+                                    $lte: Date.now()
                                 }
                             }
                             ],

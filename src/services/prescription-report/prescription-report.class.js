@@ -12,6 +12,7 @@ class Service {
     async find (params) {
         const InventoryService = this.app.service('inventories');
         const PrescriptionService = this.app.service('prescriptions');
+        const ProductServcie = this.app.service('products');
 
         let prescription = {
             patientName:String, 
