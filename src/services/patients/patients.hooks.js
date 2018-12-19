@@ -58,7 +58,6 @@ const facilityObj = {
         const facility = await context.app
           .service('facilities')
           .get(patient.facilityId, {});
-        console.log(facility);
         patient.facilityObj = {
           name: facility.name,
           _id: facility._id,
