@@ -58,7 +58,7 @@ const facilityObj = {
         const facility = await context.app
           .service('facilities')
           .get(patient.facilityId, {});
-
+        console.log(facility);
         patient.facilityObj = {
           name: facility.name,
           _id: facility._id,
@@ -66,7 +66,7 @@ const facilityObj = {
           primaryContactPhoneNo: facility.primaryContactPhoneNo,
           shortName: facility.shortName,
           logoObject: {
-            path: (facility.logoObject.path === undefined) ? '' : facility.logoObject.path
+            path: (facility.logoObject === undefined) ? '' : facility.logoObject.path
           }
         };
       }
