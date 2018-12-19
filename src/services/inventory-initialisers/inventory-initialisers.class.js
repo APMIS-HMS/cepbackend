@@ -41,7 +41,7 @@ class Service {
           storeId: storeId
         }
       });
- 
+
 
       let resultList = [];
       try {
@@ -80,6 +80,7 @@ class Service {
           inventoryModel.transactions = [];
           inventoryModel.totalQuantity = 0;
           inventoryModel.availableQuantity = 0;
+          inventoryModel.costPrice = product.costPrice;
 
           let len = batches.batchItems.length - 1;
           for (let index = len; index >= 0; index--) {
@@ -95,13 +96,6 @@ class Service {
             inventory: inventory
           };
 
-          // set product price here
-          //  facilityServiceId: { type: Schema.Types.ObjectId, require: true },
-          //         categoryId: { type: Schema.Types.ObjectId, require: true },
-          //         serviceId: { type: Schema.Types.ObjectId, require: true },
-          //         facilityId:{ type: Schema.Types.ObjectId, require: true },
-          //         modifiers :  [modifierScheme],
-          //         price:{ type: Number, require: true }
 
           let price = {
             facilityServiceId: inventory.facilityServiceId,
@@ -122,8 +116,7 @@ class Service {
 
         }
         return jsend.success(resultList);
-      } catch (error) {
-      }
+      } catch (error) {}
 
     } else {
       let inventory = await inventoriesService.find({

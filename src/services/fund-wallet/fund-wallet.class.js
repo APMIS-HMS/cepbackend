@@ -5,6 +5,7 @@ const walletTransModel = require('../../custom-models/wallet-transaction-model')
 const Client = require('node-rest-client').Client;
 const request = require('request');
 const requestPromise = require('request-promise');
+var crypt = require('crypto-js');
 const logger = require('winston');
 const rxjs = require('rxjs');
 const jsend = require('jsend');
@@ -118,67 +119,78 @@ class FundWalletService {
                             };
                             facility.wallet = transaction(userWallet, cParam);
 
-                            const facilityUpdate = await facilityService.update(facility._id, facility);
-                            return jsend.success(facilityUpdate);
-                        }
-                    } else {
-                        return new Error('There was an error while verifying this payment');
+              const facilityUpdate = await facilityService.update(facility._id, facility);
+              return jsend.success(facilityUpdate);
+            }
+          } else {
+            return new Error('There was an error while verifying this payment');
+          }
+        } else if (paymentRoute !== undefined && paymentRoute.toLowerCase() === 'paystack') {
+          const paymentRes = await paymentService.create(paymentPayload);
+          if (paymentRes !== undefined) {
+            let url = (data.authorization_code === undefined) ? process.env.PAYSTACK_VERIFICATION_URL + data.ref.trxref : process.env.PAYSTACK_CARD_REUSE_URL;
+            let payload = await this.verifyPayStackPayment(url, data);
+            if (payload.status && payload.data.status === 'success') {
+              const paystackConfirmedAmountInNaira = payload.data.amount / 100;
+              paymentRes.isActive = true;
+              paymentRes.paymentResponse = payload;
+              let updatedPayment = await paymentService.update(paymentRes._id, paymentRes);
+              if (updatedPayment !== undefined) {
+                if (entity !== undefined && entity.toLowerCase() === 'person') {
+                  const person = await peopleService.get(destinationId);
+                  const personWallet = await peopleService.get(destinationId, {
+                    query: {
+                      $select: ['wallet']
                     }
-                } else if (paymentRoute !== undefined && paymentRoute.toLowerCase() === 'paystack') {
-                    const paymentRes = await paymentService.create(paymentPayload);
-                    if (paymentRes !== undefined) {
-                        let url = process.env.PAYSTACK_VERIFICATION_URL + data.ref.trxref;
-                        let data2 = await this.verifyPayStackPayment(url);
-                        let payload = JSON.parse(data2);
-                        if (payload.status && payload.data.status === 'success') {
-                            paymentRes.isActive = true;
-                            paymentRes.paymentResponse = data2;
-                            let updatedPayment = await paymentService.update(paymentRes._id, paymentRes);
-                            if (updatedPayment !== undefined) {
-                                if (entity !== undefined && entity.toLowerCase() === 'person') {
-                                    const person = await peopleService.get(destinationId);
-                                    const personWallet = await peopleService.get(destinationId, {
-                                        query: {
-                                            $select: ['wallet']
-                                        }
-                                    });
-                                    const userWallet = personWallet.wallet;
-                                    const cParam = {
-                                        amount: amount,
-                                        paidBy: loggedPersonId,
-                                        sourceId: loggedPersonId,
-                                        sourceType: entity,
-                                        transactionType: 'Cr',
-                                        transactionMedium: paymentType,
-                                        destinationId: destinationId,
-                                        destinationType: entity,
-                                        description: 'Funded wallet via e-payment',
-                                        transactionStatus: 'Completed'
-                                    };
-                                    person.wallet = transaction(userWallet, cParam);
-                                    if (params.query.isCardReused === 'true'){
-                                        params.query.isCardReused = true;
-                                    }else if (params.query.isCardReused === 'false'){
-                                        params.query.isCardReused = false;
-                                    }
+                  });
+                  const userWallet = personWallet.wallet;
+                  const cParam = {
+                    amount: paystackConfirmedAmountInNaira,
+                    paidBy: loggedPersonId,
+                    sourceId: loggedPersonId,
+                    sourceType: entity,
+                    transactionType: 'Cr',
+                    transactionMedium: paymentType,
+                    destinationId: destinationId,
+                    destinationType: entity,
+                    description: 'Funded wallet via e-payment',
+                    transactionStatus: 'Completed'
+                  };
+                  person.wallet = transaction(userWallet, cParam);
+                  if (params.query.isCardReused === 'true') {
+                    params.query.isCardReused = true;
+                  } else if (params.query.isCardReused === 'false') {
+                    params.query.isCardReused = false;
+                  }
 
-                                    if (params.query.saveCard === 'true'){
-                                        params.query.saveCard = true;
-                                    }else if (params.query.saveCard === 'false'){
-                                        params.query.saveCard = false;
-                                    }
-                                    if (!params.query.isCardReused && params.query.saveCard) {
-                                        person.wallet.cards.push({
-                                            authorization: payload.data.authorization,
-                                            customer: payload.data.customer
-                                        })
-                                    }
-                                    try {
-                                        const personUpdate = await peopleService.update(person._id, person, {
-                                            query: {
-                                                facilityId: params.query.facilityId
-                                            }
-                                        });
+                  if (params.query.saveCard === 'true') {
+                    params.query.saveCard = true;
+                  } else if (params.query.saveCard === 'false') {
+                    params.query.saveCard = false;
+                  }
+                  if (!params.query.isCardReused && params.query.saveCard) {
+                    const checkUniqueness = person.wallet.cards.filter(x => x.authorization.signature.toString() === payload.data.authorization.signature.toString());
+                    if (checkUniqueness.length === 0) {
+                      payload.data.authorization.authorization_code = crypt.AES.encrypt(payload.data.authorization.authorization_code, process.env.CARD_AUTHORISATION_KEY).toString();
+                      payload.data.customer.email = crypt.AES.encrypt(payload.data.customer.email, process.env.CARD_AUTHORISATION_KEY).toString();
+                      person.wallet.cards.push({
+                        authorization: payload.data.authorization,
+                        customer: payload.data.customer
+                      });
+                    }
+                  }
+                  try {
+                    const personUpdate = await peopleService.update(person._id, person, {
+                      query: {
+                        facilityId: params.query.facilityId
+                      }
+                    });
+                    if (data.authorization_code === undefined) {
+                      const card_save_status = (payload.data.authorization.reusable) ? true : false;
+                      personUpdate.card_save_status = card_save_status;
+                    } else if (data.authorization_code !== undefined) {
+                      personUpdate.card_auth_status = true;
+                    }
 
                                         return jsend.success(personUpdate);
                                     } catch (error) {
@@ -219,13 +231,46 @@ class FundWalletService {
                             }
                         }
                     }
+                  });
+                  const userWallet = facilityWallet.wallet; //facility.wallet;
+                  const cParam = {
+                    amount: paystackConfirmedAmountInNaira,
+                    paidBy: loggedPersonId,
+                    sourceId: facilityId,
+                    sourceType: entity,
+                    transactionType: 'Cr',
+                    transactionMedium: paymentType,
+                    destinationId: facilityId,
+                    destinationType: entity,
+                    description: 'Funded wallet via e-payment',
+                    transactionStatus: 'Completed'
+                  };
+                  facility.wallet = transaction(userWallet, cParam);
+                  try {
+                    const facilityUpdate = await facilityService.update(facility._id, facility);
+                    let selectedFacility = await facilityService.get(facility._id, {
+                      query: {
+                        $select: ['wallet']
+                      }
+                    });
+                    facilityUpdate.wallet = selectedFacility.wallet;
+                    return jsend.success(facilityUpdate);
+                  } catch (error) {}
                 }
+              }
+            } else if (payload.status && payload.data.status === 'failed') {
+              const _result = {
+                status: payload.status,
+                card_auth_status: false
+              };
+              return jsend.success(_result);
             } else {
-                const data = {
-                    msg: 'payment parameter is not defined',
-                    status: false
-                };
-                return data;
+              const _result = {
+                status: false,
+                card_auth_status: false,
+                card_save_status: false
+              };
+              return jsend.success(_result);
             }
         } else if (
             accessToken !== undefined &&
@@ -332,16 +377,38 @@ class FundWalletService {
     // });
     }
 
-    verifyPayStackPayment(url) {
-        const options = {
-            method: 'GET',
-            uri: url,
-            headers: {
-                Authorization: 'Bearer ' + process.env.PAYSTACK_SECRET_KEY
-            }
-        };
-        return requestPromise(options);
+  verifyPayStackPayment(url, data) {
+    if (data.authorization_code !== undefined) {
+      let auth = crypt.AES.decrypt(data.authorization_code.toString(), process.env.CARD_AUTHORISATION_KEY).toString(crypt.enc.Utf8);
+      let email = crypt.AES.decrypt(data.email.toString(), process.env.CARD_AUTHORISATION_KEY).toString(crypt.enc.Utf8);
+      const options = {
+        method: 'POST',
+        uri: url,
+        headers: {
+          Authorization: 'Bearer ' + process.env.PAYSTACK_SECRET_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: {
+          authorization_code: auth.toString(),
+          email: email.toString(),
+          amount: data.amount.toString()
+        },
+        json: true
+      };
+      return requestPromise(options);
+    } else if (data.authorization_code === undefined) {
+      const options = {
+        method: 'GET',
+        uri: url,
+        headers: {
+          Authorization: 'Bearer ' + process.env.PAYSTACK_SECRET_KEY
+        },
+        json: true
+      };
+      return requestPromise(options);
     }
+
+  }
 
     verifyPayment(url, secKey, ref) {
         const options = {
@@ -371,11 +438,27 @@ class FundWalletService {
         return Promise.resolve(data);
     }
 
-    remove(id, params) {
-        return Promise.resolve({
-            id
-        });
-    }
+  //Delete User's Card
+  async remove(id, params) {
+    const peopleService = this.app.service('people');
+    const personWallet = await peopleService.get(id, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    const cards = personWallet.wallet.cards.filter(x => x._id.toString() !== params.query.cardId.toString());
+
+    personWallet.wallet.cards = JSON.parse(JSON.stringify(cards));
+    const patchedWallet = await peopleService.patch(id, {
+      wallet: personWallet.wallet
+    }, {});
+    const _result = await peopleService.get(patchedWallet._id, {
+      query: {
+        $select: ['wallet']
+      }
+    });
+    return jsend.success(_result);
+  }
 }
 
 function transaction(wallet, param, type) {
