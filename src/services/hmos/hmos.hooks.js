@@ -35,7 +35,7 @@ const fastJoinFacilityName = {
 
 module.exports = {
   before: {
-    all: [],//authenticate('jwt')],
+    all: [authenticate('jwt')],
     find: [prop()],
     get: [],
     create: [],

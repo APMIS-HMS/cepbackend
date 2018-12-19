@@ -64,7 +64,10 @@ const facilityObj = {
           _id: facility._id,
           email: facility.email,
           primaryContactPhoneNo: facility.primaryContactPhoneNo,
-          shortName: facility.shortName
+          shortName: facility.shortName,
+          logoObject: {
+            path: (facility.logoObject.path === undefined) ? '' : facility.logoObject.path
+          }
         };
       }
 
