@@ -337,6 +337,23 @@ const consumableCategories = require('./consumable-categories/consumable-categor
 
 const createPatient = require('./create-patient/create-patient.service.js');
 
+const createPatientBills = require('./create-patient-bills/create-patient-bills.service.js');
+const dispenseReport = require('./dispense-report/dispense-report.service.js');
+
+const prescriptionReport = require('./prescription-report/prescription-report.service.js');
+
+const paymentReport = require('./payment-report/payment-report.service.js');
+const findFacilities = require('./find-facilities/find-facilities.service.js');
+const apmisConsumables = require('./apmis-consumables/apmis-consumables.service.js');
+
+const consumableCategories = require('./consumable-categories/consumable-categories.service.js');
+
+const createPatient = require('./create-patient/create-patient.service.js');
+
+const createPatientBills = require('./create-patient-bills/create-patient-bills.service.js');
+
+const invoiceReport = require('./invoice-report/invoice-report.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -586,4 +603,14 @@ module.exports = function (app) {
   app.configure(apmisConsumables);
   app.configure(consumableCategories);
   app.configure(createPatient);
+  app.configure(createPatientBills);
+  app.configure(dispenseReport);
+  app.configure(prescriptionReport);
+  app.configure(paymentReport);
+  app.configure(findFacilities);
+  app.configure(apmisConsumables);
+  app.configure(consumableCategories);
+  app.configure(createPatient);
+  app.configure(createPatientBills);
+  app.configure(invoiceReport);
 };

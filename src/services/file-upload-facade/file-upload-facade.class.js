@@ -131,8 +131,8 @@ class Service {
             };
 
             getFacility.logoObject = logoObject;
-
-            facUpdateLogo = await facilityService.update(facilityId, getFacility, {});
+            console.log(logoObject);
+            facUpdateLogo = await facilityService.patch(facilityId, {logoObject:getFacility.logoObject}, {});
             finalResponse = facUpdateLogo;
             return jsend.success(finalResponse);
           } else if (data.container === 'personfolder' && data.uploadType === 'profilePicture') {

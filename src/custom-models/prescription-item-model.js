@@ -13,9 +13,9 @@ const precribeItemSchema = new Schema({
     genericName: { type: String, required: true },
     ingredients: [productIngredient],
     regimen: [{
-      frequency: { type: String, required: true },
-      duration: { type: String, required: true },
-      durationUnit: { type: String, required: true }
+        frequency: { type: String, required: true },
+        duration: { type: String, required: true },
+        durationUnit: { type: String, required: true }
     }],
     dosage: { type: String, required: false },
     dosageUnit: { type: String, required: false },

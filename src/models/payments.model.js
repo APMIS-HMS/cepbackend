@@ -18,8 +18,8 @@ module.exports = function (app) {
         paymentRoute: { type: Schema.Types.String, required: true }, // This could either be Flutterwave, cash, cheque...
         comment: { type: Schema.Types.String, required: false },
     }, {
-            timestamps: true
-        });
+        timestamps: true
+    });
 
     return mongooseClient.model('payments', payments);
 };
