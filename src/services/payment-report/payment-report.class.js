@@ -25,17 +25,17 @@ class Service {
             getPayments = await invoiceService.find({
                 query: {
                     facilityId: facilityId,
-                    // $and: [{
-                    //     createdAt: {
-                    //         $gte: startDate
-                    //     }
-                    // },
-                    // {
-                    //     createdAt: {
-                    //         $lte: endDate // Today's date
-                    //     }
-                    // }
-                    // ],
+                    $and: [{
+                        createdAt: {
+                            $gte: startDate
+                        }
+                    },
+                    {
+                        createdAt: {
+                            $lte: endDate // Today's date
+                        }
+                    }
+                    ],
                     $limit: (params.query.$limit) ? params.query.$limit : 10,
                     $skip: (params.query.$skip) ? params.query.$skip : 0
                 }
@@ -118,17 +118,17 @@ class Service {
             getPayments = await invoiceService.find({
                 query: {
                     facilityId: facilityId,
-                    // $and: [{
-                    //     createdAt: {
-                    //         $gte: startDate
-                    //     }
-                    // },
-                    // {
-                    //     createdAt: {
-                    //         $lte: endDate
-                    //     }
-                    // }
-                    // ],
+                    $and: [{
+                        createdAt: {
+                            $gte: startDate
+                        }
+                    },
+                    {
+                        createdAt: {
+                            $lte: endDate
+                        }
+                    }
+                    ],
                     $limit: (params.query.$limit) ? params.query.$limit : 10,
                     $skip: (params.query.$skip) ? params.query.$skip : 0
                 }
