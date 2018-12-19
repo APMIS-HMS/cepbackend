@@ -338,6 +338,11 @@ const consumableCategories = require('./consumable-categories/consumable-categor
 const createPatient = require('./create-patient/create-patient.service.js');
 
 const createPatientBills = require('./create-patient-bills/create-patient-bills.service.js');
+const dispenseReport = require('./dispense-report/dispense-report.service.js');
+
+const prescriptionReport = require('./prescription-report/prescription-report.service.js');
+
+const paymentReport = require('./payment-report/payment-report.service.js');
 
 module.exports = function (app) {
   app.configure(users);
@@ -589,4 +594,7 @@ module.exports = function (app) {
   app.configure(consumableCategories);
   app.configure(createPatient);
   app.configure(createPatientBills);
+  app.configure(dispenseReport);
+  app.configure(prescriptionReport);
+  app.configure(paymentReport);
 };
