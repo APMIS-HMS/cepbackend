@@ -16,6 +16,10 @@ class Service {
         
         let facilityId = params.query.facilityId;
         let getPayments, serviceCategories;
+
+        let date = new Date();
+        let startDate = params.query.startDate?params.query.startDate:new Date(date.setHours(0,0,0,0));
+        let endDate = params.query.endDate?params.query.endDate:Date.now();
         
         try {
             getPayments = await invoiceService.find({
@@ -23,7 +27,7 @@ class Service {
                     facilityId: facilityId,
                     // $and: [{
                     //     createdAt: {
-                    //         $gte: date
+                    //         $gte: startDate
                     //     }
                     // },
                     // {
@@ -106,18 +110,22 @@ class Service {
         let facilityId = params.query.facilityId;
         let getPayments, serviceCategories;
 
+        let date = new Date();
+        let startDate = params.query.startDate?params.query.startDate:new Date(date.setHours(0,0,0,0));
+        let endDate = params.query.endDate?params.query.endDate:Date.now();
+
         try {
             getPayments = await invoiceService.find({
                 query: {
                     facilityId: facilityId,
                     // $and: [{
                     //     createdAt: {
-                    //         $gte: date
+                    //         $gte: startDate
                     //     }
                     // },
                     // {
                     //     createdAt: {
-                    //         $lte: endDate // Today's date
+                    //         $lte: endDate
                     //     }
                     // }
                     // ],
@@ -151,6 +159,7 @@ class Service {
                             categoryDetail.category = y.facilityServiceObject.category;
                             categoryDetail.service = y.facilityServiceObject.service;
                             categoryDetail.amountPaid = y.totalPrice;
+                            categoryDetail.paymentDate = y.paymentDate;
                             result.push(categoryDetail) ;
                         }
                         
