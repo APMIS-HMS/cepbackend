@@ -344,6 +344,8 @@ const createPatient = require('./create-patient/create-patient.service.js');
 
 const createPatientBills = require('./create-patient-bills/create-patient-bills.service.js');
 
+const invoiceReport = require('./invoice-report/invoice-report.service.js');
+
 module.exports = function (app) {
   app.configure(users);
   app.configure(facilityOwnerships);
@@ -597,4 +599,5 @@ module.exports = function (app) {
   app.configure(consumableCategories);
   app.configure(createPatient);
   app.configure(createPatientBills);
+  app.configure(invoiceReport);
 };
