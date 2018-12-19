@@ -97,7 +97,7 @@ class Service {
             totalPrice: 0
           };
           bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           if (investigation.investigation !== undefined) {
             bill.unitPrice = (investigation.investigation.changedPrice !== null && investigation.investigation.changedPrice !== undefined) ? investigation.investigation.changedPrice : investigation.investigation.location.workbenches[0].price;
             bill.totalPrice = bill.unitPrice;
@@ -162,7 +162,7 @@ class Service {
           totalPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price,
         };
         bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-        bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
         procedureBills.push(bill);
       });
       if (procedureBills.length > 0) {
@@ -186,10 +186,10 @@ class Service {
             patientId: patient.data[0]._id,
             quantity: medication.quantity,
             active: true,
-            totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost)            
+            totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost)
           };
-          bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+          bill.covered = (patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails === undefined) ? {} : patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails;
+          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           if (medication.changedPrice !== undefined && medication.changedPrice !== null) {
             bill.unitPriceChanges.push({
               currentPrice: medication.changedPrice,
@@ -312,7 +312,7 @@ class Service {
               totalPrice: 0
             };
             bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+              bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
             if (investigation.investigation !== undefined) {
               bill.unitPrice = (investigation.investigation.changedPrice !== null && investigation.investigation.changedPrice !== undefined) ? investigation.investigation.changedPrice : investigation.investigation.location.workbenches[0].price;
               bill.totalPrice = bill.unitPrice;
@@ -382,7 +382,7 @@ class Service {
             totalPrice: (procedure.changedPrice !== undefined && procedure.changedPrice !== null) ? procedure.changedPrice : procedure.price.price
           };
           bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-          bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
           procedureBills.push(bill);
         }
       });
@@ -411,7 +411,7 @@ class Service {
               totalPrice: medication.quantity * ((medication.changedPrice !== undefined && medication.changedPrice !== null) ? medication.changedPrice : medication.cost),
             };
             bill.covered = patient.data[0].paymentPlan.find(x => x.isDefault === true).planDetails,
-            bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
+              bill.covered.coverType = patient.data[0].paymentPlan.find(x => x.isDefault === true).planType;
             if (medication.changedPrice !== undefined && medication.changedPrice !== null) {
               bill.unitPriceChanges.push({
                 currentPrice: medication.changedPrice,
