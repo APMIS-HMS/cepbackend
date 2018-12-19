@@ -4,7 +4,41 @@ class Service {
     this.options = options || {};
   }
 
-  find (params) {
+  setup(app){
+    this.app = app;
+  }
+
+  async find (params) {
+    let billingService = this.app.service('billings');
+
+    let facilityId = params.query.facilityId;
+    let getBillings, covers;
+
+        let date = new Date();
+        let startDate = params.query.startDate?params.query.startDate:new Date(date.setHours(0,0,0,0));
+        let endDate = params.query.endDate?params.query.endDate:Date.now();
+
+    try {
+      getBillings = await billingService.find({query:{
+        facilityId:facilityId,
+        $and: [{
+          createdAt: {
+              $gte: startDate
+          }
+      },
+      {
+          createdAt: {
+              $lte: endDate
+          }
+      }
+      ],
+      $limit: (params.query.$limit) ? params.query.$limit : 10,
+      $skip: (params.query.$skip) ? params.query.$skip : 0
+      }
+    });
+    } catch (error) {
+      return error;
+    }
     return Promise.resolve([]);
   }
 
