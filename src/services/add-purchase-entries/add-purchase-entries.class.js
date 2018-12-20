@@ -26,40 +26,11 @@ class Service {
     const purchaseEntriesService = this.app.service('purchase-entries');
     const makePurchaseEntriesService = this.app.service('make-purchase-entries');
     const purchaseEntry = data;
-    console.log(data);
-    // purchaseEntry.invoiceAmount = data.amount.toString();
-    // purchaseEntry.deliveryDate = data.deliveryDate;
-    // purchaseEntry.facilityId = data.facilityId;
-    // purchaseEntry.invoiceNumber = data.invoiceNo;
-    // purchaseEntry.orderId = data.orderId;
-    // purchaseEntry.remark = data.desc;
-    // purchaseEntry.storeId = data.store;
-    // purchaseEntry.supplierId = data.supplier;
-    // purchaseEntry.createdBy = data.createdBy;
-
-    // purchaseEntry.products = [];
-    // purchaseEntry = data;
-
-    /* end*/
 
     let inventories = [];
     let existingInventories = [];
     for (let index = 0; index < data.products.length; index++) {
       let productObj = data.products[index];
-      // if (productObj.productObject.config !== undefined) {
-      //   delete productObj.productObject.config;
-      // }
-
-      // let product = {};
-      // product.batchNo = productObj.batchNo;
-      // product.costPrice = productObj.costPrice;
-      // product.expiryDate = productObj.expiryDate;
-      // product.productId = productObj.productId;
-      // product.productObject = productObj.productObject;
-      // product.quantity = productObj.quantity;
-      // product.qtyDetails = productObj.qtyDetails;
-      // product.availableQuantity = productObj.quantity;
-      // purchaseEntry.products.push(product);
 
       const existingInventory = await inventoriesService.find({
         query: {
