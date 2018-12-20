@@ -36,6 +36,9 @@ class Service {
           principalId: data.cover.fileNo
         }
       });
+      console.log('***********************************Payment Plan*************************************');
+      console.log(patientItem.paymentPlan);
+      console.log('***********************************Payment Plan End*************************************');
     } else if (data.coverType === 'family') {
       patientItem.paymentPlan[0].isDefault = false;
       const poliyFile = await familyService.find({
@@ -57,6 +60,9 @@ class Service {
       });
     }
     const addedPatient = await patientService.create(patientItem);
+    console.log('***********************************Patient Plan*************************************');
+    console.log(addedPatient.paymentPlan);
+    console.log('***********************************Patient Plan End*************************************');
     const billItem = [{
       unitPrice: data.cost,
       facilityId: data.facilityId,
@@ -67,17 +73,27 @@ class Service {
       active: true,
       totalPrice: data.cost,
       covered: {
+        hmoId: (data.coverType === 'insurance') ? data.cover.id : '',
+        familyId: (data.coverType === 'family') ? poliyFile.data[0]._id : '',
         coverType: data.coverType
       }
     }];
-    const _createdBill = await billCreatorService.create(
+    console.log('***********************************Bill*************************************');
+    console.log(billItem[0]);
+    console.log('***********************************Bill End*************************************');
+    billCreatorService.create(
       billItem, {
         query: {
           facilityId: data.facilityId,
           patientId: addedPatient._id
         }
-      });
+      }).then(pay => {}, err => {
+      console.log('********************************ERROR*******************************');
+      console.log(err);
+      console.log('********************************ERROR END*******************************');
+    });
     let createdBill = _createdBill[0];
+    console.log(createdBill);
     createdBill.billItems[0].facilityServiceObject = {
       categoryId: data.categoryId,
       category: data.category,
