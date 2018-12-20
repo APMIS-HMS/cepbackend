@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+const jsend = require('jsend');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -9,9 +10,6 @@ class Service {
   }
 
   async create(data, params) {
-    // console.log('*************************************DATA***********************************');
-    // console.log(data);
-    // console.log('*************************************DATA END***********************************');
     const makePaymentService = this.app.service('make-payments');
     const patientService = this.app.service('patients');
     const personService = this.app.service('peoples');
@@ -58,9 +56,7 @@ class Service {
         isDefault: true
       });
     }
-    console.log(1);
     const addedPatient = await patientService.create(patientItem);
-    console.log(2);
     const billItem = [{
       unitPrice: data.cost,
       facilityId: data.facilityId,
@@ -74,7 +70,6 @@ class Service {
         coverType: data.coverType
       }
     }];
-    console.log(3);
     const _createdBill = await billCreatorService.create(
       billItem, {
         query: {
@@ -83,16 +78,13 @@ class Service {
         }
       });
     let createdBill = _createdBill[0];
-    console.log(4);
     createdBill.billItems[0].facilityServiceObject = {
       categoryId: data.categoryId,
       category: data.category,
       service: data.service,
       serviceId: data.serviceId
     };
-    console.log(data.coverType);
     if (data.coverType === 'wallet') {
-      console.log(data.coverType);
       let makePaymentItem = {
         inputedValue: {
           paymentMethod: addedPatient.paymentPlan.find(x => x.isDefault === true),
@@ -162,7 +154,26 @@ class Service {
         transactionStatus: "Complete"
       }
       const paidItems = await makePaymentService.create(makePaymentItem);
-      return paidItems;
+      if (paidItems !== null && paidItems !== undefined) {
+        const result = {
+          coverType: data.coverType
+        }
+        return jsend.success(result);
+      } else {
+        const result = {
+          coverType: data.coverType
+        }
+        return jsend.error(result);
+      }
+    } else if (data.coverType === 'insurance' || data.coverType === 'family') {
+      const result = {
+        coverType: data.coverType
+      };
+      if (_createdBill !== null && _createdBill !== undefined) {
+        return jsend.success(result);
+      } else {
+        return jsend.error(result);
+      }
     }
   }
 }
