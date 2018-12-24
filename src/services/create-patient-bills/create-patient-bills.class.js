@@ -46,20 +46,66 @@ class Service {
           'familyCovers.filNo': data.cover.fileNo
         }
       });
-      const bearerPatient = poliyFile.data[0].familyCovers.find(x => x.serial === 0);
-      const bearerPersonId = await personService.get(bearerPatient);
-      patientItem.paymentPlan.push({
-        planType: data.coverType,
-        bearerPersonId: bearerPersonId._id,
-        planDetails: {
-          principalId: bearerPatient.filNo,
-          principalName: bearerPersonId.firstName + ' ' + bearerPersonId.lastName,
-          familyId: poliyFile.data[0]._id
-        },
-        isDefault: true
-      });
+      console.log('***********************************poliyFile*************************************');
+      console.log(poliyFile);
+      console.log('***********************************poliyFile End*************************************');
+      const bearerPrincipalPatient = poliyFile.data[0].familyCovers.find(x => x.filNo.toString() === data.cover.fileNo.toString());
+      const bearerBeneficiaryPatient = poliyFile.data[0].familyCovers.find(x => x.filNo.toString() === data.cover.clientNo.toString());
+      if (bearerPrincipalPatient.patientId !== undefined) {
+        const principalPatient = await patientService.get(bearerPatient.patientId);
+        if (data.cover.filNo.toString() !== data.cover.clientNo.toString()) {
+          patientItem.paymentPlan.push({
+            planType: data.coverType,
+            bearerPersonId: principalPatient.personId,
+            planDetails: {
+              principalId: data.cover.fileNo,
+              principalName: bearerPatient.othernames + ' ' + bearerPatient.surname,
+              familyId: poliyFile.data[0]._id
+            },
+            isDefault: true
+          });
+        }
+      }
+    } else {
+      if (data.cover.filNo.toString() === data.cover.clientNo.toString()) {
+        patientItem.paymentPlan.push({
+          planType: data.coverType,
+          bearerPersonId: data.personId,
+          planDetails: {
+            principalId: data.cover.fileNo,
+            principalName: bearerPatient.othernames + ' ' + bearerPatient.surname,
+            familyId: poliyFile.data[0]._id
+          },
+          isDefault: true
+        });
+      } else {
+        const result = {
+          coverType: data.coverType,
+          message: 'can not find principal patient'
+        };
+        return jsend.error(result)
+      }
     }
     const addedPatient = await patientService.create(patientItem);
+    if (bearerPrincipalPatient.patientId !== undefined) {
+      poliyFile.data[0].familyCovers.forEach(element => {
+        if (element.clientNo.toString() === data.cover.clientNo.toString()) {
+          element.patientId = addedPatient._id;
+        }
+      });
+      await familyService.patch(poliyFile.data[0]._id, {
+        familyCovers: poliyFile.data[0].familyCovers
+      }, {});
+    } else {
+      poliyFile.data[0].familyCovers.forEach(element => {
+        if (element.filNo.toString() === data.cover.fileNo.toString()) {
+          element.patientId = addedPatient._id;
+        }
+      });
+      await familyService.patch(poliyFile.data[0]._id, {
+        familyCovers: poliyFile.data[0].familyCovers
+      }, {});
+    }
     console.log('***********************************Patient Plan*************************************');
     console.log(addedPatient.paymentPlan);
     console.log('***********************************Patient Plan End*************************************');
@@ -81,17 +127,13 @@ class Service {
     console.log('***********************************Bill*************************************');
     console.log(billItem[0]);
     console.log('***********************************Bill End*************************************');
-    billCreatorService.create(
+    const _createdBill = await billCreatorService.create(
       billItem, {
         query: {
           facilityId: data.facilityId,
           patientId: addedPatient._id
         }
-      }).then(pay => {}, err => {
-      console.log('********************************ERROR*******************************');
-      console.log(err);
-      console.log('********************************ERROR END*******************************');
-    });
+      });
     let createdBill = _createdBill[0];
     console.log(createdBill);
     createdBill.billItems[0].facilityServiceObject = {
@@ -185,7 +227,7 @@ class Service {
       const result = {
         coverType: data.coverType
       };
-      if (_createdBill !== null && _createdBill !== undefined) {
+      if (createdBill !== null && createdBill !== undefined) {
         return jsend.success(result);
       } else {
         return jsend.error(result);
