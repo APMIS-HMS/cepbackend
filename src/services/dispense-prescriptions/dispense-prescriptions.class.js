@@ -51,7 +51,7 @@ class Service {
                                             referenceId: prescriptionId, // Dispense id, Transfer id...
                                             referenceService: 'Prescription/Dispense Service', // Dispense, // Transfer...
                                             inventorytransactionTypeId: inventoryTransactionTypeId,
-                                        }
+                                        };
                                         inventory.batchTransactions.push(batchTransaction);
                                         inventory.quantity = inventory.quantity - qty;
                                         inventory.availableQuantity = inventory.availableQuantity - qty;
