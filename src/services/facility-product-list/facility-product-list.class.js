@@ -98,6 +98,7 @@ class Service {
         availableQuantity: inventory.availableQuantity,
         totalQuantity: inventory.totalQuantity,
         _id: inventory._id,
+        costPrice: inventory.costPrice,
         transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
         price: this.getProductPrice(
           prices.data,
@@ -116,7 +117,6 @@ class Service {
         )
       };
     });
-
     return Promise.resolve({
       total: storeInventories.total,
       limit: storeInventories.limit,
