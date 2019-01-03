@@ -11,7 +11,9 @@ class Service {
   }
 
   async find(params) {
-    let url = process.env.APMIS_FORMULARY + '/search-products?search=' + params.query.name;
+
+    let url = process.env.NODE_ENV ? process.env.NODE_ENV : 'http://localhost:3030' + '/search-products?search=' + params.query.name;
+
     const options = {
       method: 'GET',
       uri: url
