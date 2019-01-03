@@ -18,7 +18,7 @@ const resolvers = {
       }
     },
     orderObject: () => async (entryItem, context) => {
-      if (entryItem.orderId !== null && entryItem.supplierId !== undefined) {
+      if (!!entryItem.orderId && !!entryItem.supplierId) {
         try {
           const purchase = await context.app.service('purchase-orders').get(entryItem.orderId, {});
           entryItem.orderObject = purchase;
@@ -38,7 +38,7 @@ const resolvers = {
       }
     },
     productObject: () => async (entryItem, context) => {
-      if (entryItem.products.length > 0) {
+      if (!!entryItem.products && entryItem.products.length > 0) {
         const len = entryItem.products.length - 1;
         for (let index = 0; index <= len; index++) {
           if (entryItem.products[index].productId !== null && entryItem.products[index].productId !== undefined) {

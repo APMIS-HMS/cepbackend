@@ -21,12 +21,12 @@ const resolvers = {
         };
       }
     },
-    employeeDetails: () => async (supplier, context) => {
-      if (supplier.createdBy !== undefined) {
-        const employee = await context.app.service('employees').get(supplier.createdBy, {});
-        supplier.employeeDetails = employee.personDetails;
-      }
-    }
+    // employeeDetails: () => async (supplier, context) => {
+    //   if (supplier.createdBy !== undefined) {
+    //     const employee = await context.app.service('employees').get(supplier.createdBy, {});
+    //     supplier.employeeDetails = employee.personDetails;
+    //   }
+    // }
   }
 };
 
