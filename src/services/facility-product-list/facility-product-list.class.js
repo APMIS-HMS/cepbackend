@@ -97,6 +97,9 @@ class Service {
         productId: inventory.productObject.id,
         availableQuantity: inventory.availableQuantity,
         totalQuantity: inventory.totalQuantity,
+        serviceId: inventory.serviceId,
+        categoryId: inventory.categoryId,
+        facilityServiceId: inventory.facilityServiceId,
         _id: inventory._id,
         transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
         price: this.getProductPrice(
