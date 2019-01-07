@@ -102,7 +102,7 @@ class Service {
                           employeeId: inventoryTransfers.transferBy,
                           preQuantity: qty, // Before Operation.
                           postQuantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
-                          quantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
+                          quantity: inventoryTransfers.inventoryTransferTransactions[index].quantity, // Operational qty.
                           inventorytransactionTypeId: inventoryTransactionTypes.data.find(x => x.name === 'transfer' && x.inorout === 'out')
                         };
                         inventory.transactions[index2].batchTransactions.push(transaction);
@@ -131,7 +131,7 @@ class Service {
                             employeeId: inventoryTransfers.transferBy,
                             preQuantity: qty2, // Before Operation.
                             postQuantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
-                            quantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
+                            quantity: inventoryTransfers.inventoryTransferTransactions[index].quantity, // Operational qty.
                             inventorytransactionTypeId: inventoryTransactionTypes.data.find(x => x.name === 'receive' && x.inorout === 'in')
                           };
                           batchTxn[0].quantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
