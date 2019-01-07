@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const logger = require('winston');
 const sms = require('../../templates/sms-sender');
+const emailer = require('../../templates/emailer');
 const tokenLabel = require('../../parameters/token-label');
 class Service {
   constructor(options) {
@@ -13,7 +14,8 @@ class Service {
 
   get(id, params) {
     return Promise.resolve({
-      id, text: `A new message with ID: ${id}!`
+      id,
+      text: `A new message with ID: ${id}!`
     });
   }
 
@@ -27,8 +29,13 @@ class Service {
         if (getFac) {
           getTokenService.get(tokenLabel.tokenType.facilityVerification, {}).then(tokenPayload => {
             getFac.verificationToken = tokenPayload.result;
-            facilityService.patch(getFac._id, {verificationToken:tokenPayload.result}).then(facPayload => {
+            facilityService.patch(getFac._id, {
+              verificationToken: tokenPayload.result
+            }).then(facPayload => {
               sms.sendToken(getFac);
+              if (getFac.email !== undefined) {
+                emailer.sendToken(getFac);
+              }
               resolve(facPayload);
             }, facError => {
               reject(facError);
@@ -36,7 +43,7 @@ class Service {
           }, error => {
             reject(error);
           });
-        }else{
+        } else {
           resolve(getFac);
         }
       }, getFacError => {
@@ -44,7 +51,7 @@ class Service {
       });
 
 
-     
+
 
 
 
@@ -63,10 +70,12 @@ class Service {
   }
 
   remove(id, params) {
-    return Promise.resolve({ id });
+    return Promise.resolve({
+      id
+    });
   }
 
-  setup(app){
+  setup(app) {
     this.app = app;
   }
 }
