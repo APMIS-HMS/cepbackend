@@ -1044,6 +1044,15 @@ function sendApmisId(data) {
   sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
 
+function sendPasswordResetToken(data) {
+  const message =
+    'Complete your password reset by verifing your account with this OTP: ' +
+    data.verificationToken + ' to complete your registration';
+  const title = 'Apmis Password Reset Token';
+  let tem = emailApmisIdTemplate(message, title, data);
+  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+}
+
 function passwordReset(data) {
   const title = 'Password Reset';
   const message = `Kindly use this code ${data.otp} to complete your password reset.`;
@@ -1061,6 +1070,14 @@ function sendToken(data) {
 function authGeneratedPassword(data) {
   const title = 'APMIS Auto-generated Password';
   const message = `APMIS Auto-generated password: ${data.password} kindly change your password.`;
+  let tem = emailApmisIdTemplate(message, title, data);
+  sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
+}
+
+function sendPatientDocumentAuthorization(data, code) {
+  const title = 'APMIS Patient Documentation Authorization';
+  const message = 'This is to notify you that ' + code +
+    ' is your documentation authorization code.';
   let tem = emailApmisIdTemplate(message, title, data);
   sendEmailViaApi('dev@apmis.ng', data.email, title, tem);
 }
@@ -1117,11 +1134,17 @@ module.exports = {
   sendToken: function (data) {
     sendToken(data);
   },
+  sendPasswordResetToken(data) {
+    sendPasswordResetToken(data);
+  },
   authGeneratedPassword: function (data) {
     authGeneratedPassword(data);
   },
   appointment: function (data) {
     appointment(data);
+  },
+  sendPatientDocumentAuthorization(data, code) {
+    sendPatientDocumentAuthorization(data, code);
   },
   reorder: function (data) {
     reorderLevel(data);
