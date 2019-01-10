@@ -36,6 +36,7 @@ class Service {
     const retVal = getFacilityStore.data.map(store => {
       return {
         name: store.name,
+        storeId: store._id,
         productTypes: store.productTypeId,
         location: this.getMinorLocation(minorLocations, store.minorLocationId, locations.data),
       }

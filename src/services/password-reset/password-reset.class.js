@@ -102,7 +102,7 @@ class Service {
                                 verificationToken: user.verificationToken
                               });
                               if (person.email !== undefined) {
-                                await emailer.sendPasswordResetToken(person);
+                                emailer.sendPasswordResetToken(person);
                               }
                               resolve({
                                 isToken: true

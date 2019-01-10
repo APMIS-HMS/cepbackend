@@ -80,15 +80,6 @@ class Service {
       const makeRequest = await requestPromise(options);
       const parsed = JSON.parse(makeRequest);
 
-
-
-
-
-
-
-
-
-
       let regexList = [];
       parsed.map(par => par.CODE).forEach((value) => {
         regexList.push({
@@ -109,7 +100,9 @@ class Service {
       console.log(...regexList);
       const awaitConsoService = await inventoriesService.find({
         query: {
-          $and: [...regexList]
+          $and: [...regexList],
+          facilityId: params.query.facilityId,
+          storeId: params.query.storeId
         }
       });
 
@@ -118,16 +111,13 @@ class Service {
 
 
 
-
-
-
-
-
       const inventoriesAwait = await inventoriesService.find({
         query: {
           'productObject.ingredientCodes': {
             $in: parsed.map(par => par.CODE)
-          }
+          },
+          facilityId: params.query.facilityId,
+          storeId: params.query.storeId
         }
       });
       // console.log(inventoriesAwait);
