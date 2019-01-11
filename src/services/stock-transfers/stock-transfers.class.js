@@ -75,7 +75,9 @@ class Service {
 
   async patch(id, data, params) {
     const transferService = this.app.service('inventory-transfers');
+    const inventoryTransactionService = this.app.service('inventory-transaction-types');
     const inventoriesService = this.app.service('inventories');
+    const inventoryTransactionTypes = inventoryTransactionService.find({});
     let inventoryTransfers = await transferService.patch(id, data);
     let inventory = {};
 
@@ -94,23 +96,23 @@ class Service {
                     if (inventory.transactions[index2]._id.toString() == inventoryTransfers.inventoryTransferTransactions[index].transactionId.toString()) {
                       batchDetail = inventory.transactions[index2];
                       const qty = inventory.transactions[index2].quantity;
-                      if(inventoryTransfers.inventoryTransferTransactions[index].transferStatusObject.name ==='Completed'){
+                      if (inventoryTransfers.inventoryTransferTransactions[index].transferStatusObject.name === 'Completed') {
                         let transaction = {
                           batchNumber: batchDetail.batchNumber,
                           employeeId: inventoryTransfers.transferBy,
                           preQuantity: qty, // Before Operation.
                           postQuantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
-                          quantity: (inventory.totalQuantity - inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
-                          inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
+                          quantity: inventoryTransfers.inventoryTransferTransactions[index].quantity, // Operational qty.
+                          inventorytransactionTypeId: inventoryTransactionTypes.data.find(x => x.name === 'transfer' && x.inorout === 'out')
                         };
                         inventory.transactions[index2].batchTransactions.push(transaction);
                         inventory.transactions[index2].quantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
                         inventory.totalQuantity -= inventoryTransfers.inventoryTransferTransactions[index].quantity;
-                      }else{
+                      } else {
                         inventory.transactions[index2].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                         inventory.availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                       }
-                      
+
 
                       let updatedInv = await inventoriesService.patch(inventory._id, inventory);
                       let inventory2 = await inventoriesService.find({
@@ -129,8 +131,8 @@ class Service {
                             employeeId: inventoryTransfers.transferBy,
                             preQuantity: qty2, // Before Operation.
                             postQuantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // After Operation.
-                            quantity: (qty2 + inventoryTransfers.inventoryTransferTransactions[index].quantity), // Operational qty.
-                            inventorytransactionTypeId: inventoryTransfers.inventorytransactionTypeId
+                            quantity: inventoryTransfers.inventoryTransferTransactions[index].quantity, // Operational qty.
+                            inventorytransactionTypeId: inventoryTransactionTypes.data.find(x => x.name === 'receive' && x.inorout === 'in')
                           };
                           batchTxn[0].quantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;
                           batchTxn[0].availableQuantity += inventoryTransfers.inventoryTransferTransactions[index].quantity;

@@ -6,6 +6,7 @@ var isFuture = require('date-fns/is_future');
 var parse = require('date-fns/parse');
 const jsend = require('jsend');
 const sms = require('../../templates/sms-sender');
+const emailer = require('../../templates/emailer');
 var AES = require('crypto-js/aes');
 var CryptoJS = require('crypto-js');
 const bcrypt = require('bcryptjs');
@@ -185,6 +186,9 @@ class Service {
         if (process.env.SENDSMS === 'true') {
           await sms.sendPatientDocumentAuthorization(
             patient.personDetails, token.result);
+            if (patient.personDetails.email !== undefined) {
+              await emailer.sendPatientDocumentAuthorization(patient.personDetails, token.result);
+            }
         }
 
         return jsend.success('Authorization code sent to the patient');

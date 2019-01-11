@@ -65,7 +65,7 @@ module.exports = function (app) {
     },
     costPrice: {
       type: Number,
-      required: false
+      required: true
     },
     transactions: [inventoryTransactionSchema]
   }, {

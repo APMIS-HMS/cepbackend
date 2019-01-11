@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const jsend = require('jsend');
+const requestPromise = require('request-promise');
 class Service {
   constructor(options) {
     this.options = options || {};
@@ -26,11 +27,10 @@ class Service {
     const orgService = this.app.service('organisation-services');
     const facilityPriceService = this.app.service('facility-prices');
     if (params.query.isArray) {
-
       const facilityId = data[0].product.facilityId;
       const storeId = data[0].storeId;
-      const productIds = data.map(product => {
-        return product.product.productObject.id
+      const productIds = data.map((product) => {
+        return product.product.productObject.id;
       });
       let inventory = await inventoriesService.find({
         query: {
@@ -42,7 +42,6 @@ class Service {
         }
       });
 
-
       let resultList = [];
       try {
         for (const product of data) {
@@ -51,12 +50,15 @@ class Service {
           let orgServiceValue = {};
           service.name = product.product.productObject.name;
           let awaitOrganService = await orgService.get(product.facilityServiceId);
-          awaitOrganService.categories.forEach((item, i) => {
-            if (item._id.toString() === product.categoryId.toString()) {
-              item.services.push(service);
-              index = i;
-            }
-          });
+          try {
+            awaitOrganService.categories.forEach((item, i) => {
+              if (item._id.toString() === product.categoryId.toString()) {
+                item.services.push(service);
+                index = i;
+              }
+            });
+          } catch (error) {}
+
           const payResult = await orgService.patch(awaitOrganService._id, awaitOrganService);
           payResult.categories.forEach((itemi, i) => {
             if (itemi._id.toString() === product.categoryId.toString()) {
@@ -82,6 +84,39 @@ class Service {
           inventoryModel.availableQuantity = 0;
           inventoryModel.costPrice = product.costPrice;
 
+          const url = process.env.NODE_ENV ?
+            process.env.NODE_ENV :
+            'http://localhost:3030' + '/get-scdc-by-sbd-code/' + inventoryModel.productObject.code;
+
+          const url2 = process.env.NODE_ENV ?
+            process.env.NODE_ENV :
+            'http://localhost:3030' + '/get-scdc-by-sbd-code/' + inventoryModel.productObject.code + '?fromSCD=true';
+
+          const options = {
+            method: 'GET',
+            uri: url
+          };
+
+          const options2 = {
+            method: 'GET',
+            uri: url2
+          };
+
+          try {
+            const [result1, result2] = await Promise.all([requestPromise(options), requestPromise(options2)]);
+            let parsed;
+            if (JSON.parse(result1).length > 0) {
+              parsed = JSON.parse(result1);
+            } else if (JSON.parse(result2).length > 0) {
+              parsed = JSON.parse(result2);
+            } else {
+              parsed = [];
+            }
+            // const parsed = JSON.parse(makeRequest);
+            inventoryModel.productObject.ingredientCodes = parsed.map(ing => ing.CODE);
+            inventoryModel.productObject.ingredientNames = parsed.map(ing => ing.STR);
+          } catch (e) {}
+
           let len = batches.batchItems.length - 1;
           for (let index = len; index >= 0; index--) {
             if (index >= 0) {
@@ -96,7 +131,6 @@ class Service {
             inventory: inventory
           };
 
-
           let price = {
             facilityServiceId: inventory.facilityServiceId,
             categoryId: inventory.categoryId,
@@ -104,20 +138,14 @@ class Service {
             modifieres: [],
             price: product.sellingPrice,
             facilityId: facilityId
-          }
+          };
 
-          const createdPrice = await facilityPriceService.create(price)
-
-
-
+          const createdPrice = await facilityPriceService.create(price);
 
           resultList.push(res);
-
-
         }
         return jsend.success(resultList);
       } catch (error) {}
-
     } else {
       let inventory = await inventoriesService.find({
         query: {
@@ -150,7 +178,6 @@ class Service {
             });
           }
         });
-
         let batches = data;
         let inventoryModel = {};
         inventoryModel.facilityId = batches.product.facilityId;
@@ -179,7 +206,6 @@ class Service {
         return res;
       }
     }
-
   }
 
   update(id, data, params) {
