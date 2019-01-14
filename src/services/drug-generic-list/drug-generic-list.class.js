@@ -58,7 +58,7 @@ class Service {
         error: e,
         url: url
       }
-      return jsend.fail(e);
+      return jsend.fail(err);
     }
   }
 
