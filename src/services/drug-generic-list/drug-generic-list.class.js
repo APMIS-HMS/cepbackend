@@ -54,7 +54,7 @@ class Service {
         }
       }
     } catch (e) {
-      return jsend.success([]);
+      return jsend.fail(e);
     }
   }
 
