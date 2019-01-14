@@ -54,6 +54,10 @@ class Service {
         }
       }
     } catch (e) {
+      let err = {
+        error: e,
+        url: url
+      }
       return jsend.fail(e);
     }
   }
