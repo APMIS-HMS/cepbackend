@@ -10,122 +10,142 @@ class Service {
     const reOrderLevelService = this.app.service('product-reorders');
     const productConfigurationService = this.app.service('product-configs');
     let storeInventories;
-    if (params.query.searchText === undefined && params.query.productIds === undefined) {
-      storeInventories = await inventoryService.find({
+    if (!!params.query.direct) {
+      try {
+           const inventoriesAwait = await inventoryService.find({
+             query: {
+               'productObject.name': {
+                 $regex: params.query.searchText,
+                 $options: 'i'
+               },
+               facilityId: params.query.facilityId,
+               storeId: params.query.storeId
+             }
+           });
+           return {
+             data: inventoriesAwait.data
+           };
+      } catch (error) {
+
+      }
+    } else {
+      if (params.query.searchText === undefined && params.query.productIds === undefined) {
+        storeInventories = await inventoryService.find({
+          query: {
+            facilityId: params.query.facilityId,
+            storeId: params.query.storeId,
+            $limit: params.query.limit !== undefined ? params.query.limit : 10,
+            $skip: params.query.skip != undefined ? params.query.skip : 0
+          }
+        });
+      } else if (params.query.productIds !== undefined) {
+        storeInventories = await inventoryService.find({
+          query: {
+            facilityId: params.query.facilityId,
+            storeId: params.query.storeId,
+            productId: {
+              $in: params.query.productIds
+            },
+            $limit: params.query.limit !== undefined ? params.query.limit : 10,
+            $skip: params.query.skip != undefined ? params.query.skip : 0
+          }
+        });
+      } else {
+        storeInventories = await inventoryService.find({
+          query: {
+            facilityId: params.query.facilityId,
+            storeId: params.query.storeId,
+            'productObject.name': {
+              $regex: params.query.searchText,
+              $options: 'i'
+            },
+            $limit: params.query.limit !== undefined ? params.query.limit : 10,
+            $skip: params.query.skip != undefined ? params.query.skip : 0
+          }
+        });
+      }
+
+      const facilityServiceIds = storeInventories.data.map((inventory) => inventory.facilityServiceId);
+      const serviceIds = storeInventories.data.map((inventory) => inventory.serviceId);
+      const productIds = storeInventories.data.map((inventory) => inventory.productId);
+
+      //get prices for all inventory products
+      const prices = await facilityPriceService.find({
         query: {
           facilityId: params.query.facilityId,
-          storeId: params.query.storeId,
-          $limit: params.query.limit !== undefined ? params.query.limit : 10,
-          $skip: params.query.skip != undefined ? params.query.skip : 0
+          $and: [{
+              facilityServiceId: {
+                $in: facilityServiceIds
+              }
+            },
+            {
+              serviceId: {
+                $in: serviceIds
+              }
+            }
+          ]
         }
       });
-    } else if (params.query.productIds !== undefined) {
-      storeInventories = await inventoryService.find({
+
+      // get product re-order-level
+      const productLevels = await reOrderLevelService.find({
         query: {
           facilityId: params.query.facilityId,
           storeId: params.query.storeId,
           productId: {
-            $in: params.query.productIds
-          },
-          $limit: params.query.limit !== undefined ? params.query.limit : 10,
-          $skip: params.query.skip != undefined ? params.query.skip : 0
+            $in: productIds
+          }
         }
       });
-    } else {
-      storeInventories = await inventoryService.find({
+
+      // get product configuration
+      const productConfigurations = await productConfigurationService.find({
         query: {
           facilityId: params.query.facilityId,
           storeId: params.query.storeId,
-          'productObject.name': {
-            $regex: params.query.searchText,
-            $options: 'i'
-          },
-          $limit: params.query.limit !== undefined ? params.query.limit : 10,
-          $skip: params.query.skip != undefined ? params.query.skip : 0
+          productId: {
+            $in: productIds
+          }
         }
       });
+
+      const mapStoreInventories = storeInventories.data.map((inventory) => {
+        return {
+          productName: inventory.productObject.name,
+          productCode: inventory.productObject.code,
+          productId: inventory.productObject.id,
+          availableQuantity: inventory.availableQuantity,
+          totalQuantity: inventory.totalQuantity,
+          serviceId: inventory.serviceId,
+          categoryId: inventory.categoryId,
+          facilityServiceId: inventory.facilityServiceId,
+          _id: inventory._id,
+          costPrice: inventory.costPrice,
+          transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
+          price: this.getProductPrice(
+            prices.data,
+            inventory.serviceId.toString(),
+            inventory.facilityServiceId.toString()
+          ),
+          reOrderLevel: this.getProductReOrderLevel(
+            productLevels.data,
+            inventory.storeId.toString(),
+            inventory.productId.toString()
+          ),
+          productConfiguration: this.getProductConfiguration(
+            productConfigurations.data,
+            inventory.facilityId.toString(),
+            inventory.productId.toString()
+          )
+        };
+      });
+      return Promise.resolve({
+        total: storeInventories.total,
+        limit: storeInventories.limit,
+        skip: storeInventories.skip,
+        data: mapStoreInventories
+      });
     }
-
-    const facilityServiceIds = storeInventories.data.map((inventory) => inventory.facilityServiceId);
-    const serviceIds = storeInventories.data.map((inventory) => inventory.serviceId);
-    const productIds = storeInventories.data.map((inventory) => inventory.productId);
-
-    //get prices for all inventory products
-    const prices = await facilityPriceService.find({
-      query: {
-        facilityId: params.query.facilityId,
-        $and: [{
-            facilityServiceId: {
-              $in: facilityServiceIds
-            }
-          },
-          {
-            serviceId: {
-              $in: serviceIds
-            }
-          }
-        ]
-      }
-    });
-
-    // get product re-order-level
-    const productLevels = await reOrderLevelService.find({
-      query: {
-        facilityId: params.query.facilityId,
-        storeId: params.query.storeId,
-        productId: {
-          $in: productIds
-        }
-      }
-    });
-
-    // get product configuration
-    const productConfigurations = await productConfigurationService.find({
-      query: {
-        facilityId: params.query.facilityId,
-        storeId: params.query.storeId,
-        productId: {
-          $in: productIds
-        }
-      }
-    });
-
-    const mapStoreInventories = storeInventories.data.map((inventory) => {
-      return {
-        productName: inventory.productObject.name,
-        productCode: inventory.productObject.code,
-        productId: inventory.productObject.id,
-        availableQuantity: inventory.availableQuantity,
-        totalQuantity: inventory.totalQuantity,
-        serviceId: inventory.serviceId,
-        categoryId: inventory.categoryId,
-        facilityServiceId: inventory.facilityServiceId,
-        _id: inventory._id,
-        costPrice: inventory.costPrice,
-        transactions: inventory.transactions.filter((transaction) => transaction.availableQuantity > 0),
-        price: this.getProductPrice(
-          prices.data,
-          inventory.serviceId.toString(),
-          inventory.facilityServiceId.toString()
-        ),
-        reOrderLevel: this.getProductReOrderLevel(
-          productLevels.data,
-          inventory.storeId.toString(),
-          inventory.productId.toString()
-        ),
-        productConfiguration: this.getProductConfiguration(
-          productConfigurations.data,
-          inventory.facilityId.toString(),
-          inventory.productId.toString()
-        )
-      };
-    });
-    return Promise.resolve({
-      total: storeInventories.total,
-      limit: storeInventories.limit,
-      skip: storeInventories.skip,
-      data: mapStoreInventories
-    });
   }
 
   getProductPrice(prices, serviceId, facilityServiceId) {
