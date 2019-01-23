@@ -18,13 +18,12 @@ class Service {
     let _inventories = {};
     _inventories.data = [];
 
-    console.log(params.query.name);
     let productIds = await fpService.find({
       query: {
         name: params.query.name
       }
     });
-    console.log(productIds);
+
     for (let index = 0; index < productIds.data.length; index++) {
       const inventories = await inventoriesService.find({
         query: {
@@ -97,7 +96,7 @@ class Service {
       //   }
       // });
 
-      console.log(...regexList);
+
       const awaitConsoService = await inventoriesService.find({
         query: {
           $and: [...regexList],
@@ -105,9 +104,6 @@ class Service {
           storeId: params.query.storeId
         }
       });
-
-
-      console.log(awaitConsoService.data.map(d => d.productObject));
 
 
 
@@ -125,7 +121,7 @@ class Service {
         data: inventoriesAwait.data
       };
     } catch (error) {
-      console.log(error);
+
     }
 
 
@@ -133,13 +129,13 @@ class Service {
     let _inventories = {};
     _inventories.data = [];
 
-    console.log(params.query.name);
+
     let productIds = await fpService.find({
       query: {
         name: params.query.name
       }
     });
-    console.log(productIds);
+
     for (let index = 0; index < productIds.data.length; index++) {
       const inventories = await inventoriesService.find({
         query: {

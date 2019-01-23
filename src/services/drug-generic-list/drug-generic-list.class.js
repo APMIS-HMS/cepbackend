@@ -18,11 +18,16 @@ class Service {
       url = process.env.EMDEX_BASEURL + '/products/' + productId;
     } else if (method === 'immunization') {
       // url = process.env.APMIS_FORMULARY + '/search-ingredients?search=' + searchText;
-      url = process.env.NODE_ENV === 'production' ? process.env.APMIS_FORMULARY + '/search-ingredients?search=' + searchText : 'http://localhost:3030' + '/search-ingredients?search=' + searchText;
-
+      url =
+        process.env.NODE_ENV === 'production' ?
+        process.env.APMIS_FORMULARY + '/search-ingredients?search=' + searchText :
+        'http://localhost:3030' + '/search-ingredients?search=' + searchText;
     } else {
       // url = process.env.APMIS_FORMULARY + '/prescriptions?search=' + searchText;
-      url = process.env.NODE_ENV === 'production' ? process.env.APMIS_FORMULARY + '/prescriptions?search=' + searchText : 'http://localhost:3030' + '/prescriptions?search=' + searchText;
+      url =
+        process.env.NODE_ENV === 'production' ?
+        process.env.APMIS_FORMULARY + '/prescriptions?search=' + searchText :
+        'http://localhost:3030' + '/prescriptions?search=' + searchText;
 
       // url = process.env.EMDEX_BASEURL + '/list/?query=' + params.query.searchtext +
       //     '&po=' + params.query.po + '&brandonly=' + params.query.brandonly + '&genericonly=' + params.query.genericonly;
@@ -30,7 +35,7 @@ class Service {
 
     const options = {
       method: 'GET',
-      uri: url,
+      uri: url
       // headers: { authorisation: process.env.EMDEX_AUTHORISATION_KEY }
     };
 
@@ -57,7 +62,7 @@ class Service {
       let err = {
         error: e,
         url: url
-      }
+      };
       return jsend.fail(err);
     }
   }
