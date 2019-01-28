@@ -12,19 +12,19 @@ class Service {
     let storeInventories;
     if (!!params.query.direct) {
       try {
-           const inventoriesAwait = await inventoryService.find({
-             query: {
-               'productObject.name': {
-                 $regex: params.query.searchText,
-                 $options: 'i'
-               },
-               facilityId: params.query.facilityId,
-               storeId: params.query.storeId
-             }
-           });
-           return {
-             data: inventoriesAwait.data
-           };
+        const inventoriesAwait = await inventoryService.find({
+          query: {
+            'productObject.name': {
+              $regex: params.query.searchText,
+              $options: 'i'
+            },
+            facilityId: params.query.facilityId,
+            storeId: params.query.storeId
+          }
+        });
+        return {
+          data: inventoriesAwait.data
+        };
       } catch (error) {
 
       }
@@ -136,6 +136,12 @@ class Service {
             productConfigurations.data,
             inventory.facilityId.toString(),
             inventory.productId.toString()
+          ),
+          packSizes: this.getProductConfiguration(
+            productConfigurations.data,
+            inventory.facilityId.toString(),
+            inventory.productId.toString(),
+            true
           )
         };
       });
@@ -163,11 +169,17 @@ class Service {
     return order.length > 0 ? order[0].reOrderLevel : 0;
   }
 
-  getProductConfiguration(configurations, facilityId, productId) {
+  getProductConfiguration(configurations, facilityId, productId, returnAll) {
     const configuration = configurations.filter(
       (config) => config.facilityId.toString() == facilityId && config.productId.toString() == productId
     );
-    return this.getBasePackType(configuration.length > 0 ? configuration[0] : undefined);
+    if (returnAll) {
+      const result = configuration.map(config => config.packSizes);
+      return [].concat.apply([], result).sort(b => b.isBase !== true);
+    } else {
+      return this.getBasePackType(configuration.length > 0 ? configuration[0] : undefined);
+    }
+
   }
 
   getBasePackType(config) {
